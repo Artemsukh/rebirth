@@ -360,6 +360,7 @@ function fitName() {
   const over = () => wrap ? el.scrollHeight > f * 1.12 * 2 + 2 : el.scrollWidth > el.clientWidth + 1;
   while (f > 18 && over()) { f -= 2; el.style.fontSize = f + 'px'; }
   if (f === f0) el.style.fontSize = '';
+  setSpread(el);
 }
 /* the tier name stays on one line: Least developed and Menos adelantado are shrunk to fit */
 function fitTier() {
@@ -368,6 +369,25 @@ function fitTier() {
   if (!el.clientWidth) return;
   let f = parseFloat(getComputedStyle(el).fontSize);
   while (f > 18 && el.scrollWidth > el.clientWidth + 1) { f -= 2; el.style.fontSize = f + 'px'; }
+  setSpread(el);
+}
+/* The name and the tier enter with their letters spread apart (keyframes nameIn). At the full .35em a
+   long English or Spanish tier ("Menos adelantado") ran up to 114px past the right edge of a phone
+   screen, and phone browsers shifted or rescaled the whole page for that moment; a name that may wrap
+   ("Estados Unidos") was pushed onto a second line, so everything below jumped. The spread is capped
+   to the room there is: one-line text may reach the stage's right edge, wrapping text only the room
+   left in its own box, so no line break changes. The room is added to the element's own spacing
+   (the name's is -.01em), with a pixel to spare. Short names keep the full .35em. */
+function setSpread(el) {
+  el.style.removeProperty('--spread');
+  const n = [...el.textContent].length, range = document.createRange();
+  range.selectNodeContents(el);
+  const lines = [...range.getClientRects()];
+  if (!n || !lines.length) return;
+  const cs = getComputedStyle(el), widest = Math.max(...lines.map(r => r.width)), own = parseFloat(cs.letterSpacing) || 0;
+  const right = stage.getBoundingClientRect().right - parseFloat(getComputedStyle(stage).paddingRight);
+  const room = (cs.whiteSpace === 'nowrap' ? right - lines[0].left : el.clientWidth) - widest - 1;
+  el.style.setProperty('--spread', Math.min(0.35 * parseFloat(cs.fontSize), own + Math.max(0, room) / n).toFixed(2) + 'px');
 }
 
 function tierDesc(L) {

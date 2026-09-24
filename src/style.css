@@ -270,7 +270,8 @@ a:hover { text-decoration-color: currentColor; }
 .stage.fx .id-name:not(.empty), .stage.fx .tier-name { animation: nameIn 700ms cubic-bezier(.2, .8, .2, 1) both; }
 .stage.fx .fx-sm { animation: smIn 500ms ease-out 250ms both; }
 #planet .p-body.enter { animation: planetIn 950ms cubic-bezier(.2, .8, .2, 1) both; }
-@keyframes nameIn { from { letter-spacing: .35em; filter: blur(6px); opacity: 0; } }
+/* the letters start spread apart by --spread, which app.js (setSpread) caps to the room there is */
+@keyframes nameIn { from { letter-spacing: var(--spread, .35em); filter: blur(6px); opacity: 0; } }
 @keyframes smIn { from { transform: translateY(6px); opacity: 0; } }
 @keyframes planetIn { from { transform: scale(.78) rotate(-10deg); opacity: 0; } }
 
