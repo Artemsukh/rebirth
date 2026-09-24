@@ -283,9 +283,12 @@ function digitWidths(el) {
   if (loaded) DIGW.set(font, w);
   return w;
 }
+/* the stop is a share of the strip's own height (30 lines), not (20 + d) x 1.1em: WebKit truncates
+   the line height to whole pixels (30.8px -> 30px), and over 20-29 lines the em distance overshot
+   by most of a line, so iPhones showed the next digit, or a blank after a 9 */
 (function rollKeyframes() {
   const css = Array.from({ length: 10 }, (_, d) => '@keyframes r' + d + ' { 0% { transform: translateY(0); filter: blur(0); } 18% { filter: blur(1.3px); } ' +
-    '80% { filter: blur(0); } 100% { transform: translateY(-' + ((20 + d) * 1.1).toFixed(1) + 'em); } }').join('\n');
+    '80% { filter: blur(0); } 100% { transform: translateY(-' + ((20 + d) / 30 * 100).toFixed(4) + '%); } }').join('\n');
   const el = document.createElement('style');
   el.textContent = css;
   document.head.appendChild(el);
