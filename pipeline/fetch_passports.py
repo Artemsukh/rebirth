@@ -56,7 +56,7 @@ REFRESH = False
 # Checked against Wikidata (English labels) before anything else.
 # str = the label, tuple = the label contains one of these.
 IDS = {
-    'Q41438': 'passport',
+    'Q43812': 'passport',    # the work order expected Q41438, which is a person (Jan Gajek) on Wikidata
     'P17': 'country',
     'P18': 'image',
     'P31': 'instance of',
@@ -77,7 +77,7 @@ Q_COUNTRIES = '''SELECT ?country ?iso2 ?m49 ?label ?commonscat WHERE {
 }'''
 
 Q_PASSPORTS = '''SELECT ?item ?itemLabel ?country ?juris ?image ?inception ?start ?end ?classLabel WHERE {
-  ?item (wdt:P31|wdt:P279)/wdt:P279* wd:Q41438 ;
+  ?item (wdt:P31|wdt:P279)/wdt:P279* wd:Q43812 ;
         wdt:P17 ?country ;
         wdt:P18 ?image .
   OPTIONAL { ?item wdt:P1001 ?juris }

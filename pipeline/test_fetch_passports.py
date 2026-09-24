@@ -62,7 +62,7 @@ APPDATA = {
     'CLASS': {'adv': [250, 208], 'ldc': {'4': None}},
 }
 
-LABELS = {'Q41438': 'passport', 'P17': 'country', 'P18': 'image', 'P31': 'instance of',
+LABELS = {'Q43812': 'passport', 'P17': 'country', 'P18': 'image', 'P31': 'instance of',
           'P279': 'subclass of', 'P297': 'ISO 3166-1 alpha-2 code', 'P2082': 'United Nations M49 code',
           'P571': 'inception', 'P580': 'start time', 'P582': 'end time',
           'P1001': 'applies to jurisdiction', 'P373': 'Commons category'}
@@ -400,14 +400,14 @@ class Items(unittest.TestCase):
 
 class Blocked(Base):
     def test_identifier_check_failure_aborts(self):
-        self.fake.labels['Q41438'] = 'visa'
+        self.fake.labels['Q43812'] = 'visa'
         before = self.data_bytes()
         self.assertEqual(fp.collect(), 3)
         self.assertEqual([u for u, _, _ in self.fake.calls], [fp.WD_API])       # nothing after the check
         self.assertEqual(self.state()['collect']['status'], 'identifier')
         text = self.report_text()
         self.assertIn('식별자', text)
-        self.assertIn('Q41438', text)
+        self.assertIn('Q43812', text)
         self.assertEqual(self.data_bytes(), before)
 
     def test_m49_label_variants(self):
