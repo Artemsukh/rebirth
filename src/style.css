@@ -261,10 +261,12 @@ a:hover { text-decoration-color: currentColor; }
 
 /* ---------- rolling digits ---------- */
 .roller { display: inline-flex; align-items: flex-start; line-height: 1.1em; height: 1.1em; }
-.rwin { display: inline-flex; justify-content: center; height: 1.1em; overflow: hidden; }
+/* flex-start: the strip keeps its full 30-line height instead of being stretched to the window,
+   so a translateY percentage counts whole lines as the browser laid them out */
+.rwin { display: inline-flex; justify-content: center; align-items: flex-start; height: 1.1em; overflow: hidden; }
 .rstrip { display: block; flex: none; width: 1ch; line-height: 1.1em; text-align: center; white-space: normal; word-break: break-all; }
 .rch { display: inline-block; line-height: 1.1em; white-space: pre; }
-/* @keyframes r0..r9 are generated in app.js: end at -(20 + d) x 1.1em, blurred while moving */
+/* @keyframes r0..r9 are generated in app.js: end at -(20 + d) / 30 of the strip, blurred while moving */
 
 /* ---------- entrance effects (re-triggered by toggling .fx on the stage) ---------- */
 .stage.fx .id-name:not(.empty), .stage.fx .tier-name { animation: nameIn 700ms cubic-bezier(.2, .8, .2, 1) both; }
