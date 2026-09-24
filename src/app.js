@@ -380,6 +380,7 @@ function renderStage(st, opt = {}) {
   const tier = empty ? 'NONE' : tierOf(L);
   const T = tierStats();
   stage.dataset.tier = tier;
+  document.documentElement.dataset.tier = tier;
 
   /* identity */
   flagChip($('#chip'), L);
@@ -1072,7 +1073,7 @@ function renderHundred() {
   const row = (l, cls) => '<li class="k' + l.cont + (cls ? ' ' + cls : '') + '"><span class="nm">' + esc(l.ko) + '</span>' +
     '<span class="bar"><b style="--w:' + (l.births / max * 100).toFixed(2) + '%"></b></span><span class="v">' + fmtSmall(l.births / tot * 100) + '명</span></li>';
   const refL = current.type !== 'empty' ? current.loc : BY.get(410);
-  $('#hBars').innerHTML = top.map(l => row(l, l === refL ? 'ref' : '')).join('') + (top.includes(refL) ? '' : row(refL, 'ref'));
+  $('#hBars').innerHTML = top.map(l => row(l, l === refL ? 'ref' : '')).join('') + (top.includes(refL) ? '' : row(refL, 'ref extra'));
 }
 
 /* ================= my records ================= */

@@ -70,17 +70,17 @@ a:hover { text-decoration-color: currentColor; }
 @keyframes blink { 50% { opacity: .35; } }
 
 /* ---------- stage (result screen) ---------- */
+:root { transition: --tier .6s; }
+:root[data-tier="ADV"] { --tier: var(--tier-adv); }
+:root[data-tier="DEV"] { --tier: var(--tier-dev); }
+:root[data-tier="LDC"] { --tier: var(--tier-ldc); }
 .stage {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 340px minmax(0, 1fr) 390px; column-gap: 24px;
   grid-template-areas: "id center read";
   min-height: calc(100vh - 72px); min-height: calc(100svh - 72px);
   padding: 20px 40px 32px;
-  transition: --tier .6s;
 }
-.stage[data-tier="ADV"] { --tier: var(--tier-adv); }
-.stage[data-tier="DEV"] { --tier: var(--tier-dev); }
-.stage[data-tier="LDC"] { --tier: var(--tier-ldc); }
 .center-col { grid-area: center; position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; }
 .id-col { grid-area: id; position: relative; z-index: 2; min-width: 0; }
 .read-col { grid-area: read; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -127,7 +127,7 @@ a:hover { text-decoration-color: currentColor; }
   grid-template-areas: "chip kind copy" "name name name" "sub sub sub";
   align-items: center;
 }
-.chip { grid-area: chip; }
+.id-head > .chip { grid-area: chip; }
 .id-kind { grid-area: kind; display: flex; flex-direction: column; min-width: 0; }
 #copyBtn { grid-area: copy; align-self: start; }
 .id-name { grid-area: name; }
@@ -366,7 +366,7 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .bars .bar { height: 11px; background: rgba(234, 242, 255, .06); position: relative; }
 .bars .bar b { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); min-width: 2px; background: var(--k); }
 .bars .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
-.bars li.ref { margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.bars li.ref.extra { margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--line); }
 .bars li.ref .nm { font-weight: 600; }
 .bars li.ref .bar b { background: var(--tier); box-shadow: 0 0 8px var(--tier); }
 
@@ -424,7 +424,8 @@ td.na { color: var(--ink-3); }
 .tbl-empty { padding: 28px 16px; text-align: center !important; color: var(--ink-2); white-space: normal !important; }
 
 /* method */
-.method { max-width: 860px !important; padding-bottom: 96px !important; }
+.method { padding-bottom: 96px !important; }
+.method > p, .method > ul, .method > details, .method > h3 { max-width: 780px; }
 .method h3 { margin: 28px 0 6px; font-size: 1.0625rem; font-weight: 600; }
 .method p { margin: 0 0 10px; color: var(--ink-2); line-height: 1.75; }
 .method p b { color: var(--ink); font-weight: 600; }
