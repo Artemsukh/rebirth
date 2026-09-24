@@ -6,6 +6,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
+const PASSPORT = D.PASSPORT || {};
 /* rows are plain arrays; LOC_FIELDS names each column so removing one cannot shift the rest */
 const LOCS = D.LOC.map((r, i) => {
   const o = { i };
@@ -16,17 +17,6 @@ const LOCS = D.LOC.map((r, i) => {
 const BY = new Map(LOCS.map(l => [l.code, l]));
 const TOT = { births: 0, pop: 0 };
 LOCS.forEach(l => { TOT.births += l.births; TOT.pop += l.pop; });
-/* development tier, computed for today: IMF advanced economies (and their territories),
-   UN least developed countries until their graduation date, everything else developing */
-const ADV = new Set(D.CLASS.adv);
-function tierOf(L, now = new Date()) {
-  const c = L.sov || L.code;
-  if (ADV.has(c)) return 'ADV';
-  const g = D.CLASS.ldc[c];
-  if (g !== undefined && (g === null || now < new Date(g + 'T00:00:00Z'))) return 'LDC';
-  return 'DEV';
-}
-const TIER_KO = { ADV: '선진국', DEV: '개발도상국', LDC: '최저개발국' };
 const RATE_B = WR.births / (365 * 86400);
 const RATE_D = WR.deaths / (365 * 86400);
 /* source notes such as 'WB 2024', 'UN 2023', 'WB' (World Bank, same year) */
@@ -36,6 +26,43 @@ function noteKo(n) {
   return ({ WB: '세계은행', UN: 'UN', IMF: 'IMF' }[src] || src) + (yr ? ' ' + yr + '년' : '') + ' 값';
 }
 const REDUCED = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+/* ================= development tiers ================= */
+/* computed for today: IMF advanced economies (and their territories), UN least developed
+   countries until their graduation date, everything else developing */
+const TIERS = ['ADV', 'DEV', 'LDC'];
+const TIER_KO = { ADV: '선진국', DEV: '개발도상국', LDC: '최저개발국' };
+const TIER_PIPS = { ADV: 3, DEV: 2, LDC: 1 };
+const ADV = new Set(D.CLASS.adv);
+function tierOf(L, now = new Date()) {
+  const c = L.sov || L.code;
+  if (ADV.has(c)) return 'ADV';
+  const g = D.CLASS.ldc[c];
+  if (g !== undefined && (g === null || now < new Date(g + 'T00:00:00Z'))) return 'LDC';
+  return 'DEV';
+}
+function largestRemainder(exact, total) {
+  const fl = exact.map(Math.floor);
+  let left = total - fl.reduce((a, b) => a + b, 0);
+  exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { fl[i]++; left--; } });
+  return fl;
+}
+/* counts and birth shares per tier; shares are rounded so the three add up to 100 */
+let tierCache = null;
+function tierStats() {
+  const day = new Date().toISOString().slice(0, 10);
+  if (tierCache && tierCache.day === day) return tierCache;
+  const count = { ADV: 0, DEV: 0, LDC: 0 }, births = { ADV: 0, DEV: 0, LDC: 0 };
+  LOCS.forEach(l => { const t = tierOf(l); l.tier = t; count[t]++; births[t] += l.births; });
+  const share = {}, p2 = {}, p1 = {};
+  const h = largestRemainder(TIERS.map(t => births[t] / TOT.births * 10000), 10000);
+  const d = largestRemainder(TIERS.map(t => births[t] / TOT.births * 1000), 1000);
+  TIERS.forEach((t, i) => { share[t] = births[t] / TOT.births; p2[t] = (h[i] / 100).toFixed(2); p1[t] = (d[i] / 10).toFixed(1); });
+  tierCache = { day, count, births, share, p2, p1 };
+  return tierCache;
+}
+const tierIdx = t => TIERS.indexOf(t);
+const pipsHTML = t => '<span class="pips" aria-hidden="true">' + [0, 1, 2].map(i => '<i' + (i < TIER_PIPS[t] ? ' class="on"' : '') + '></i>').join('') + '</span>';
 
 /* ================= random ================= */
 const U32 = new Uint32Array(2);
@@ -109,28 +136,59 @@ function fmtSmall(v) {
   return String(Number(v.toPrecision(1)));
 }
 const usd = v => '$' + fmtInt(v);
+const intl = v => fmtInt(v) + ' 국제달러';
 const sexKo = s => (s === 'M' ? '남자' : '여자');
 const hasJong = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 !== 0; };
 const topic = w => w + (hasJong(w) ? '은' : '는');
+const withWa = w => w + (hasJong(w) ? '과' : '와');
 function todayKo(t) { const d = t ? new Date(t) : new Date(); return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
+function dateKo(iso) { const [y, m, d] = iso.split('-').map(Number); return y + '년 ' + m + '월 ' + d + '일'; }
+function coordText(lat, lng) {
+  return Math.abs(lat).toFixed(1) + '°' + (lat >= 0 ? 'N' : 'S') + ' ' + Math.abs(lng).toFixed(1) + '°' + (lng >= 0 ? 'E' : 'W');
+}
 
 /* ================= storage ================= */
-const KEY = 'dasi-taeeonandamyeon-v1';
-const freshStats = () => ({ n: 0, cont: [0, 0, 0, 0, 0, 0], top: {} });
-let store = { serial: 0, stats: freshStats(), recent: [] };
-try {
-  const raw = localStorage.getItem(KEY);
-  if (raw) {
-    const o = JSON.parse(raw);
-    if (o && typeof o.serial === 'number') {
-      store.serial = o.serial;
-      const s = o.stats && o.stats.births;
-      if (s && typeof s.n === 'number' && Array.isArray(s.cont) && s.cont.length === 6) store.stats = { n: s.n, cont: s.cont, top: s.top || {} };
-      if (Array.isArray(o.recent)) store.recent = o.recent.filter(r => r && BY.has(r.c) && typeof r.no === 'number' && r.m === 'b' && (r.s === 'M' || r.s === 'F')).slice(0, 12);
-    }
+/* v2 lives under its own key; a v1 record (births and population modes) is migrated once:
+   births stats and births draws are kept, population-mode draws are dropped, the serial continues */
+const KEY = 'rebirth-simulator-v2', OLD_KEY = 'dasi-taeeonandamyeon-v1';
+const freshStats = () => ({ n: 0, cont: [0, 0, 0, 0, 0, 0], top: {}, tier: [0, 0, 0] });
+let store = { v: 2, serial: 0, stats: freshStats(), recent: [] };
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); return true; } catch (e) { return false; } }
+function cleanStats(s) {
+  if (!s || !(s.n >= 0) || !Array.isArray(s.cont) || s.cont.length !== 6) return freshStats();
+  const top = {};
+  if (s.top && typeof s.top === 'object') {
+    for (const [c, n] of Object.entries(s.top)) if (BY.has(+c) && n > 0) top[+c] = Math.floor(n);
   }
-} catch (e) { /* storage unavailable: keep in memory */ }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* ignore */ } }
+  return { n: Math.floor(s.n), cont: s.cont.map(v => Math.max(0, Math.floor(+v || 0))), top, tier: [0, 0, 0] };
+}
+/* tier counts follow today's classification, so they are rebuilt from the per-place counts */
+function recountTiers() {
+  const t = [0, 0, 0];
+  for (const [c, n] of Object.entries(store.stats.top)) t[tierIdx(tierOf(BY.get(+c)))] += n;
+  store.stats.tier = t;
+}
+(function loadStore() {
+  let raw = null, v1 = false;
+  try {
+    raw = localStorage.getItem(KEY);
+    if (!raw) { raw = localStorage.getItem(OLD_KEY); v1 = !!raw; }
+  } catch (e) { return; }
+  if (!raw) return;
+  let o;
+  try { o = JSON.parse(raw); } catch (e) { return; }
+  if (!o || typeof o.serial !== 'number' || !(o.serial >= 0)) return;
+  store.serial = Math.floor(o.serial);
+  store.stats = cleanStats(v1 ? o.stats && o.stats.births : o.stats);
+  if (Array.isArray(o.recent)) {
+    store.recent = o.recent
+      .filter(r => r && BY.has(r.c) && typeof r.no === 'number' && (r.s === 'M' || r.s === 'F') && (!v1 || r.m === 'b'))
+      .map(r => ({ no: r.no, c: r.c, s: r.s, t: typeof r.t === 'number' ? r.t : null, b: r.b > 1 ? r.b : 0 }))
+      .slice(0, 12);
+  }
+  recountTiers();
+  if (v1 && save()) { try { localStorage.removeItem(OLD_KEY); } catch (e) { /* keep it */ } }
+})();
 
 /* ================= ranks ================= */
 function rankPos(vals, ws, v, higher) {
@@ -149,157 +207,292 @@ function rankText(r) {
   if (top <= 0.5) return '상위 ' + Math.max(1, Math.ceil(top * 100 - 1e-9)) + '%';
   return '하위 ' + Math.max(1, Math.ceil(r * 100 - 1e-9)) + '%';
 }
-function metric(label, v, w, fmt, fmtW, higher, vals, ws, opt = {}) {
-  const m = { label, note: opt.note || '', sub: opt.sub || '', world: w == null ? '' : '세계 ' + fmtW(w) };
-  if (v == null) { m.value = '자료 없음'; m.r = null; return m; }
-  m.value = fmt(v);
-  m.r = rankPos(vals, ws, v, higher);
-  return m;
+/* the two headline metrics: life expectancy and GDP per head (nominal US$, PPP below).
+   Draws compare with same-sex births, lookups with all births. */
+function metrics(st) {
+  const L = st.loc, draw = st.type === 'draw', s = st.sex;
+  const ws = draw ? LOCS.map(l => l.births * (s === 'M' ? l.pm : 1 - l.pm)) : LOCS.map(l => l.births);
+  const ek = draw ? 'e0' + s : 'e0B';
+  const life = { v: L[ek], world: WR[ek], r: rankPos(LOCS.map(l => l[ek]), ws, L[ek], true) };
+  const gdp = { v: L.gdpN, ppp: L.gdp, world: WR.gdpN, r: L.gdpN == null ? null : rankPos(LOCS.map(l => l.gdpN), ws, L.gdpN, true) };
+  return { life, gdp, share: L.births / TOT.births };
 }
-/* headline: nominal US$ at market exchange rates; second line: PPP in international dollars */
-const intl = v => fmtInt(v) + ' 국제달러';
-function gdpMetric(L, ws) {
-  const ppp = L.gdp == null ? '' : '구매력 기준 ' + intl(L.gdp) + (L.gdpNote && L.gdpNote !== L.gdpNNote ? '(' + noteKo(L.gdpNote) + ')' : '');
-  return metric('1인당 GDP', L.gdpN, WR.gdpN, usd, usd, true, LOCS.map(l => l.gdpN), ws, {
-    note: L.gdpN == null ? '비교할 수 있는 값이 없습니다' : (L.gdpNNote ? noteKo(L.gdpNNote) + ', 환율 기준' : '2025년, 환율 기준'),
-    sub: ppp
+
+/* ================= space backdrop ================= */
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function paintSpace() {
+  const rnd = mulberry32(20260924), cols = ['#FFFFFF', '#CFE4FF', '#FFE9D6', '#DDEBFF'];
+  const neb = [[720, 430, 620, '#1B2A5E', .55], [1180, 120, 520, '#3B1F5E', .45], [180, 820, 480, '#0F3B4A', .4]];
+  let defs = '', body = '';
+  neb.forEach(([x, y, r, c, o], i) => {
+    defs += '<radialGradient id="nb' + i + '" gradientUnits="userSpaceOnUse" cx="' + x + '" cy="' + y + '" r="' + r + '">' +
+      '<stop offset="0" stop-color="' + c + '" stop-opacity="' + o + '"/><stop offset="1" stop-color="' + c + '" stop-opacity="0"/></radialGradient>';
+    body += '<rect width="1440" height="900" fill="url(#nb' + i + ')"/>';
   });
-}
-function buildMetrics(st) {
-  const L = st.loc, list = [];
-  const e0f = v => v.toFixed(1) + '세';
-  if (st.type === 'draw') {
-    const s = st.sex, ws = LOCS.map(l => l.births * (s === 'M' ? l.pm : 1 - l.pm));
-    list.push(metric('기대수명', L['e0' + s], WR['e0' + s], e0f, e0f, true, LOCS.map(l => l['e0' + s]), ws));
-    list.push(gdpMetric(L, ws));
-    return { title: '이 아이의 출발선', note: '순위는 2026년 세계 ' + sexKo(s) + ' 출생아 가운데', list };
+  for (let i = 0; i < 230; i++) {
+    const x = rnd() * 1440, y = rnd() * 900, r = 0.5 + rnd() * 0.9, o = 0.25 + rnd() * 0.65, c = cols[Math.floor(rnd() * 4)];
+    body += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(2) + '" fill="' + c + '" fill-opacity="' + o.toFixed(2) + '"/>';
   }
-  const wsL = LOCS.map(l => l.births);
-  list.push(metric('기대수명', L.e0B, WR.e0B, e0f, e0f, true, LOCS.map(l => l.e0B), wsL));
-  list.push(gdpMetric(L, wsL));
-  return { title: '이 나라의 평균', note: '남녀 전체, 순위는 세계 출생아 가운데', list };
+  $('#space').innerHTML = '<svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><defs>' + defs + '</defs>' + body + '</svg>';
 }
 
-/* ================= record ================= */
-function guillocheSVG() {
-  const w = 480, h = 26, paths = [];
-  for (let f = 0; f < 2; f++) {
-    for (let i = 0; i < 5; i++) {
-      const ph = i * 2 * Math.PI / 5 + f * Math.PI / 5, lam = f ? 34 : 41;
-      let d = '';
-      for (let x = 0; x <= w; x += 2) {
-        const amp = h * 0.36 * (0.62 + 0.38 * Math.cos(2 * Math.PI * x / 160 + i * 0.9 + f));
-        const y = h / 2 + amp * Math.sin(2 * Math.PI * x / lam + ph);
-        d += (x ? 'L' : 'M') + x + ',' + y.toFixed(2);
-      }
-      paths.push('<path d="' + d + '"/>');
+/* ================= rolling digits ================= */
+/* each digit is a 1.1em window over a strip 0-9 x3; the strip stops on the target digit
+   after two turns, left digits first. The final value is also given as text for screen readers. */
+const STRIP = Array.from({ length: 30 }, (_, i) => i % 10).join(' ');
+(function rollKeyframes() {
+  const css = Array.from({ length: 10 }, (_, d) => '@keyframes r' + d + ' { 0% { transform: translateY(0); filter: blur(0); } 18% { filter: blur(1.3px); } ' +
+    '80% { filter: blur(0); } 100% { transform: translateY(-' + ((20 + d) * 1.1).toFixed(1) + 'em); } }').join('\n');
+  const el = document.createElement('style');
+  el.textContent = css;
+  document.head.appendChild(el);
+})();
+function roll(el, text, base = 0, speed = 1, animate = true) {
+  el.textContent = '';
+  if (!animate || REDUCED.matches) { el.textContent = text; return; }
+  const sr = document.createElement('span');
+  sr.className = 'sr-only';
+  sr.textContent = text;
+  const vis = document.createElement('span');
+  vis.className = 'roller';
+  vis.setAttribute('aria-hidden', 'true');
+  let k = 0;
+  for (const ch of text) {
+    if (ch < '0' || ch > '9') {
+      const s = document.createElement('span');
+      s.className = 'rch';
+      s.textContent = ch;
+      vis.appendChild(s);
+      continue;
     }
+    const i = k++;
+    const win = document.createElement('span');
+    win.className = 'rwin';
+    const strip = document.createElement('span');
+    strip.className = 'rstrip';
+    strip.textContent = STRIP;
+    strip.style.animation = 'r' + ch + ' ' + Math.round((850 + 150 * i) * speed) + 'ms ' +
+      'cubic-bezier(0.12, 0.72, 0.16, 1) ' + Math.round((base + 45 * i) * speed) + 'ms both';
+    win.appendChild(strip);
+    vis.appendChild(win);
   }
-  return '<svg class="guil" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width=".7" vector-effect="non-scaling-stroke">' + paths.join('') + '</g></svg>';
-}
-const GUIL = guillocheSVG();
-
-function sealSVG(no, serial, stamp) {
-  const ring = 'Rebirth Simulator ★ 2026 출생 등록 ★ ';
-  const seed = serial % 97 + 1, rot = -7 - (serial * 37 % 9);
-  const fs = no.length > 7 ? 8.5 : 10;
-  return '<svg class="seal' + (stamp ? ' stamp' : '') + '" style="--rot:' + rot + 'deg" viewBox="0 0 120 120" aria-hidden="true">' +
-    '<defs><path id="sealArc" d="M60,60 m-43,0 a43,43 0 1,1 86,0 a43,43 0 1,1 -86,0"/>' +
-    '<filter id="sealInk" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="' + seed + '" result="n"/>' +
-    '<feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter></defs>' +
-    '<g filter="url(#sealInk)" fill="currentColor">' +
-    '<circle cx="60" cy="60" r="55.5" fill="none" stroke="currentColor" stroke-width="4"/>' +
-    '<circle cx="60" cy="60" r="32" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
-    '<text font-size="10.5" font-weight="700"><textPath href="#sealArc" textLength="264" lengthAdjust="spacing">' + ring + '</textPath></text>' +
-    '<text x="60" y="62" text-anchor="middle" font-size="19" font-weight="700">등록</text>' +
-    '<text x="60" y="80" text-anchor="middle" font-size="' + fs + '">' + esc(no) + '</text>' +
-    '</g></svg>';
+  el.append(sr, vis);
 }
 
+/* ================= result screen ================= */
 let current = { type: 'empty' };
-const rec = $('#record');
+const stage = $('#stage');
 
-function emblemHTML(L) {
-  const d = MAP.emblemPath ? MAP.emblemPath(L.code) : null;
-  if (d) return '<svg viewBox="0 0 96 96" aria-hidden="true"><path class="shape" d="' + d + '"/></svg>';
-  return '<svg viewBox="0 0 96 96" aria-hidden="true"><circle class="ring" cx="48" cy="48" r="17"/><circle class="shape" cx="48" cy="48" r="5.5"/></svg>';
+function flagChip(el, L) {
+  el.className = 'chip' + (L ? '' : ' empty');
+  el.textContent = '';
+  if (!L) return;
+  const img = new Image();
+  img.src = 'assets/flags/' + L.iso2.toLowerCase() + '.svg';
+  img.alt = L.ko + ' 국기';
+  img.decoding = 'async';
+  img.onerror = () => {
+    const s = document.createElement('span');
+    s.className = 'chip-code';
+    s.setAttribute('role', 'img');
+    s.setAttribute('aria-label', L.ko + ' 국기');
+    s.textContent = L.iso2;
+    img.replaceWith(s);
+  };
+  el.appendChild(img);
 }
 
-function metricsHTML(M) {
-  return '<div class="metrics"><div class="metrics-h"><h3>' + M.title + '</h3><span>' + M.note + '</span></div>' +
-    M.list.map(m => {
-      const p = m.r == null ? null : (m.r * 100).toFixed(1);
-      return '<div class="metric"><div class="m-label">' + m.label + (m.note ? '<small>' + m.note + '</small>' : '') + '</div>' +
-        '<div class="m-val">' + m.value + (m.sub ? '<small>' + m.sub + '</small>' : '') + '</div>' +
-        '<div class="m-cmp"><span>' + m.world + '</span>' +
-        (p == null ? '<span></span><span></span>' :
-          '<span class="strip" style="--p:' + p + '%" aria-hidden="true"><b></b><i></i></span><span class="m-rank">' + rankText(m.r) + '</span>') +
-        '</div></div>';
-    }).join('') + '</div>';
+/* font size by name length, then shrink if the name still overflows its box */
+function nameClass(ko) { const n = [...ko].length; return n <= 5 ? '' : n <= 8 ? 'n2' : 'n3'; }
+function fitName() {
+  const el = $('#idName');
+  el.style.fontSize = '';
+  if (el.classList.contains('empty') || !el.clientWidth) return;
+  const probe = el.cloneNode(true);
+  probe.removeAttribute('id');
+  probe.style.cssText = 'position:absolute;visibility:hidden;left:0;top:0;animation:none;letter-spacing:normal;width:' + el.clientWidth + 'px';
+  el.parentNode.appendChild(probe);
+  const f0 = parseFloat(getComputedStyle(el).fontSize);
+  let f = f0;
+  const wrap = el.classList.contains('n3');
+  const over = () => wrap ? probe.scrollHeight > f * 1.12 * 2 + 2 : probe.scrollWidth > probe.clientWidth + 1;
+  while (f > 18 && over()) { f -= 2; probe.style.fontSize = f + 'px'; }
+  probe.remove();
+  if (f !== f0) el.style.fontSize = f + 'px';
 }
 
-function renderRecord(st, animate) {
+function tierDesc(L) {
+  const T = tierStats(), t = tierOf(L), sov = L.sov ? BY.get(L.sov) : null;
+  let s;
+  if (L.code === 492) s = 'IMF 비회원, 프랑스와 같은 단계로 분류';
+  else if (sov && (L.code === 184 || L.code === 570)) s = withWa(sov.ko) + ' 자유연합 관계, 본국의 단계를 따릅니다';
+  else if (sov) s = sov.ko + '의 속령, 본국의 단계를 따릅니다';
+  else if (t === 'ADV') s = 'IMF 선진경제 ' + D.CLASS.adv.length + '곳 가운데 한 곳';
+  else if (t === 'LDC') s = 'UN 최저개발국 ' + T.count.LDC + '곳 가운데 한 곳';
+  else s = '선진국도 최저개발국도 아닌 ' + T.count.DEV + '곳 가운데 한 곳';
+  const g = D.CLASS.ldc[L.sov || L.code];
+  if (g && t === 'LDC') s += ' (' + dateKo(g) + ' 졸업 예정)';
+  else if (g && t === 'DEV') s += ' (' + dateKo(g) + ' 최저개발국 졸업)';
+  return s;
+}
+
+const PP_EMPTY = '태어날 나라가 정해지면 여권이 여기에 놓입니다';
+const PP_NONE = '공개 자료에서 이 나라의 여권 표지를 찾지 못했습니다';
+function passportHTML(L) {
+  const frame = msg => '<div class="pp-frame none"><p class="pp-msg"><span><b>PASSPORT</b>' + msg + '</span></p></div>';
+  if (!L) return frame(PP_EMPTY);
+  const p = PASSPORT[L.code];
+  if (!p) return frame(PP_NONE);
+  const sov = p.via && p.via.indexOf('sov:') === 0 ? BY.get(+p.via.slice(4)) : null;
+  const who = sov || L;
+  const lic = p.license_url ? '<a href="' + esc(p.license_url) + '">' + esc(p.license) + '</a>' : esc(p.license);
+  const cc = /^CC BY/i.test(p.license || '');
+  return '<div class="pp-frame"><img src="assets/' + esc(p.file) + '" alt="' + esc(who.ko) + ' 일반 여권 앞표지" decoding="async"></div>' +
+    '<figcaption class="pp-cap fx-sm">' + (sov ? '본국 ' + esc(sov.ko) + '의 여권. ' : '') +
+    '사진: <a href="' + esc(p.page) + '">' + esc(p.artist || '저작자 미상') + '</a>, ' + lic + (cc && p.changes ? ', ' + esc(p.changes) : '') + '</figcaption>';
+}
+function mountPassport(L) {
+  const fig = $('#passport');
+  fig.innerHTML = passportHTML(L);
+  const img = fig.querySelector('img');
+  if (img) img.onerror = () => { fig.innerHTML = passportHTML(null).replace(PP_EMPTY, PP_NONE); };
+}
+
+function setRank(id, r) {
+  const el = $('#' + id);
+  el.classList.toggle('off', r == null);
+  el.querySelector('.bar').style.setProperty('--p', r == null ? '0%' : (r * 100).toFixed(2) + '%');
+}
+
+function renderStage(st, opt = {}) {
   current = st;
-  if (st.type === 'empty') {
-    rec.innerHTML = GUIL + '<div class="rec-body">' +
-      '<header class="rec-head"><span>2026년 출생 기록</span><span class="rec-no">제 &nbsp;&nbsp;&nbsp;&nbsp;호</span></header>' +
-      '<div class="rec-id"><div class="photo empty">윤곽</div><div><p class="rec-name blank">빈 기록</p>' +
-      '<p class="rec-sub">‘다시 태어나기’를 누르면 이 칸이 채워집니다.</p></div></div>' +
-      '<dl class="facts"><div class="fact"><dt>성별</dt><dd class="blank-line"></dd></div>' +
-      '<div class="fact"><dt>이 나라가 나올 확률</dt><dd class="blank-line"></dd></div></dl>' +
-      '<p class="empty-note">나라와 성별이 정해지면 그 아이가 받게 될 출발선을 세계와 나란히 적습니다. 기대수명과 1인당 GDP입니다.</p>' +
-      '<div class="rec-foot"><p class="attest">위와 같이 등록합니다.<span class="date">' + todayKo() + '</span></p><div class="seal-slot">직인</div></div>' +
-      '</div>';
-    updateStick();
-    return;
-  }
-  const L = st.loc, isDraw = st.type === 'draw';
-  const share = L.births / TOT.births;
-  const kind = isDraw ? '2026년 출생 기록' : '국가 정보 조회';
-  const no = isDraw ? '제 ' + fmtInt(st.serial) + '호' : '';
-  let facts = '';
-  facts = '<div class="fact wide">발전 단계: <b>' + TIER_KO[tierOf(L)] + '</b></div>';
-  if (isDraw) {
-    facts += '<div class="fact"><dt>성별</dt><dd>' + sexKo(st.sex) + '<small>여아 100명당 남아 ' + Math.round(L.srb * 100) + '명</small></dd></div>' +
-      '<div class="fact"><dt>이 나라가 나올 확률</dt><dd>' + fmtPct(share) + '<small>' + oneIn(share) + '</small></dd></div>';
+  const animate = !!opt.animate && !REDUCED.matches, spd = opt.speed || 1;
+  stage.style.setProperty('--spd', spd);
+  stage.classList.remove('fx');
+  const empty = st.type === 'empty', L = empty ? null : st.loc, draw = st.type === 'draw';
+  const tier = empty ? 'NONE' : tierOf(L);
+  const T = tierStats();
+  stage.dataset.tier = tier;
+
+  /* identity */
+  flagChip($('#chip'), L);
+  $('#kindL').textContent = st.type === 'lookup' ? '국가 정보 조회' : '2026년 출생 기록';
+  const no = $('#kindNo');
+  if (draw) roll(no, '제 ' + fmtInt(st.serial) + '호', 0, spd, animate);
+  else no.textContent = empty ? '제 — 호' : '';
+  const nm = $('#idName');
+  nm.className = 'id-name' + (empty ? ' empty' : ' ' + nameClass(L.ko));
+  nm.textContent = empty ? '다시 태어나기를 누르면 태어날 나라가 정해집니다.' : L.ko;
+  $('#idSex').textContent = empty ? '' : draw ? sexKo(st.sex) : '남녀 전체';
+  $('#idEn').textContent = empty ? '' : L.en;
+  $('#idEn').className = 'id-en fx-sm';
+  $('#idGeo').innerHTML = empty ? '' : esc(SUB[L.sub]) + '<span class="coord">' + coordText(L.lat, L.lng) + '</span>';
+  $('#idGeo').className = 'id-geo fx-sm';
+  $('#copyBtn').hidden = empty;
+  const dash = '—';
+  const fact = (dt, dd, sm) => '<div class="fact"><dt>' + dt + '</dt><dd>' + dd + (sm ? '<small class="fx-sm">' + sm + '</small>' : '') + '</dd></div>';
+  $('#facts').innerHTML = empty
+    ? fact('성별', dash) + fact('인구', dash) + fact('중위연령', dash) + fact('합계출산율', dash)
+    : fact('성별', draw ? sexKo(st.sex) : '남녀 전체', '여아 100명당 남아 ' + Math.round(L.srb * 100) + '명') +
+      fact('인구', people(L.pop), '세계의 ' + fmtPct(L.pop / TOT.pop)) +
+      fact('중위연령', L.med.toFixed(1) + '세', '세계 ' + WR.med.toFixed(1) + '세') +
+      fact('합계출산율', L.tfr.toFixed(2) + '명', '세계 ' + WR.tfr.toFixed(2) + '명');
+  mountPassport(L);
+
+  /* read-outs */
+  const bl = $('#tierBarL');
+  if (empty) {
+    ['vProb', 'vGdp', 'vLife', 'vTier'].forEach(id => { $('#' + id).textContent = dash; $('#' + id).classList.remove('na'); });
+    ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier', 'sTier', 'fLife'].forEach(id => { $('#' + id).textContent = ''; });
+    setRank('rGdp', 0); setRank('rLife', 0);
+    $('#pips').querySelectorAll('i').forEach(i => i.classList.remove('on'));
+    $('#tierBar').innerHTML = '';
+    bl.innerHTML = '';
   } else {
-    facts += '<div class="fact"><dt>인구</dt><dd>' + people(L.pop) + '<small>세계의 ' + fmtPct(L.pop / TOT.pop) + '</small></dd></div>' +
-      '<div class="fact"><dt>2026년 출생아</dt><dd>' + people(L.births) + '<small>세계의 ' + fmtPct(L.births / TOT.births) + '</small></dd></div>';
+    const M = metrics(st);
+    roll($('#vProb'), fmtPct(M.share), 80, spd, animate);
+    $('#sProb').textContent = oneIn(M.share);
+    $('#sProb').className = 'p-sub fx-sm';
+
+    const vg = $('#vGdp'), sg = $('#sGdp');
+    $('#wGdp').textContent = '세계 ' + usd(WR.gdpN);
+    if (M.gdp.v == null) {
+      vg.classList.add('na');
+      vg.textContent = '자료 없음';
+      $('#nGdp').textContent = '';
+      sg.className = 'p-sub memo fx-sm';
+      const nNa = LOCS.filter(l => l.gdpN == null).length;
+      sg.textContent = 'IMF 세계경제전망에 환율 기준 값이 없는 ' + nNa + '곳 가운데 한 곳입니다.' +
+        (L.gdp == null ? '' : ' 구매력 기준 ' + intl(L.gdp) + (L.gdpNote ? '(' + noteKo(L.gdpNote) + ')' : '') + '.');
+      setRank('rGdp', null);
+      $('#kGdp').textContent = '';
+    } else {
+      vg.classList.remove('na');
+      roll(vg, usd(M.gdp.v), 150, spd, animate);
+      $('#nGdp').textContent = L.gdpNNote ? noteKo(L.gdpNNote) + ', 환율 기준' : '2025년, 환율 기준';
+      sg.className = 'p-sub fx-sm';
+      sg.textContent = '';
+      if (M.gdp.ppp == null) sg.textContent = '구매력 기준 값 없음';
+      else {
+        const n = document.createElement('span');
+        roll(n, fmtInt(M.gdp.ppp), 220, spd, animate);
+        sg.append('구매력 기준 ', n, ' 국제달러' + (L.gdpNote && L.gdpNote !== L.gdpNNote ? '(' + noteKo(L.gdpNote) + ')' : ''));
+      }
+      setRank('rGdp', M.gdp.r);
+      $('#kGdp').textContent = rankText(M.gdp.r);
+    }
+
+    $('#pips').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < TIER_PIPS[tier]));
+    $('#vTier').textContent = TIER_KO[tier];
+    $('#dTier').textContent = tierDesc(L);
+    $('#dTier').className = 'tier-desc fx-sm';
+    $('#tierBar').innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
+    bl.innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '">' + TIER_KO[t] + ' ' + T.p2[t] + '%</span>').join('');
+    $('#sTier').innerHTML = '2026년 아기 100명 중 <b>' + T.p1[tier] + '명</b>이 이 단계의 나라에서 태어납니다.';
+    $('#sTier').className = 'tier-say fx-sm';
+
+    const vl = $('#vLife');
+    vl.textContent = '';
+    const num = document.createElement('span');
+    roll(num, M.life.v.toFixed(1), 260, spd, animate);
+    const unit = document.createElement('span');
+    unit.className = 'unit';
+    unit.textContent = '세';
+    vl.append(num, unit);
+    setRank('rLife', M.life.r);
+    $('#wLife').textContent = '세계 ' + M.life.world.toFixed(1) + '세';
+    $('#kLife').textContent = rankText(M.life.r);
+    $('#fLife').textContent = draw ? '순위는 2026년 세계 ' + (st.sex === 'M' ? '남아' : '여아') + ' 출생아 가운데' : '순위는 2026년 세계 출생아(남녀 전체) 가운데';
   }
-  const demo = '중위연령 ' + L.med.toFixed(1) + '세(세계 ' + WR.med.toFixed(1) + '세), 합계출산율 ' + L.tfr.toFixed(2) + '명(세계 ' + WR.tfr.toFixed(2) + '명)';
-  const ctx = isDraw
-    ? '인구 ' + people(L.pop) + '(세계의 ' + fmtPct(L.pop / TOT.pop) + '), 2026년 출생아 ' + people(L.births) + '. ' + demo + '.'
-    : demo + '. 출생 성비는 여아 100명당 남아 ' + Math.round(L.srb * 100) + '명이고, 이 나라에 태어날 확률은 ' + fmtPct(share) + '(' + oneIn(share) + ')입니다.';
-  const foot = isDraw
-    ? '<div class="rec-foot"><div><p class="attest">위와 같이 등록합니다.<span class="date">' + todayKo(st.t) + '</span></p>' +
-      '<div class="rec-tools"><button type="button" class="btn btn-sm" id="copyBtn">결과 복사</button></div></div>' + sealSVG(no, st.serial, animate && st.fresh && !REDUCED.matches) + '</div>'
-    : '<div class="rec-foot"><div><p class="attest muted">조회한 나라는 나의 기록에 남지 않습니다.</p>' +
-      '<div class="rec-tools"><button type="button" class="btn btn-sm" id="copyBtn">결과 복사</button></div></div></div>';
-  rec.innerHTML = GUIL + '<div class="rec-body">' +
-    '<header class="rec-head"><span>' + kind + '</span><span class="rec-no">' + no + '</span></header>' +
-    '<div class="rec-id"><div class="photo" title="' + esc(L.ko) + ' 윤곽">' + emblemHTML(L) + '</div><div>' +
-    '<h2 class="rec-name">' + esc(L.ko) + '</h2><p class="rec-sub">' + esc(L.en) + ', ' + SUB[L.sub] + '</p></div></div>' +
-    '<dl class="facts">' + facts + '</dl>' + metricsHTML(buildMetrics(st)) +
-    '<p class="ctx">' + ctx + '</p>' + foot + '</div>';
-  if (animate && !REDUCED.matches) { rec.classList.remove('swap'); void rec.offsetWidth; rec.classList.add('swap'); }
-  $('#copyBtn').addEventListener('click', onCopy);
-  updateStick();
+
+  fitName();
+  if (animate) { void stage.offsetWidth; stage.classList.add('fx'); }
+  PLANET.show(st, { animate, speed: spd });
 }
 
 function recordText(st) {
-  const L = st.loc, isDraw = st.type === 'draw';
-  const share = L.births / TOT.births;
-  const lines = [];
-  if (isDraw) {
+  const L = st.loc, draw = st.type === 'draw', M = metrics(st), lines = [];
+  if (draw) {
     lines.push('Rebirth Simulator: 2026년 출생 기록 제 ' + fmtInt(st.serial) + '호, ' + todayKo(st.t));
     lines.push(L.ko + '(' + SUB[L.sub] + '), ' + sexKo(st.sex));
   } else {
-    lines.push('Rebirth Simulator: 국가 정보 조회');
-    lines.push(L.ko + '(' + SUB[L.sub] + ')');
+    lines.push('Rebirth Simulator: 국가 정보 조회, ' + todayKo());
+    lines.push(L.ko + '(' + SUB[L.sub] + '), 남녀 전체');
   }
-  lines.push('이 나라가 나올 확률 ' + fmtPct(share) + ', ' + oneIn(share));
-  const M = buildMetrics(st);
-  M.list.forEach(m => lines.push(m.label + ' ' + m.value + (m.sub ? '(' + m.sub + ')' : '') + (m.world ? ', ' + m.world : '') + (m.r != null ? ', ' + rankText(m.r) : '')));
+  lines.push('이 나라에 태어날 확률 ' + fmtPct(M.share) + ', ' + oneIn(M.share));
+  const ppp = L.gdp == null ? '' : '(구매력 기준 ' + intl(L.gdp) + ')';
+  lines.push(M.gdp.v == null
+    ? '1인당 GDP 자료 없음' + ppp + ', 세계 ' + usd(WR.gdpN)
+    : '1인당 GDP ' + usd(M.gdp.v) + ppp + ', 세계 ' + usd(WR.gdpN) + ', ' + rankText(M.gdp.r));
+  lines.push('발전 단계 ' + TIER_KO[tierOf(L)]);
+  lines.push('기대수명 ' + M.life.v.toFixed(1) + '세, 세계 ' + M.life.world.toFixed(1) + '세, ' + rankText(M.life.r));
   return lines.join('\n');
 }
 
@@ -315,25 +508,339 @@ async function copyText(t) {
 }
 async function onCopy(ev) {
   const btn = ev.currentTarget;
+  if (current.type === 'empty') return;
   const ok = await copyText(recordText(current));
   btn.textContent = ok ? '복사했습니다' : '복사하지 못했습니다';
   setTimeout(() => { if (btn.isConnected) btn.textContent = '결과 복사'; }, 1800);
 }
 
-/* ================= map (needs d3) ================= */
+/* ================= shared geography (needs d3) ================= */
+const GEO = { ready: false };
+function initGeo() {
+  if (GEO.ready) return true;
+  const tj = window.topojson;
+  if (!window.d3 || !tj) return false;
+  let topo;
+  try { topo = JSON.parse($('#map-data').textContent); } catch (e) { return false; }
+  const fc = tj.feature(topo, topo.objects.countries);
+  fc.features.forEach(f => { f.code = f.properties && f.properties.id ? +f.properties.id : 0; });
+  GEO.fc = fc;
+  GEO.feats = fc.features;
+  GEO.FEAT = new Map(GEO.feats.filter(f => f.code).map(f => [f.code, f]));
+  GEO.ready = true;
+  return true;
+}
+/* the main piece of a country plus the islands near it (drops far-flung territories) */
+function emblemGeom(f) {
+  if (f._em) return f._em;
+  const d3 = window.d3, g = f.geometry;
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  const items = polys.map(c => {
+    const p = { type: 'Polygon', coordinates: c };
+    return { c, area: d3.geoArea(p), cen: d3.geoCentroid(p) };
+  }).sort((a, b) => b.area - a.area);
+  const main = items[0];
+  let R = 0;
+  for (const pt of main.c[0]) R = Math.max(R, d3.geoDistance(main.cen, pt));
+  const thr = Math.max(10, 1.2 * R * 180 / Math.PI);
+  const inc = items.filter(it => {
+    const dd = d3.geoDistance(main.cen, it.cen) * 180 / Math.PI;
+    return dd <= thr || (it.area >= 0.2 * main.area && dd <= 30);
+  });
+  const geo = { type: 'MultiPolygon', coordinates: inc.map(it => it.c) };
+  f._em = { geo, c: d3.geoCentroid(geo), main: { type: 'Polygon', coordinates: main.c } };
+  return f._em;
+}
+
+/* ================= planet ================= */
+/* The drawn country sits at the centre of a globe. To make small countries visible the angle c
+   from the centre is stretched to m*c before the orthographic wrap, so the visible cap shrinks to
+   90/m degrees. A draw flies the camera: pull back to the whole globe, turn, then zoom in. */
+const PLANET = (() => {
+  const R = 196, CX = 360, CY = 300, RAD = Math.PI / 180;
+  const svg = $('#planet');
+  const STEPS = [0.5, 1, 2, 5, 10, 15, 20, 30];
+  const halfRing = (k, front) => {
+    const rx = 1.62 * R * k, ry = 0.30 * R * k;
+    return 'M' + (CX - rx).toFixed(2) + ' ' + CY + 'A' + rx.toFixed(2) + ' ' + ry.toFixed(2) + ' 0 0 ' + (front ? 0 : 1) + ' ' + (CX + rx).toFixed(2) + ' ' + CY;
+  };
+  const stops = list => list.map(([o, a]) => '<stop offset="' + o + '" class="stop-t" stop-opacity="' + a + '"/>').join('');
+  const arc = (a0, a1, r) => {
+    const p = a => [CX + r * Math.cos(a * RAD), CY + r * Math.sin(a * RAD)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    return 'M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'A' + r + ' ' + r + ' 0 0 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1);
+  };
+  const B = 100, A = 26; // bracket half-size and arm length at scale 1
+  const brk = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) =>
+    'M' + (CX + sx * B) + ' ' + (CY + sy * (B - A)) + 'V' + (CY + sy * B) + 'H' + (CX + sx * (B - A))).join('');
+  svg.innerHTML =
+    '<defs>' +
+      '<radialGradient id="pHalo" gradientUnits="userSpaceOnUse" cx="' + CX + '" cy="' + CY + '" r="' + 1.34 * R + '">' + stops([[0, .34], [.7, .34], [.76, .14], [1, 0]]) + '</radialGradient>' +
+      '<linearGradient id="pRingGrad" gradientUnits="userSpaceOnUse" x1="' + (CX - 1.62 * R) + '" y1="' + CY + '" x2="' + (CX + 1.62 * R) + '" y2="' + CY + '">' + stops([[0, 0], [.3, .55], [.7, .55], [1, 0]]) + '</linearGradient>' +
+      '<radialGradient id="pSea" gradientUnits="userSpaceOnUse" cx="' + (CX - .38 * R) + '" cy="' + (CY - .42 * R) + '" r="' + 1.5 * R + '"><stop offset="0" stop-color="#1A3552"/><stop offset=".55" stop-color="#0A1830"/><stop offset="1" stop-color="#03060F"/></radialGradient>' +
+      '<radialGradient id="pShade" gradientUnits="userSpaceOnUse" cx="' + (CX - .45 * R) + '" cy="' + (CY - .5 * R) + '" r="' + 1.75 * R + '"><stop offset="0" stop-color="#01030A" stop-opacity="0"/><stop offset=".35" stop-color="#01030A" stop-opacity="0"/><stop offset=".72" stop-color="#01030A" stop-opacity=".55"/><stop offset="1" stop-color="#01030A" stop-opacity=".92"/></radialGradient>' +
+      '<radialGradient id="pRim" gradientUnits="userSpaceOnUse" cx="' + CX + '" cy="' + CY + '" r="' + R + '">' + stops([[0, 0], [.86, 0], [1, .42]]) + '</radialGradient>' +
+      '<linearGradient id="pSweepGrad" x1="0" y1="0" x2="0" y2="1">' + stops([[0, 0], [.5, .22], [1, 0]]) + '</linearGradient>' +
+      '<clipPath id="pClip"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '"/></clipPath>' +
+      '<filter id="pBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>' +
+      '<pattern id="pScan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="#B8E6FF" fill-opacity=".05"/></pattern>' +
+    '</defs>' +
+    '<g class="p-body">' +
+      '<circle cx="' + CX + '" cy="' + CY + '" r="' + 1.34 * R + '" fill="url(#pHalo)"/>' +
+      '<g class="p-ring back" transform="rotate(-16 ' + CX + ' ' + CY + ')"><path class="solid" d="' + halfRing(1, false) + '"/><path class="dash" d="' + halfRing(.9, false) + '"/></g>' +
+      '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pSea)"/>' +
+      '<g clip-path="url(#pClip)">' +
+        '<path class="p-grat"/><path class="p-land"/>' +
+        '<path class="p-glow" filter="url(#pBlur)"/><path class="p-country"/>' +
+        '<g class="p-dotg" display="none"><circle class="p-dot" r="9" filter="url(#pBlur)"/><circle class="p-dot" r="6"/><circle class="p-dot-ring" r="12"/></g>' +
+        '<rect class="p-sweep" x="' + (CX - R) + '" y="' + (CY - 60) + '" width="' + 2 * R + '" height="120"/>' +
+        '<rect x="' + (CX - R) + '" y="' + (CY - R) + '" width="' + 2 * R + '" height="' + 2 * R + '" fill="url(#pScan)"/>' +
+        '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pShade)"/>' +
+      '</g>' +
+      '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pRim)"/>' +
+      '<circle class="p-rimline" cx="' + CX + '" cy="' + CY + '" r="' + R + '"/>' +
+      '<g class="p-ring front" transform="rotate(-16 ' + CX + ' ' + CY + ')"><path class="solid" d="' + halfRing(1, true) + '"/><path class="dash" d="' + halfRing(.9, true) + '"/></g>' +
+      '<g class="p-hud">' +
+        '<circle class="p-hud-ring" cx="' + CX + '" cy="' + CY + '" r="' + (R + 26) + '"/>' +
+        '<path class="p-hud-arcs" d="' + [45, 135, 225, 315].map(a => arc(a - 11, a + 11, R + 40)).join('') + '"/>' +
+        '<path class="p-brk" d="' + brk + '" vector-effect="non-scaling-stroke"/>' +
+        '<text x="112" y="62">TARGET</text>' +
+        '<text x="112" y="84" class="hl" id="hudLat">LAT  --.--</text>' +
+        '<text x="112" y="104" class="hl" id="hudLng">LNG  --.--</text>' +
+        '<text x="112" y="124" id="hudZoom">ZOOM ×1.0</text>' +
+        '<text x="608" y="540" text-anchor="end" class="p-status" id="hudStatus">STANDBY</text>' +
+        '<text x="608" y="560" text-anchor="end" id="hudCode">NO SIGNAL</text>' +
+      '</g>' +
+      '<g class="p-cross"><circle cx="' + CX + '" cy="' + CY + '" r="7"/><path d="M' + CX + ' ' + (CY - 19) + 'v8M' + CX + ' ' + (CY + 11) + 'v8M' + (CX - 19) + ' ' + CY + 'h8M' + (CX + 11) + ' ' + CY + 'h8"/></g>' +
+    '</g>';
+  const body = $('.p-body', svg), grat = $('.p-grat', svg), land = $('.p-land', svg), glow = $('.p-glow', svg), country = $('.p-country', svg);
+  const dotg = $('.p-dotg', svg), brkEl = $('.p-brk', svg), cross = $('.p-cross', svg);
+  const hud = { lat: $('#hudLat'), lng: $('#hudLng'), zoom: $('#hudZoom'), status: $('#hudStatus'), code: $('#hudCode') };
+
+  let mutate = null, proj = null, path = null, lo = null;
+  let view = null, target = null, raf = 0, idleRaf = 0, visible = true;
+  const tcache = new Map();
+
+  function setup() {
+    if (mutate) return true;
+    if (!GEO.ready) return false;
+    const d3 = window.d3;
+    const exRaw = m => {
+      const az = d3.geoAzimuthalEquidistantRaw;
+      return (lambda, phi) => {
+        const [x, y] = az(lambda, phi);
+        const c = Math.hypot(x, y);
+        if (c < 1e-12) return [0, 0];
+        const k = Math.sin(Math.min(m * c, Math.PI / 2)) / c;
+        return [x * k, y * k];
+      };
+    };
+    mutate = d3.geoProjectionMutator(exRaw);
+    proj = mutate(1).scale(R).translate([CX, CY]);
+    path = d3.geoPath(proj).digits(1);
+    /* a lighter copy of the land for whole-globe frames, and a bounding cap per country for culling */
+    const thin = ring => ring.length < 16 ? ring : ring.filter((p, i) => i % 3 === 0 || i === ring.length - 1);
+    lo = GEO.feats.map(f => {
+      const g = f.geometry;
+      const geometry = !g ? g : g.type === 'Polygon' ? { type: 'Polygon', coordinates: g.coordinates.map(thin) }
+        : { type: 'MultiPolygon', coordinates: g.coordinates.map(p => p.map(thin)) };
+      return { type: 'Feature', code: f.code, geometry };
+    });
+    GEO.feats.forEach(f => {
+      f._bc = d3.geoCentroid(f);
+      let r = 0;
+      d3.geoStream(f, { point(x, y) { r = Math.max(r, d3.geoDistance(f._bc, [x, y])); }, lineStart() {}, lineEnd() {}, polygonStart() {}, polygonEnd() {}, sphere() {} });
+      f._br = r;
+    });
+    return true;
+  }
+
+  /* where to look and how much to magnify for a place */
+  function targetFor(code) {
+    if (tcache.has(code)) return tcache.get(code);
+    const d3 = window.d3, L = BY.get(code), f = GEO.FEAT.get(code);
+    let t;
+    const em = f ? emblemGeom(f) : null;
+    if (!em || em.main.coordinates[0].length < 10) {
+      /* no outline, or one drawn with a handful of points: a glowing dot at the listed position */
+      t = { code, lon: L.lng, lat: L.lat, m: 22, dot: true, feat: null };
+    } else {
+      let cmax = 0;
+      for (const poly of em.geo.coordinates) for (const pt of poly[0]) cmax = Math.max(cmax, d3.geoDistance(em.c, pt));
+      t = { code, lon: em.c[0], lat: em.c[1], m: Math.min(22, Math.max(1, 52 / (cmax / RAD))), dot: false, feat: f };
+    }
+    tcache.set(code, t);
+    return t;
+  }
+
+  function graticule(v, vis) {
+    const d3 = window.d3;
+    const step = STEPS.find(s => vis / s <= 6) || 30;
+    const g = d3.geoGraticule().step([step, step]).precision(step / 4);
+    if (vis < 60) {
+      const pad = vis + 2 * step, lat0 = Math.max(-90, v.lat - pad), lat1 = Math.min(90, v.lat + pad);
+      const polar = Math.max(Math.abs(lat0), Math.abs(lat1));
+      const dl = polar > 80 ? 180 : Math.min(180, pad / Math.cos(polar * RAD));
+      const snap = x => Math.floor(x / step) * step;
+      g.extent([[snap(v.lon - dl), snap(lat0)], [snap(v.lon + dl) + step, Math.min(90, snap(lat1) + step)]]);
+    }
+    return path(g());
+  }
+
+  function frame(v, fine) {
+    const d3 = window.d3;
+    mutate(v.m);
+    const vis = Math.min(90, 90 / v.m);
+    proj.rotate([-v.lon, -v.lat]).clipAngle(vis).precision(fine ? 0.3 : 0.9);
+    grat.setAttribute('d', graticule(v, vis) || '');
+    const cap = vis * RAD + 0.03, ctr = [v.lon, v.lat];
+    const skip = target && !target.dot ? target.code : -1;
+    const src = v.m < 2.2 && !fine ? lo : GEO.feats;
+    const list = [];
+    for (let i = 0; i < src.length; i++) {
+      const f = GEO.feats[i];
+      if (f.code === skip || !src[i].geometry) continue;
+      if (vis < 80 && d3.geoDistance(f._bc, ctr) - f._br > cap) continue;
+      list.push(src[i]);
+    }
+    land.setAttribute('d', path({ type: 'FeatureCollection', features: list }) || '');
+    const cd = target && target.feat ? path(target.feat) || '' : '';
+    country.setAttribute('d', cd);
+    glow.setAttribute('d', cd);
+    if (target && target.dot && d3.geoDistance([target.lon, target.lat], ctr) < vis * RAD) {
+      const p = proj([target.lon, target.lat]);
+      dotg.setAttribute('display', 'inline');
+      dotg.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')');
+    } else dotg.setAttribute('display', 'none');
+    const lon = ((v.lon + 540) % 360) - 180;
+    hud.lat.textContent = 'LAT  ' + Math.abs(v.lat).toFixed(2) + '°' + (v.lat >= 0 ? 'N' : 'S');
+    hud.lng.textContent = 'LNG  ' + Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'E' : 'W');
+    hud.zoom.textContent = 'ZOOM ×' + v.m.toFixed(1);
+  }
+
+  function clear() {
+    [grat, land, glow, country].forEach(e => e.setAttribute('d', ''));
+    dotg.setAttribute('display', 'none');
+  }
+  const status = (s, hl) => { hud.status.textContent = s; hud.status.classList.toggle('hl', !!hl); };
+  function brackets(k) { brkEl.style.transform = 'scale(' + k + ')'; brkEl.style.opacity = k > 1.2 ? '.5' : '1'; }
+
+  function lock(animate) {
+    svg.classList.remove('flying');
+    svg.classList.add('locked');
+    status('TARGET LOCKED', true);
+    brackets(0.42);
+    cross.style.opacity = '';
+    if (animate) { body.classList.remove('glitch'); void body.getBoundingClientRect(); body.classList.add('glitch'); }
+  }
+
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const clamp01 = t => Math.max(0, Math.min(1, t));
+  function fly(t, dur) {
+    const d3 = window.d3;
+    stopIdle();
+    cancelAnimationFrame(raf);
+    const from = view || { lon: t.lon + 75, lat: 14, m: 1 };
+    const dist = d3.geoDistance([from.lon, from.lat], [t.lon, t.lat]);
+    const rot = d3.geoInterpolate([from.lon, from.lat], [t.lon, t.lat]);
+    const far = dist > 0.03;
+    const zOut = far && from.m > 1.05 ? 0.3 : 0;
+    const lf = Math.log(from.m), lt = Math.log(t.m);
+    svg.classList.add('flying');
+    svg.classList.remove('locked');
+    status('SCANNING');
+    brackets(1.6);
+    cross.style.opacity = '.35';
+    const t0 = performance.now();
+    const step = now => {
+      const p = clamp01((now - t0) / dur);
+      let m, r;
+      if (!far) { m = Math.exp(lf + (lt - lf) * ease(p)); r = ease(p); }
+      else {
+        if (p < zOut) m = Math.exp(lf * (1 - ease(p / zOut)));
+        else if (p < 0.55) m = 1;
+        else m = Math.exp(lt * ease((p - 0.55) / 0.45));
+        r = ease(clamp01((p - zOut * 0.6) / (0.75 - zOut * 0.6)));
+      }
+      const c = rot(r);
+      view = { lon: c[0], lat: c[1], m };
+      if (p > 0.55) brackets(1.6 - 0.6 * ease((p - 0.55) / 0.45));
+      frame(view, p >= 1);
+      if (p < 1) raf = requestAnimationFrame(step);
+      else { raf = 0; view = { lon: t.lon, lat: t.lat, m: t.m }; lock(true); }
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  /* the empty state: a grey world slowly turning */
+  function stopIdle() { cancelAnimationFrame(idleRaf); idleRaf = 0; }
+  function idle() {
+    stopIdle();
+    cancelAnimationFrame(raf);
+    target = null;
+    view = view && view.m === 1 ? view : { lon: 20, lat: 14, m: 1 };
+    svg.classList.remove('flying', 'locked');
+    status('STANDBY');
+    hud.code.textContent = 'AWAITING DRAW';
+    brackets(1.6);
+    cross.style.opacity = '.35';
+    frame(view, true);
+    if (REDUCED.matches) return;
+    let last = performance.now();
+    const spin = now => {
+      if (visible && !document.hidden) {
+        if (now - last > 33) {
+          view.lon = (view.lon + (now - last) * 0.006) % 360;
+          last = now;
+          frame(view, false);
+        }
+      } else last = now;
+      idleRaf = requestAnimationFrame(spin);
+    };
+    idleRaf = requestAnimationFrame(spin);
+  }
+
+  function show(st, opt = {}) {
+    body.classList.toggle('enter', !!opt.animate && !view);
+    if (st.type === 'empty') {
+      if (!setup()) { clear(); status(GEO.failed ? 'NO MAP DATA' : 'STANDBY'); hud.code.textContent = 'AWAITING DRAW'; return; }
+      idle();
+      return;
+    }
+    const L = st.loc;
+    hud.code.textContent = 'M49 ' + String(L.code).padStart(3, '0') + ' · ' + L.iso2;
+    if (!setup()) {
+      /* no d3 (yet): sea, halo, rim and ring only, in the tier colour */
+      clear();
+      lock(false);
+      status(GEO.failed ? 'NO MAP DATA' : 'LINKING', GEO.failed);
+      return;
+    }
+    target = targetFor(L.code);
+    if (!opt.animate || REDUCED.matches) {
+      stopIdle();
+      cancelAnimationFrame(raf);
+      view = { lon: target.lon, lat: target.lat, m: target.m };
+      frame(view, true);
+      lock(false);
+      return;
+    }
+    fly(target, Math.round(2000 * (opt.speed || 1)));
+  }
+
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; }).observe(svg);
+  return { show };
+})();
+
+/* ================= world map (needs d3) ================= */
 const MAP = { ready: false };
 let batchCounts = null;
 
 function initMap() {
   if (MAP.ready) return;
-  const d3 = window.d3, tj = window.topojson;
-  if (!d3 || !tj) { mapFail(); return; }
-  let topo;
-  try { topo = JSON.parse($('#map-data').textContent); } catch (e) { mapFail(); return; }
-  const fc = tj.feature(topo, topo.objects.countries);
-  const feats = fc.features;
-  feats.forEach(f => { f.code = f.properties && f.properties.id ? +f.properties.id : 0; });
-  const FEAT = new Map(feats.filter(f => f.code).map(f => [f.code, f]));
+  if (!initGeo()) { mapFail(); return; }
+  const d3 = window.d3, fc = GEO.fc, feats = GEO.feats, FEAT = GEO.FEAT;
+  tierStats();
 
   const Wv = 1000;
   const proj = d3.geoEqualEarth().fitWidth(Wv - 24, fc);
@@ -355,21 +862,23 @@ function initMap() {
   const rBase = LOCS.map(l => Math.max(1.1, 25 * Math.sqrt(l.births / maxB)));
   const order = LOCS.map(l => l.i).sort((a, b) => LOCS[b].births - LOCS[a].births);
   const bub = zl.append('g').selectAll('circle').data(order).join('circle')
-    .attr('class', i => 'bubble k' + LOCS[i].cont)
+    .attr('class', i => 'bubble t-' + LOCS[i].tier)
     .attr('cx', i => pos[i][0]).attr('cy', i => pos[i][1])
     .attr('r', i => rBase[i])
     .attr('data-code', i => LOCS[i].code);
   const pulseG = zl.append('g');
   const batchG = zl.append('g');
   const pinG = zl.append('g').attr('display', 'none');
+  const pinCross = pinG.append('path').attr('class', 'pin-cross');
   const pinRing = pinG.append('circle').attr('class', 'pin-ring').attr('r', 8);
   const pinDot = pinG.append('circle').attr('class', 'pin-dot').attr('r', 2.8);
+  const crossD = k => 'M' + (-16 / k) + ' 0h' + (6 / k) + 'M' + (10 / k) + ' 0h' + (6 / k) + 'M0 ' + (-16 / k) + 'v' + (6 / k) + 'M0 ' + (10 / k) + 'v' + (6 / k);
 
   let K = 1;
   const resetBtn = $('#resetMap');
   function rescale() {
     bub.attr('r', i => rBase[i] / K);
-    pinRing.attr('r', 8 / K); pinDot.attr('r', 2.8 / K);
+    pinRing.attr('r', 8 / K); pinDot.attr('r', 2.8 / K); pinCross.attr('d', crossD(K));
     batchG.selectAll('circle').attr('r', d => d.r / K);
   }
   const zoom = d3.zoom().on('zoom', ev => {
@@ -379,42 +888,6 @@ function initMap() {
     rescale();
     resetBtn.hidden = t.k < 1.001 && Math.abs(t.x) < 0.5 && Math.abs(t.y) < 0.5;
   });
-
-  function emblemGeom(f) {
-    if (f._em) return f._em;
-    const g = f.geometry;
-    const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
-    const items = polys.map(c => {
-      const p = { type: 'Polygon', coordinates: c };
-      return { c, area: d3.geoArea(p), cen: d3.geoCentroid(p) };
-    }).sort((a, b) => b.area - a.area);
-    const main = items[0];
-    let R = 0;
-    for (const pt of main.c[0]) R = Math.max(R, d3.geoDistance(main.cen, pt));
-    const thr = Math.max(10, 1.2 * R * 180 / Math.PI);
-    const inc = items.filter(it => {
-      const dd = d3.geoDistance(main.cen, it.cen) * 180 / Math.PI;
-      return dd <= thr || (it.area >= 0.2 * main.area && dd <= 30);
-    });
-    const geo = { type: 'MultiPolygon', coordinates: inc.map(it => it.c) };
-    f._em = { geo, c: d3.geoCentroid(geo), main: { type: 'Polygon', coordinates: main.c } };
-    return f._em;
-  }
-  const emCache = new Map();
-  MAP.emblemPath = code => {
-    if (emCache.has(code)) return emCache.get(code);
-    const f = FEAT.get(code);
-    let d = null;
-    const em = f ? emblemGeom(f) : null;
-    const b = em ? path.bounds(em.main) : null;
-    /* islands only a few pixels wide on the world map, or drawn with a handful of points, get the dot icon */
-    if (em && Math.max(b[1][0] - b[0][0], b[1][1] - b[0][1]) >= 4 && em.main.coordinates[0].length >= 10) {
-      const pr = d3.geoAzimuthalEqualArea().rotate([-em.c[0], -em.c[1]]).fitExtent([[6, 6], [90, 90]], em.geo);
-      d = d3.geoPath(pr)(em.geo);
-    }
-    emCache.set(code, d);
-    return d;
-  };
 
   function targetFor(code) {
     const L = BY.get(code), p = proj([L.lng, L.lat]), f = FEAT.get(code);
@@ -445,17 +918,23 @@ function initMap() {
     if (pickedEl) pickedEl.classList.add('picked');
     const L = BY.get(code), p = proj([L.lng, L.lat]);
     pinG.attr('display', null).attr('transform', 'translate(' + p[0] + ',' + p[1] + ')');
+    pinCross.attr('d', crossD(K));
     const ring = pinRing.node();
     ring.classList.remove('ping'); void ring.getBoundingClientRect(); ring.classList.add('ping');
     if (fly) MAP.fly(code);
+  };
+  MAP.unpick = () => {
+    if (pickedEl) pickedEl.classList.remove('picked');
+    pickedEl = null;
+    pinG.attr('display', 'none');
   };
   MAP.showBatch = counts => {
     batchCounts = counts;
     const data = [...counts].map(([code, n]) => {
       const L = BY.get(code), p = proj([L.lng, L.lat]);
-      return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n) };
+      return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n), t: L.tier };
     }).sort((a, b) => b.n - a.n);
-    batchG.selectAll('circle').data(data).join('circle').attr('class', 'bdot')
+    batchG.selectAll('circle').data(data).join('circle').attr('class', d => 'bdot t-' + d.t)
       .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r / K).attr('data-code', d => d.code);
   };
   MAP.clearBatch = () => { batchCounts = null; batchG.selectAll('*').remove(); };
@@ -471,7 +950,7 @@ function initMap() {
     const code = codeAt(ev), L = BY.get(code);
     if (!L) { tip.hidden = true; return; }
     const r = wrap.getBoundingClientRect();
-    let h = '<b>' + esc(L.ko) + '</b><br>2026년 출생아 ' + people(L.births) +
+    let h = '<b>' + esc(L.ko) + '</b> <span class="t t-' + L.tier + '">' + TIER_KO[L.tier] + '</span><br>2026년 출생아 ' + people(L.births) +
       '<br>이 나라에 태어날 확률 ' + fmtPct(L.births / TOT.births);
     if (batchCounts && batchCounts.has(code)) h += '<br>이번 연속 추첨에서 ' + batchCounts.get(code) + '번';
     tip.innerHTML = h;
@@ -480,7 +959,7 @@ function initMap() {
     tip.style.left = Math.min(Math.max(x, half), r.width - half) + 'px';
     tip.style.top = (ev.clientY - r.top) + 'px';
   }).on('pointerleave', () => { tip.hidden = true; })
-    .on('click', ev => { const code = codeAt(ev); if (BY.has(code)) { tip.hidden = true; lookup(code, true); } });
+    .on('click', ev => { const code = codeAt(ev); if (BY.has(code)) { tip.hidden = true; lookup(code); } });
 
   /* ambient births at the real rate */
   let pulseT = 0, visible = true;
@@ -511,13 +990,12 @@ function initMap() {
   schedule();
 
   MAP.ready = true;
-  if (current.type !== 'empty') {
-    MAP.pick(current.loc.code, false);
-    renderRecord(current, false);
-  }
+  if (current.type !== 'empty') MAP.pick(current.loc.code, false);
 }
 
 function mapFail() {
+  GEO.failed = true;
+  PLANET.show(current, {});
   const msg = $('#mapMsg');
   msg.textContent = '지도를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침하세요. 추첨과 표는 지도 없이도 쓸 수 있습니다.';
   msg.hidden = false;
@@ -533,27 +1011,45 @@ function loadScript(src) {
 
 /* ================= page text ================= */
 function renderIntro() {
-  $('#lede').textContent = '2026년에 태어날 아기 약 ' + koUnit(WR.births, 4) + ' 명 가운데 한 명으로 다시 태어납니다. 나라는 출생아 수에 비례해, 성별은 그 나라의 출생 성비에 따라 정해집니다.';
-  $('#legend').textContent = '원의 크기는 2026년 출생아 수입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 정보를 볼 수 있습니다.';
-  $('#map').setAttribute('aria-label', '세계 지도. 원의 크기는 나라별 2026년 출생아 수를 나타냅니다.');
+  $('#lede').innerHTML = '2026년에 태어날 아기 <b>' + koUnit(WR.births, 4) + '</b> 명 가운데 한 명이 됩니다';
+  $('#atlasLede').textContent = '나라는 2026년 출생아 수에 비례해, 성별은 그 나라의 출생 성비에 따라 정해집니다. 원이 클수록 그 나라에 태어날 확률이 큽니다.';
+  $('#legend').textContent = '원의 크기는 2026년 출생아 수, 색은 발전 단계입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.';
+  $('#map').setAttribute('aria-label', '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 발전 단계를 나타냅니다.');
+  $('#keys').innerHTML = TIERS.map(t => '<li class="t-' + t + '">' + pipsHTML(t) + TIER_KO[t] + '</li>').join('');
+  $('#live').innerHTML = '<span class="rate">초당 탄생<b>' + RATE_B.toFixed(1) + '</b></span><span class="rate">초당 사망<b>' + RATE_D.toFixed(1) + '</b></span>' +
+    '<span><span class="dot" aria-hidden="true"></span><span class="since">화면을 연 뒤 </span><b id="liveN">0</b>명 탄생</span>';
 }
-
 const T0 = performance.now();
 function tickLive() {
-  const n = Math.floor((performance.now() - T0) / 1000 * RATE_B);
-  $('#live').innerHTML = '지금도 1초에 약 ' + RATE_B.toFixed(1) + '명이 태어나고 ' + RATE_D.toFixed(1) + '명이 세상을 떠납니다. ' +
-    '이 페이지를 연 뒤로 약 <b>' + fmtInt(n) + '명</b>이 태어났습니다.';
+  $('#liveN').textContent = fmtInt(Math.floor((performance.now() - T0) / 1000 * RATE_B));
+}
+
+function renderMethod() {
+  const T = tierStats(), C = D.CLASS;
+  const g = Object.entries(C.ldc).filter(([, d]) => d).map(([c, d]) => BY.get(+c).ko + ' ' + dateKo(d)).join(', ');
+  $('#tierRules').textContent = '발전 단계는 두 국제기구의 공식 분류를 그대로 따르고, 오늘 날짜(' + todayKo() + ')를 기준으로 계산합니다.';
+  $('#tierList').innerHTML =
+    '<li class="t-ADV"><b>선진국</b>: ' + esc(C.sources.imf) + '의 선진경제 ' + C.adv.length + '곳과 그 속령. 지금 ' + T.count.ADV + '곳, 2026년 출생아의 ' + T.p2.ADV + '%입니다.</li>' +
+    '<li class="t-LDC"><b>최저개발국</b>: ' + esc(C.sources.ldc) + '의 ' + Object.keys(C.ldc).length + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. 졸업 예정: ' + esc(g) + '. 지금 ' + T.count.LDC + '곳, ' + T.p2.LDC + '%입니다.</li>' +
+    '<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + T.count.DEV + '곳, ' + T.p2.DEV + '%입니다.</li>' +
+    '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
+    '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>';
+  const pp = Object.entries(PASSPORT).map(([c, p]) => [BY.get(+c), p]).filter(x => x[0]).sort((a, b) => a[0].ko.localeCompare(b[0].ko, 'ko'));
+  const own = pp.filter(([, p]) => p.via === 'own').length;
+  $('#ppIntro').textContent = pp.length
+    ? '여권 표지 이미지는 위키데이터와 위키미디어 공용에서 퍼블릭 도메인, CC0, CC BY, CC BY-SA(2.0 이상)로 공개된 것만 골라 크기를 줄여 실었습니다. ' + own + '곳은 자기 여권, ' + (pp.length - own) + '곳은 본국의 여권이고, 나머지 ' + (LOCS.length - pp.length) + '곳은 쓸 수 있는 이미지를 찾지 못해 빈 틀로 둡니다.'
+    : '여권 표지 이미지는 위키데이터와 위키미디어 공용에서 라이선스를 확인할 수 있는 것만 싣습니다. 지금은 수록된 이미지가 없어 모든 나라에 빈 틀을 보여 줍니다.';
+  $('#ppList').innerHTML = pp.length
+    ? pp.map(([L, p]) => {
+      const sov = p.via && p.via.indexOf('sov:') === 0 ? BY.get(+p.via.slice(4)) : null;
+      return '<li>' + esc(L.ko) + (sov ? ' (본국 ' + esc(sov.ko) + ')' : '') + ': <a href="' + esc(p.page) + '">' + esc(p.title) + '</a>, ' + esc(p.artist || '저작자 미상') + ', ' + esc(p.license) + (p.changes ? ', ' + esc(p.changes) : '') + (p.restrictions ? ' (' + esc(p.restrictions) + ')' : '') + '</li>';
+    }).join('')
+    : '<li>수록된 이미지가 없습니다.</li>';
 }
 
 /* ================= 100 people ================= */
-function largestRemainder(exact, total) {
-  const fl = exact.map(Math.floor);
-  let left = total - fl.reduce((a, b) => a + b, 0);
-  exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { fl[i]++; left--; } });
-  return fl;
-}
 function renderHundred() {
-  const tot = TOT.births;
+  const tot = TOT.births, T = tierStats();
   const shares = CONT.map(() => 0);
   LOCS.forEach(l => { shares[l.cont] += l.births / tot; });
   const exact = shares.map(s => s * 100), cells = largestRemainder(exact, 100);
@@ -562,7 +1058,11 @@ function renderHundred() {
   const [a, b] = named, rest = named.slice(2);
   $('#hLede').textContent = '2026년에 태어나는 아기 100명 가운데 ' + cells[a] + '명은 ' + CONT[a] + ', ' + cells[b] + '명은 ' + CONT[b] + '에서 태어납니다. ' +
     rest.map(ci => topic(CONT[ci]) + ' ' + cells[ci] + '명').join(', ') + '입니다.' +
-    order.filter(ci => cells[ci] === 0).map(ci => ' ' + topic(CONT[ci]) + ' 1명이 채 안 됩니다.').join('');
+    order.filter(ci => cells[ci] === 0).map(ci => ' ' + topic(CONT[ci]) + ' 1명이 채 안 됩니다.').join('') +
+    ' 발전 단계로 나누면 선진국에서 ' + T.p1.ADV + '명, 개발도상국에서 ' + T.p1.DEV + '명, 최저개발국에서 ' + T.p1.LDC + '명이 태어납니다.';
+  $('#hTier').innerHTML = TIERS.map(t => '<span class="t-' + t + '" style="flex:' + T.p1[t] + ' 1 0">' + T.p1[t] + '</span>').join('');
+  $('#hTier').setAttribute('aria-label', '발전 단계별 아기 수: ' + TIERS.map(t => TIER_KO[t] + ' ' + T.p1[t] + '명').join(', '));
+  $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="t-' + t + '"><i></i>' + TIER_KO[t] + ' <b>' + T.p1[t] + '명</b></li>').join('');
   const waffle = $('#waffle');
   waffle.innerHTML = order.map(ci => ('<span class="k' + ci + '"></span>').repeat(cells[ci])).join('');
   waffle.setAttribute('aria-label', order.map(ci => CONT[ci] + ' ' + cells[ci] + '칸').join(', '));
@@ -578,7 +1078,7 @@ function renderHundred() {
 /* ================= my records ================= */
 let clearArmed = 0;
 function renderMine() {
-  const st = store.stats;
+  const st = store.stats, T = tierStats();
   const lede = $('#mLede'), wrap = $('#mCmpWrap');
   if (!st.n) {
     lede.textContent = '아직 뽑은 기록이 없습니다. 위에서 ‘다시 태어나기’를 눌러 첫 기록을 받아 보세요.';
@@ -589,11 +1089,10 @@ function renderMine() {
     const tot = TOT.births, exp = CONT.map(() => 0);
     LOCS.forEach(l => { exp[l.cont] += l.births / tot; });
     const order = CONT.map((_, i) => i).sort((a, b) => exp[b] - exp[a]);
-    $('#mCmp').innerHTML = order.map(ci => {
-      const obs = st.cont[ci] / st.n;
-      return '<li class="k' + ci + '"><span>' + CONT[ci] + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (exp[ci] * 100).toFixed(2) + '%"></i></span>' +
-        '<span class="v">' + (obs * 100).toFixed(1) + '% <small>기대 ' + (exp[ci] * 100).toFixed(1) + '%</small></span></li>';
-    }).join('');
+    const li = (cls, name, obs, ex) => '<li class="' + cls + '"><span>' + name + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (ex * 100).toFixed(2) + '%"></i></span>' +
+      '<span class="v">' + (obs * 100).toFixed(1) + '% <small>기대 ' + (ex * 100).toFixed(1) + '%</small></span></li>';
+    $('#mCmp').innerHTML = order.map(ci => li('k' + ci, CONT[ci], st.cont[ci] / st.n, exp[ci])).join('');
+    $('#mTier').innerHTML = TIERS.map((t, i) => li('t-' + t, TIER_KO[t], st.tier[i] / st.n, T.share[t])).join('');
     const tops = Object.entries(st.top).map(([c, n]) => [BY.get(+c), n]).filter(x => x[0])
       .sort((x, y) => y[1] - x[1] || y[0].births - x[0].births).slice(0, 5);
     $('#mTop').textContent = '가장 많이 나온 곳: ' + tops.map(([l, n]) => l.ko + ' ' + fmtInt(n) + '번(기대 ' + fmtSmall(st.n * l.births / tot) + '번)').join(', ') + '.';
@@ -603,12 +1102,13 @@ function renderMine() {
     list.innerHTML = '<li><p class="empty-hint">발급된 기록이 여기에 쌓입니다.</p></li>';
   } else {
     list.innerHTML = store.recent.map(r => {
-      const l = BY.get(r.c);
-      const who = sexKo(r.s);
-      return '<li><button type="button" data-no="' + r.no + '"' + (current.type === 'draw' && current.serial === r.no ? ' aria-current="true"' : '') + '><span class="r-name">' + esc(l.ko) + ', ' + who + '</span><span class="r-no">' + (r.b ? '<small>' + r.b + '번 연속의 끝</small>' : '') + '제 ' + fmtInt(r.no) + '호</span></button></li>';
+      const l = BY.get(r.c), t = tierOf(l);
+      return '<li><button type="button" data-no="' + r.no + '"' + (current.type === 'draw' && current.serial === r.no ? ' aria-current="true"' : '') + '>' +
+        '<span class="r-name t-' + t + '"><span class="sr-only">' + TIER_KO[t] + ', </span><span class="r-txt">' + esc(l.ko) + ', ' + sexKo(r.s) + '</span></span>' +
+        '<span class="r-no">' + (r.b ? '<small>' + r.b + '번 연속의 끝</small>' : '') + '제 ' + fmtInt(r.no) + '호</span></button></li>';
     }).join('');
   }
-  $('#clearBtn').hidden = !store.recent.length && !store.stats.n;
+  $('#clearBtn').hidden = !store.recent.length && !st.n;
 }
 
 /* ================= table ================= */
@@ -616,23 +1116,24 @@ const COLS = [
   { key: 'name', label: '나라' },
   { key: 'births', label: '2026년 출생아' },
   { key: 'pop', label: '인구' },
-  { key: 'prob', label: '나올 확률' },
+  { key: 'prob', label: '태어날 확률' },
+  { key: 'tier', label: '발전 단계', cls: 'tl' },
   { key: 'e0B', label: '기대수명' },
   { key: 'gdpN', label: '1인당 GDP($)' },
   { key: 'gdp', label: '구매력 기준' }
 ];
-const TBL = { key: 'prob', dir: -1, q: '', cont: -1 };
+const TBL = { key: 'prob', dir: -1, q: '', cont: -1, tier: '' };
 const norm = s => s.toLowerCase().replace(/[\s·,.'’()\-]/g, '');
 /* other names people type: 한국, 남한, 터키, 버마, 스와질란드, USA ... */
 const ALIAS = { 410: '한국 남한 korea', 408: '조선 dprk', 840: 'usa us 미합중국', 826: 'uk 잉글랜드 britain', 180: '민주콩고 drc', 178: '콩고',
   792: '터키 turkey', 104: '버마 burma', 748: '스와질란드 swaziland', 384: '아이보리코스트 ivorycoast', 132: '케이프베르데 capeverde',
   807: '마케도니아', 626: '티모르', 784: 'uae 에미리트', 203: 'czechrepublic', 643: 'russianfederation', 158: '타이완', 344: '홍콩', 275: 'palestine' };
 LOCS.forEach(l => { l.key = norm(l.ko) + '|' + norm(l.en) + '|' + norm(ALIAS[l.code] || ''); });
-function colVal(l, k) { return k === 'prob' ? l.births : k === 'name' ? l.ko : l[k]; }
+function colVal(l, k) { return k === 'prob' ? l.births : k === 'name' ? l.ko : k === 'tier' ? tierIdx(l.tier) : l[k]; }
 function renderTableHead() {
   $('#tHead').innerHTML = COLS.map(c => {
     const s = TBL.key === c.key ? ' aria-sort="' + (TBL.dir > 0 ? 'ascending' : 'descending') + '"' : '';
-    return '<th scope="col"' + s + '><button type="button" data-key="' + c.key + '">' + c.label + '</button></th>';
+    return '<th scope="col"' + (c.cls ? ' class="' + c.cls + '"' : '') + s + '><button type="button" data-key="' + c.key + '">' + c.label + '</button></th>';
   }).join('');
 }
 function gdpCell(v, note, f) {
@@ -640,8 +1141,9 @@ function gdpCell(v, note, f) {
   return '<td' + (note ? ' title="' + noteKo(note) + '"' : '') + '>' + f(v) + (note ? '*' : '') + '</td>';
 }
 function renderTable() {
+  tierStats();
   const q = norm(TBL.q);
-  let rows = LOCS.filter(l => (TBL.cont < 0 || l.cont === TBL.cont) && (!q || l.key.includes(q)));
+  const rows = LOCS.filter(l => (TBL.cont < 0 || l.cont === TBL.cont) && (!TBL.tier || l.tier === TBL.tier) && (!q || l.key.includes(q)));
   const k = TBL.key, dir = TBL.dir;
   rows.sort((a, b) => {
     const x = colVal(a, k), y = colVal(b, k);
@@ -649,47 +1151,44 @@ function renderTable() {
     if (x == null) return 1;
     if (y == null) return -1;
     if (k === 'name') return dir * x.localeCompare(y, 'ko');
-    return dir * (x - y);
+    return dir * (x - y) || b.births - a.births;
   });
   const cur = current.type !== 'empty' ? current.loc.code : 0;
   $('#tBody').innerHTML = rows.length ? rows.map(l =>
-    '<tr' + (l.code === cur ? ' class="cur"' : '') + '><th scope="row"><button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(l.ko) + '</button><span class="en">' + esc(l.en) + '</span></th>' +
+    '<tr' + (l.code === cur ? ' class="cur"' : '') + '><th scope="row"><div class="nm-cell"><span class="chip xs"><img src="assets/flags/' + l.iso2.toLowerCase() + '.svg" alt="" width="22" height="16" loading="lazy" decoding="async"></span>' +
+    '<button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(l.ko) + '</button><span class="en">' + esc(l.en) + '</span></div></th>' +
     '<td>' + koCompact(l.births) + '</td><td>' + koCompact(l.pop) + '</td><td>' + fmtPct(l.births / TOT.births) + '</td>' +
+    '<td class="tier-c t-' + l.tier + '">' + pipsHTML(l.tier) + TIER_KO[l.tier] + '</td>' +
     '<td>' + l.e0B.toFixed(1) + '</td>' +
     gdpCell(l.gdpN, l.gdpNNote, usd) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
-    '</tr>').join('') : '<tr><td colspan="7" class="tbl-empty">‘' + esc(TBL.q) + '’에 맞는 나라가 없습니다. 다른 이름이나 영어 이름으로 찾아 보세요.</td></tr>';
+    '</tr>').join('') : '<tr><td colspan="8" class="tbl-empty">조건에 맞는 나라가 없습니다. 다른 이름이나 영어 이름으로 찾아 보세요.</td></tr>';
   $('#tCount').textContent = rows.length === LOCS.length ? LOCS.length + '곳' : LOCS.length + '곳 중 ' + rows.length + '곳';
 }
+/* after a draw only the highlighted row changes, so the 236 rows are not rebuilt */
+function markTableRow() {
+  const cur = current.type !== 'empty' ? current.loc.code : 0, old = $('#tBody tr.cur');
+  if (old) old.classList.remove('cur');
+  const b = cur && $('#tBody button[data-code="' + cur + '"]');
+  if (b) b.closest('tr').classList.add('cur');
+}
+/* a missing flag file leaves an empty chip frame instead of a broken image */
+$('#tBody').addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.remove(); }, true);
 
 /* ================= actions ================= */
 function announce(t) { const s = $('#sr'); s.textContent = ''; setTimeout(() => { s.textContent = t; }, 30); }
-const NARROW = () => window.innerWidth <= 940;
 function smoothTo(el) { el.scrollIntoView({ behavior: REDUCED.matches ? 'auto' : 'smooth', block: 'start' }); }
-/* After a draw or lookup: on one-column screens bring the map (fly-to) and the record head into view;
-   on two columns the record sits beside the map, so only scroll when it is out of sight. */
-function reveal(fromMap) {
-  if (NARROW()) {
-    const a = $('.atlas').getBoundingClientRect();
-    if (!fromMap && (a.top < -4 || a.top > 90)) smoothTo($('.atlas'));
-    return;
-  }
-  const r = rec.getBoundingClientRect();
-  if (r.top < -4 || r.top > window.innerHeight * 0.6) smoothTo($('.side'));
-}
-let stickRO = null;
-function updateStick() {
-  const side = $('.side');
-  if (!side) return;
-  const fits = !NARROW() && side.offsetHeight + 40 <= window.innerHeight;
-  side.classList.toggle('stick', fits);
+/* after a lookup or reopening a record from further down the page, bring the result screen back */
+function reveal() {
+  const r = stage.getBoundingClientRect();
+  if (r.top < -window.innerHeight * 0.35 || r.top > window.innerHeight * 0.5) smoothTo(document.body);
 }
 
 function fromRecent(r) {
   return { type: 'draw', loc: BY.get(r.c), sex: r.s, serial: r.no, t: r.t };
 }
 
-function renderBatch(n, batch, last) {
-  const box = $('#batch'), tot = TOT.births;
+function renderBatch(n, batch, last, tierN) {
+  const box = $('#batch'), tot = TOT.births, T = tierStats();
   const cc = CONT.map(() => 0), exp = CONT.map(() => 0);
   batch.forEach((c, code) => { cc[BY.get(code).cont] += c; });
   LOCS.forEach(l => { exp[l.cont] += l.births / tot * n; });
@@ -697,7 +1196,7 @@ function renderBatch(n, batch, last) {
   const seg = vals => order.map(ci => vals[ci] > 0 ? '<b class="k' + ci + '" style="--w:' + (vals[ci] / n * 100).toFixed(3) + '%"></b>' : '').join('');
   const tops = [...batch].sort((x, y) => y[1] - x[1] || BY.get(y[0]).births - BY.get(x[0]).births).slice(0, 5);
   box.innerHTML =
-    '<div class="batch-h"><h3>이번 ' + n + '번</h3><p>지도의 빨간 점이 이번에 나온 곳입니다. 기록지에는 마지막 제 ' + fmtInt(last.serial) + '호를 적었습니다.</p></div>' +
+    '<div class="batch-h"><h3>이번 ' + n + '번</h3><p>지도의 점이 이번에 나온 곳입니다(색은 발전 단계). 위 화면에는 마지막 제 ' + fmtInt(last.serial) + '호를 띄웠습니다.</p></div>' +
     '<div class="stack" role="img" aria-label="' + esc('대륙별로 이번에 나온 횟수와 기대 횟수. ' + order.map(ci => CONT[ci] + ' ' + cc[ci] + '번, 기대 ' + fmtSmall(exp[ci]) + '번').join('; ')) + '">' +
       '<div class="stack-row"><span>이번</span><span class="stack-bar">' + seg(cc) + '</span></div>' +
       '<div class="stack-row"><span>기대</span><span class="stack-bar exp">' + seg(exp) + '</span></div>' +
@@ -705,91 +1204,104 @@ function renderBatch(n, batch, last) {
     '<ul class="stack-keys">' + order.map(ci => '<li class="k' + ci + '"><i></i>' + CONT[ci] + ' <b>' + cc[ci] + '</b><small>기대 ' + fmtSmall(exp[ci]) + '</small></li>').join('') + '</ul>' +
     '<p class="batch-top">가장 많이 나온 곳: ' + tops.map(([c, k]) => esc(BY.get(c).ko) + ' ' + k + '번(기대 ' + fmtSmall(BY.get(c).births / tot * n) + '번)').join(', ') + '.</p>';
   box.hidden = false;
+  const line = $('#batchLine');
+  line.innerHTML = '이번 ' + n + '번: ' + TIERS.map((t, i) => '<span class="t-' + t + '">' + TIER_KO[t] + ' <b>' + tierN[i] + '</b></span>').join(', ') +
+    ' (기대 ' + TIERS.map(t => (T.share[t] * n).toFixed(1)).join(' / ') + ')' +
+    '<a href="#atlas" id="toMap">지도에서 보기</a>';
+  line.hidden = false;
 }
 function hideBatch() {
   $('#batch').hidden = true;
+  $('#batchLine').hidden = true;
   if (MAP.ready) MAP.clearBatch();
 }
 
+const SPEED = { 1: 1, 10: 1.35, 100: 1.7 };
 function doDraws(n) {
-  const st = store.stats, batch = new Map();
+  const st = store.stats, batch = new Map(), tierN = [0, 0, 0];
   let last = null;
   for (let k = 0; k < n; k++) {
     const r = drawOne();
     r.serial = ++store.serial;
-    st.n++; st.cont[r.loc.cont]++;
+    const ti = tierIdx(tierOf(r.loc));
+    st.n++; st.cont[r.loc.cont]++; st.tier[ti]++; tierN[ti]++;
     st.top[r.loc.code] = (st.top[r.loc.code] || 0) + 1;
     batch.set(r.loc.code, (batch.get(r.loc.code) || 0) + 1);
     last = r;
   }
   const now = Date.now();
-  last.t = now; last.fresh = true;
-  store.recent.unshift({ no: last.serial, m: 'b', c: last.loc.code, s: last.sex, t: now, b: n > 1 ? n : 0 });
+  last.t = now;
+  store.recent.unshift({ no: last.serial, c: last.loc.code, s: last.sex, t: now, b: n > 1 ? n : 0 });
   store.recent = store.recent.slice(0, 12);
   save();
-  renderRecord(last, true);
+  renderStage(last, { animate: true, speed: SPEED[n] || 1 });
   if (n === 1) {
     hideBatch();
     if (MAP.ready) MAP.pick(last.loc.code, true);
   } else {
-    renderBatch(n, batch, last);
+    renderBatch(n, batch, last, tierN);
     if (MAP.ready) { MAP.showBatch(batch); MAP.pick(last.loc.code, false); MAP.reset(); }
   }
   renderMine();
   renderHundred();
-  renderTable();
+  markTableRow();
   const L = last.loc;
   announce(n === 1
-    ? '제 ' + fmtInt(last.serial) + '호. ' + L.ko + ', ' + sexKo(last.sex) + '로 태어났습니다. 이 나라에 태어날 확률은 ' + fmtPct(L.births / TOT.births) + '입니다.'
-    : n + '번을 뽑았습니다. 마지막은 ' + L.ko + '입니다.');
-  reveal(false);
+    ? '제 ' + fmtInt(last.serial) + '호. ' + L.ko + ', ' + sexKo(last.sex) + '로 태어났습니다. 이 나라에 태어날 확률은 ' + fmtPct(L.births / TOT.births) + ', 발전 단계는 ' + TIER_KO[tierOf(L)] + '입니다.'
+    : n + '번을 뽑았습니다. 선진국 ' + tierN[0] + '번, 개발도상국 ' + tierN[1] + '번, 최저개발국 ' + tierN[2] + '번입니다. 마지막은 ' + L.ko + '입니다.');
 }
 
 function reopen(no) {
   const r = store.recent.find(x => x.no === no);
   if (!r) return;
   const st = fromRecent(r);
-  renderRecord(st, true);
+  renderStage(st, { animate: true });
   hideBatch();
   if (MAP.ready) MAP.pick(st.loc.code, true);
   renderHundred();
   renderMine();
-  renderTable();
-  announce('제 ' + fmtInt(no) + '호 기록을 다시 펼쳤습니다. ' + st.loc.ko + '.');
-  reveal(false);
+  markTableRow();
+  announce('제 ' + fmtInt(no) + '호 기록을 다시 펼쳤습니다. ' + st.loc.ko + ', 발전 단계는 ' + TIER_KO[tierOf(st.loc)] + '입니다.');
+  reveal();
 }
 
-function lookup(code, fromMap) {
+function lookup(code) {
   const L = BY.get(code);
   if (!L) return;
-  renderRecord({ type: 'lookup', loc: L }, true);
+  renderStage({ type: 'lookup', loc: L }, { animate: true });
   hideBatch();
   if (MAP.ready) MAP.pick(code, true);
   renderHundred();
   renderMine();
-  renderTable();
-  announce(L.ko + ' 정보를 기록지에 띄웠습니다.');
-  reveal(fromMap);
+  markTableRow();
+  announce(L.ko + ' 정보를 띄웠습니다. 발전 단계는 ' + TIER_KO[tierOf(L)] + '입니다.');
+  reveal();
 }
 
 /* ================= wiring ================= */
 $('#draw1').addEventListener('click', () => doDraws(1));
 $('#draw10').addEventListener('click', () => doDraws(10));
 $('#draw100').addEventListener('click', () => doDraws(100));
+$('#draw10').setAttribute('aria-label', '10번 연속');
+$('#draw100').setAttribute('aria-label', '100번 연속');
+$('#copyBtn').addEventListener('click', onCopy);
+$('#batchLine').addEventListener('click', e => { if (e.target.closest('#toMap')) { e.preventDefault(); smoothTo($('#atlas')); } });
 $('#mRecent').addEventListener('click', e => { const b = e.target.closest('button[data-no]'); if (b) reopen(+b.dataset.no); });
-$('#tBody').addEventListener('click', e => { const b = e.target.closest('button[data-code]'); if (b) lookup(+b.dataset.code, false); });
+$('#tBody').addEventListener('click', e => { const b = e.target.closest('button[data-code]'); if (b) lookup(+b.dataset.code); });
 $('#tHead').addEventListener('click', e => {
   const b = e.target.closest('button[data-key]');
   if (!b) return;
   const k = b.dataset.key;
   if (TBL.key === k) TBL.dir = -TBL.dir;
-  else { TBL.key = k; TBL.dir = k === 'name' ? 1 : -1; }
+  else { TBL.key = k; TBL.dir = k === 'name' || k === 'tier' ? 1 : -1; }
   renderTableHead(); renderTable();
   const nb = $('#tHead button[data-key="' + k + '"]'); if (nb) nb.focus();
 });
 $('#q').addEventListener('input', e => { TBL.q = e.target.value.trim(); renderTable(); });
 $('#contSel').innerHTML = '<option value="-1">모든 대륙</option>' + CONT.map((c, i) => '<option value="' + i + '">' + c + '</option>').join('');
 $('#contSel').addEventListener('change', e => { TBL.cont = +e.target.value; renderTable(); });
+$('#tierSel').innerHTML = '<option value="">모든 발전 단계</option>' + TIERS.map(t => '<option value="' + t + '">' + TIER_KO[t] + '</option>').join('');
+$('#tierSel').addEventListener('change', e => { TBL.tier = e.target.value; renderTable(); });
 $('#clearBtn').addEventListener('click', e => {
   const btn = e.currentTarget;
   if (Date.now() - clearArmed > 3500) {
@@ -802,27 +1314,40 @@ $('#clearBtn').addEventListener('click', e => {
   btn.textContent = '기록 지우기';
   store.serial = 0; store.recent = []; store.stats = freshStats();
   save();
-  if (current.type === 'draw') renderRecord({ type: 'empty' }, false);
+  if (current.type === 'draw') {
+    renderStage({ type: 'empty' }, {});
+    if (MAP.ready) MAP.unpick();
+  }
   hideBatch();
-  renderMine(); renderHundred(); renderTable();
+  renderMine(); renderHundred(); markTableRow();
   announce('기록을 지웠습니다.');
 });
-$('#keys').innerHTML = CONT.map((c, i) => '<li class="k' + i + '"><i></i>' + c + '</li>').join('');
 $('#tTitle').textContent = LOCS.length + '개 국가·지역 전체';
 
+tierStats();
+paintSpace();
 renderIntro();
-renderRecord(store.recent.length ? fromRecent(store.recent[0]) : { type: 'empty' }, false);
+renderMethod();
+renderStage(store.recent.length ? fromRecent(store.recent[0]) : { type: 'empty' }, {});
 renderHundred();
 renderMine();
 renderTableHead();
 renderTable();
 tickLive();
 setInterval(tickLive, 1000);
-window.addEventListener('resize', updateStick);
-if ('ResizeObserver' in window) { stickRO = new ResizeObserver(updateStick); stickRO.observe($('.side')); }
+let fitT = 0;
+window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitName, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
 
-if (window.d3) initMap();
+function geoReady() {
+  if (!initGeo()) { mapFail(); return; }
+  initMap();
+  /* first sight of the planet: from the whole globe down to the last record */
+  if (current.type === 'empty') PLANET.show(current, {});
+  else PLANET.show(current, { animate: true });
+}
+if (window.d3) geoReady();
 else loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js')
   .catch(() => loadScript('https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js'))
-  .then(initMap, mapFail);
+  .then(geoReady, mapFail);
 })();
