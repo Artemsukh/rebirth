@@ -248,26 +248,29 @@ function mulberry32(a) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
+/* the stars are painted once into a 1440x900 image that the fixed backdrop shows (see .space::before,
+   which also draws the three nebulae), so scrolling never repaints them */
 function paintSpace() {
   const rnd = mulberry32(20260924), cols = ['#FFFFFF', '#CFE4FF', '#FFE9D6', '#DDEBFF'];
-  const neb = [[720, 430, 620, '#1B2A5E', .55], [1180, 120, 520, '#3B1F5E', .45], [180, 820, 480, '#0F3B4A', .4]];
-  let defs = '', body = '';
-  neb.forEach(([x, y, r, c, o], i) => {
-    defs += '<radialGradient id="nb' + i + '" gradientUnits="userSpaceOnUse" cx="' + x + '" cy="' + y + '" r="' + r + '">' +
-      '<stop offset="0" stop-color="' + c + '" stop-opacity="' + o + '"/><stop offset="1" stop-color="' + c + '" stop-opacity="0"/></radialGradient>';
-    body += '<rect width="1440" height="900" fill="url(#nb' + i + ')"/>';
-  });
+  const cv = document.createElement('canvas');
+  cv.width = 1440; cv.height = 900;
+  const ctx = cv.getContext('2d');
+  if (!ctx) return;
   for (let i = 0; i < 230; i++) {
     const x = rnd() * 1440, y = rnd() * 900, r = 0.5 + rnd() * 0.9, o = 0.25 + rnd() * 0.65, c = cols[Math.floor(rnd() * 4)];
-    body += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(2) + '" fill="' + c + '" fill-opacity="' + o.toFixed(2) + '"/>';
+    const w = r < 0.8 ? 1 : 2;
+    ctx.globalAlpha = o;
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(x - w / 2), Math.round(y - w / 2), w, w);
   }
-  $('#space').innerHTML = '<svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><defs>' + defs + '</defs>' + body + '</svg>';
+  try { $('#space').style.setProperty('--stars', 'url("' + cv.toDataURL('image/png') + '")'); } catch (e) { /* nebulae only */ }
 }
 
 /* ================= rolling digits ================= */
-/* each digit is a 1.1em window over a strip 0-9 x3; the strip stops on the target digit
-   after two turns, left digits first. The final value is also given as text for screen readers. */
-const STRIP = Array.from({ length: 30 }, (_, i) => i % 10).join(' ');
+/* each digit is a 1.1em window over a strip 0-9 x2; the strip stops on the target digit
+   after one turn, left digits first. The final value is also given as text for screen readers.
+   When the last strip stops the number becomes plain text, so no moving layer is left behind. */
+const STRIP = Array.from({ length: 20 }, (_, i) => i % 10).join(' ');
 /* digit advance widths in em for the element's font, so a stopped number is spaced like plain text */
 const DIGW = new Map();
 function digitWidths(el) {
@@ -283,19 +286,20 @@ function digitWidths(el) {
   if (loaded) DIGW.set(font, w);
   return w;
 }
-/* the stop is a share of the strip's own height (30 lines), not (20 + d) x 1.1em: WebKit truncates
-   the line height to whole pixels (30.8px -> 30px), and over 20-29 lines the em distance overshot
-   by most of a line, so iPhones showed the next digit, or a blank after a 9 */
+/* the stop is a share of the strip's own height (20 lines), not (10 + d) x 1.1em: WebKit truncates
+   the line height to whole pixels (30.8px -> 30px), and over 10-19 lines the em distance overshot
+   by a large part of a line, so iPhones showed the next digit, or a blank after a 9 */
 (function rollKeyframes() {
-  const css = Array.from({ length: 10 }, (_, d) => '@keyframes r' + d + ' { 0% { transform: translateY(0); filter: blur(0); } 18% { filter: blur(1.3px); } ' +
-    '80% { filter: blur(0); } 100% { transform: translateY(-' + ((20 + d) / 30 * 100).toFixed(4) + '%); } }').join('\n');
+  const css = Array.from({ length: 10 }, (_, d) => '@keyframes r' + d + ' { 0% { transform: translateY(0); } ' +
+    '100% { transform: translateY(-' + ((10 + d) / 20 * 100).toFixed(4) + '%); } }').join('\n');
   const el = document.createElement('style');
   el.textContent = css;
   document.head.appendChild(el);
 })();
 function roll(el, text, base = 0, speed = 1, animate = true) {
   el.textContent = '';
-  if (!animate || REDUCED.matches) { el.textContent = text; return; }
+  const token = el._roll = {};
+  if (!animate || REDUCED.matches || !/[0-9]/.test(text)) { el.textContent = text; return; }
   const sr = document.createElement('span');
   sr.className = 'sr-only';
   sr.textContent = text;
@@ -303,7 +307,7 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
   vis.className = 'roller';
   vis.setAttribute('aria-hidden', 'true');
   const dw = digitWidths(el);
-  let k = 0;
+  let k = 0, lastStrip = null;
   for (const ch of text) {
     if (ch < '0' || ch > '9') {
       const s = document.createElement('span');
@@ -323,8 +327,13 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
       'cubic-bezier(0.12, 0.72, 0.16, 1) ' + Math.round((base + 45 * i) * speed) + 'ms both';
     win.appendChild(strip);
     vis.appendChild(win);
+    lastStrip = strip;
   }
   el.append(sr, vis);
+  /* the rightmost digit starts last and runs longest, so it stops last */
+  const done = () => { if (el._roll === token) el.textContent = text; };
+  lastStrip.addEventListener('animationend', done);
+  lastStrip.addEventListener('animationcancel', done);
 }
 
 /* ================= result screen ================= */
@@ -391,7 +400,7 @@ function tierDesc(L) {
 function setRank(id, r) {
   const el = $('#' + id);
   el.classList.toggle('off', r == null);
-  el.querySelector('.bar').style.setProperty('--p', r == null ? '0%' : (r * 100).toFixed(2) + '%');
+  el.querySelector('.bar').style.setProperty('--p', r == null ? '0' : r.toFixed(4));
 }
 
 function renderStage(st, opt = {}) {
@@ -465,6 +474,7 @@ function renderStage(st, opt = {}) {
       if (M.gdp.ppp == null) sg.textContent = S.noPpp;
       else {
         const n = document.createElement('span');
+        n.className = 'num';
         sg.append(S.ppp[0], n, S.ppp[1] + (L.gdpNote && L.gdpNote !== L.gdpNNote ? S.paren(note(L.gdpNote)) : ''));
         roll(n, fmtInt(M.gdp.ppp), 220, spd, animate);
       }
