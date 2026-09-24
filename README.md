@@ -35,7 +35,6 @@
 | 1인당 GDP | IMF World Economic Outlook, 2026년 4월판의 2025년 추정치 (Worldometers 정리표 경유). IMF 값이 없는 곳은 세계은행이나 UN 값을 쓰고 표시함 |
 | 발전 단계 | IMF WEO 2026년 4월 통계 부록 Table B, UN 최저개발국 목록 |
 | 국기 | [flag-icons](https://github.com/lipis/flag-icons) 7.5.0의 4:3 SVG (MIT 라이선스, `vendor/flag-icons.LICENSE`) |
-| 여권 표지 | 위키데이터와 위키미디어 공용에서 퍼블릭 도메인, CC0, CC BY(2.0 이상), CC BY-SA(2.0 이상)인 것만. 출처와 라이선스는 화면의 '자료와 계산 방법' 끝에 모두 적음 |
 | 지도 | Natural Earth (퍼블릭 도메인), world-atlas 경유 |
 
 1인당 GDP는 두 값을 함께 적습니다. 큰 숫자는 시장 환율로 바꾼 미국 달러이고, 순위도 이 값으로 매깁니다. 작은 숫자는 물가 차이를 걷어 낸 구매력평가(PPP) 기준 국제달러입니다. 예를 들어 한국은 36,227달러와 65,405국제달러, 인도는 2,675달러와 11,789국제달러입니다.
@@ -43,18 +42,16 @@
 ## 폴더 구조
 
 ```
-index.html        빌드 결과물. 국기와 여권 이미지를 뺀 모든 것이 이 파일 하나에 들어 있습니다.
+index.html        빌드 결과물. 국기를 뺀 모든 것이 이 파일 하나에 들어 있습니다.
 build.py          src/와 data/를 index.html 하나로 합칩니다.
 src/              body.html(구조), style.css(모양), app.js(동작), topo.js(TopoJSON 해독)
 data/             appdata.json(가공된 인구·경제·분류 자료), world.topo.json(지도)
 assets/flags/     236곳의 국기 SVG (index.html과 같은 곳에서 필요할 때만 불러옴)
-assets/passports/ 여권 표지 WebP (수집된 것만. 지금은 비어 있음)
-assets/passports.json  여권 출처 목록 (build.py가 appdata.json의 PASSPORT에서 만듦)
 vendor/           flag-icons 라이선스, topojson-client 3.1.0 (src/topo.js 대조 검사용, ISC)
 pipeline/         자료를 만든 스크립트
 ```
 
-`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov`). 그 밖에 `CONT`, `SUB`, `WORLD`, `CLASS`(발전 단계), `PASSPORT`(여권 이미지 출처) 키가 있습니다. `PASSPORT`는 크기를 아끼려고 `index.html`에 넣지 않고, 빌드할 때 `assets/passports.json`으로 따로 써서 페이지가 시작할 때 불러옵니다.
+`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov`). 그 밖에 `CONT`, `SUB`, `WORLD`, `CLASS`(발전 단계) 키가 있습니다.
 
 ### pipeline/
 
@@ -64,7 +61,6 @@ pipeline/         자료를 만든 스크립트
 | `migrate_v2.py` | v1 `appdata.json`에서 인구 기준 모드 자료와 사망·생존 지표를 지우고 `LOC_FIELDS` 형식으로 바꿉니다. 이미 v2면 검사만 합니다. |
 | `classify.py` | 발전 단계 목록(`CLASS`)과 본국(`sov`)을 넣고 단계별 곳 수와 비중을 검증합니다. |
 | `build_iso.py` | ISO 두 글자 코드(`iso2`)를 채우고 flag-icons에서 국기를 복사해 svgo로 줄입니다. `pip install pycountry`와 npm이 필요합니다. |
-| `fetch_passports.py` | 여권 표지를 수집합니다(`collect`), 사람이 확인한 것만 줄여서 싣고(`apply`), 보고서를 씁니다(`report`). 사람의 판정은 `passports_review.json`에 남깁니다. |
 | `check_topo.js` | `src/topo.js`가 topojson-client와 똑같이 지도를 풀어내는지 확인합니다. |
 
 ## 고친 뒤 다시 빌드하기
@@ -73,13 +69,13 @@ pipeline/         자료를 만든 스크립트
 python3 build.py
 ```
 
-빌드는 CSS와 JS의 주석과 들여쓰기만 걷어 냅니다. 외부에서 불러오는 것은 d3 7.9.0(cdnjs, 실패 시 jsDelivr)과 Google Fonts(Orbit, Chakra Petch, IBM Plex Sans KR)뿐입니다. d3를 불러오지 못해도 추첨, 판독값, 표는 작동하고, 행성은 땅 없이 그려지며, 지도 자리에 안내 문구가 나옵니다. 국기나 여권 파일이 없으면 두 글자 코드 칩이나 빈 틀을 보여 줍니다.
+빌드는 CSS와 JS의 주석과 들여쓰기만 걷어 냅니다. 외부에서 불러오는 것은 d3 7.9.0(cdnjs, 실패 시 jsDelivr)과 Google Fonts(Orbit, Chakra Petch, IBM Plex Sans KR)뿐입니다. d3를 불러오지 못해도 추첨, 판독값, 표는 작동하고, 행성은 땅 없이 그려지며, 지도 자리에 안내 문구가 나옵니다. 국기 파일이 없으면 두 글자 코드 칩을 보여 줍니다.
 
 기록은 브라우저의 localStorage(`rebirth-simulator-v2`)에만 저장됩니다. 예전 형식(`dasi-taeeonandamyeon-v1`)이 있으면 처음 열 때 한 번 옮깁니다. 출생아 기준 통계와 기록은 그대로 가져오고, 인구 기준 기록은 버리며, 일련번호는 이어서 씁니다.
 
 ## GitHub Pages로 공개하기
 
-저장소의 Settings → Pages에서 Source를 "Deploy from a branch", Branch를 `main`, 폴더를 `/ (root)`로 고르면 https://artemsukh.github.io/rebirth/ 에서 열립니다. 국기와 여권 이미지는 `assets/`에서 같은 출처로 제공되므로 `index.html`과 함께 올라가야 합니다. 무료 계정에서는 저장소가 공개(Public)여야 Pages를 켤 수 있습니다.
+저장소의 Settings → Pages에서 Source를 "Deploy from a branch", Branch를 `main`, 폴더를 `/ (root)`로 고르면 https://artemsukh.github.io/rebirth/ 에서 열립니다. 국기는 `assets/flags/`에서 같은 출처로 제공되므로 `index.html`과 함께 올라가야 합니다. 무료 계정에서는 저장소가 공개(Public)여야 Pages를 켤 수 있습니다.
 
 ## 한계
 
@@ -87,5 +83,4 @@ python3 build.py
 - 나라 평균은 나라 안의 격차를 가립니다. 같은 나라라도 지역, 소득, 도시와 농촌에 따라 출발선은 크게 다릅니다.
 - 1인당 GDP는 평균 생산량일 뿐 분배를 말해 주지 않습니다. 환율 기준으로 코소보, 레위니옹, 저지섬 등 18곳은 IMF 값이 없어 비워 두었습니다.
 - 발전 단계는 국제기구의 행정 분류입니다. 최저개발국 졸업 일정은 유엔 총회 결정에 따라 미뤄질 수 있습니다(방글라데시와 네팔은 2029년까지 연기를 요청해 두었습니다).
-- 여권 표지는 공개 라이선스 이미지를 찾은 곳만 보여 줍니다. 찾지 못한 곳은 빈 틀로 둡니다.
 - 행성의 확대 배율은 모양을 보이게 하려는 과장이라 면적 비교에는 쓸 수 없습니다. 윤곽이 너무 거친 작은 섬나라는 빛나는 점으로 표시합니다.

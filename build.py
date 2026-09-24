@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Assemble the single-file app: src/{style.css, body.html, app.js} + data + topology.
 
-Flags and passport covers under assets/ are not inlined; the page loads them as
-same-origin static files (GitHub Pages serves them next to index.html)."""
+Flags under assets/flags/ are not inlined; the page loads the one it needs as a
+same-origin static file (GitHub Pages serves it next to index.html)."""
 import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -56,12 +56,6 @@ css = min_css(read(os.path.join(SRC, 'style.css')))
 body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('\n') if l.strip())
 app = min_js(read(os.path.join(SRC, 'app.js')))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))
-# passport credits grow with every adopted cover (about 330 bytes each), so they are not inlined:
-# the page fetches assets/passports.json when it starts
-passports = data.pop('PASSPORT', {})
-os.makedirs(os.path.join(HERE, 'assets'), exist_ok=True)
-with open(os.path.join(HERE, 'assets', 'passports.json'), 'w', encoding='utf-8') as f:
-    json.dump(passports, f, ensure_ascii=False, separators=(',', ':'))
 topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='utf-8'))
 # TopoJSON decoding: src/topo.js gives the same output as topojson-client 3.1.0 for this map
 # (pipeline/check_topo.js compares them) in a seventh of the size

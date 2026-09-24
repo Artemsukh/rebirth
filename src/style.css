@@ -174,27 +174,6 @@ a:hover { text-decoration-color: currentColor; }
 .fact dd { margin: 1px 0 0; font-size: 16px; line-height: 1.4; color: var(--ink); font-variant-numeric: tabular-nums; }
 .fact dd small { display: block; font-size: 13px; color: var(--ink-3); }
 
-/* passport */
-.passport { margin: 26px 0 0; display: flex; flex-direction: column; align-items: flex-start; }
-.pp-frame {
-  position: relative; width: 250px; height: 355px; margin-left: 30px; transform: rotate(-4deg);
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7);
-  background: rgba(10, 18, 38, .75);
-}
-.pp-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.pp-frame::before, .pp-frame::after { content: ""; position: absolute; pointer-events: none; }
-.pp-frame::after { inset: -6px; background:
-  linear-gradient(var(--tier), var(--tier)) left top / 18px 2px, linear-gradient(var(--tier), var(--tier)) left top / 2px 18px,
-  linear-gradient(var(--tier), var(--tier)) right top / 18px 2px, linear-gradient(var(--tier), var(--tier)) right top / 2px 18px,
-  linear-gradient(var(--tier), var(--tier)) left bottom / 18px 2px, linear-gradient(var(--tier), var(--tier)) left bottom / 2px 18px,
-  linear-gradient(var(--tier), var(--tier)) right bottom / 18px 2px, linear-gradient(var(--tier), var(--tier)) right bottom / 2px 18px;
-  background-repeat: no-repeat; }
-.pp-frame.none { background: rgba(10, 18, 38, .45); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5); }
-.pp-frame.none::before { inset: 14px; border: 1px dashed rgba(234, 242, 255, .3); }
-.pp-frame .pp-msg { position: absolute; inset: 14px; display: grid; place-items: center; padding: 22px; text-align: center; font-size: .875rem; line-height: 1.6; color: var(--ink-3); }
-.pp-frame .pp-msg b { display: block; margin-bottom: 8px; font-family: var(--num); font-weight: 500; font-size: .75rem; letter-spacing: .24em; color: var(--ink-2); }
-.pp-cap { margin: 22px 0 0; max-width: 300px; font-size: 12px; line-height: 1.5; color: var(--ink-3); }
-.pp-cap a { color: var(--ink-2); }
 
 /* ---------- read-out panels ---------- */
 .panel {
@@ -429,17 +408,13 @@ td.na { color: var(--ink-3); }
 
 /* method */
 .method { padding-bottom: 96px !important; }
-.method > p, .method > ul, .method > details, .method > h3 { max-width: 780px; }
+.method > p, .method > ul, .method > h3 { max-width: 780px; }
 .method h3 { margin: 28px 0 6px; font-size: 1.0625rem; font-weight: 600; }
 .method p { margin: 0 0 10px; color: var(--ink-2); line-height: 1.75; }
 .method p b { color: var(--ink); font-weight: 600; }
 .rules { margin: 6px 0 12px; padding-left: 1.2em; color: var(--ink-2); line-height: 1.7; }
 .rules li { margin-bottom: 6px; }
 .rules b { color: var(--k); font-weight: 600; }
-.credits { margin-top: 8px; padding: 10px 14px; box-shadow: inset 0 0 0 1px var(--line); background: rgba(8, 14, 32, .5); font-size: .8125rem; color: var(--ink-2); }
-.credits summary { cursor: pointer; color: var(--ink); }
-.credits ol { margin: 10px 0 0; padding-left: 1.4em; line-height: 1.6; }
-.credits li { margin-bottom: 4px; }
 .method p.colophon { margin-top: 30px; font-size: .8125rem; color: var(--ink-3) !important; }
 
 @media (min-width: 1180px) {
@@ -452,7 +427,6 @@ td.na { color: var(--ink-3); }
   .btn-primary { padding: 0 22px; }
   .btn-ghost { padding: 0 14px; }
   .p-val.big { font-size: 42px; }
-  .pp-frame { margin-left: 20px; }
 }
 
 /* ---------- tablet 760..1179 ---------- */
@@ -474,8 +448,6 @@ td.na { color: var(--ink-3); }
   .id-name { font-size: 54px; }
   .id-name.n2 { font-size: 40px; }
   .id-name.n3 { font-size: 30px; }
-  .passport { align-items: center; }
-  .pp-frame { margin-left: 0; }
   main > .block { padding: 64px 24px 0; }
 }
 @media (max-width: 1179px) and (min-width: 1000px) {
@@ -550,9 +522,6 @@ td.na { color: var(--ink-3); }
   .p-gdp .rank-r { text-align: left; }
   .tier-name { font-size: 30px; }
   .facts { order: 4; margin-top: 0; }
-  .passport { order: 5; align-items: center; margin-top: 8px; }
-  .pp-frame { width: 240px; height: 341px; margin: 0; }
-  .pp-cap { text-align: center; }
   .actions {
     order: 6; position: sticky; bottom: 0; z-index: 20; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
     display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 8px;

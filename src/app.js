@@ -6,7 +6,6 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
-let PASSPORT = D.PASSPORT || {};
 /* rows are plain arrays; LOC_FIELDS names each column so removing one cannot shift the rest */
 const LOCS = D.LOC.map((r, i) => {
   const o = { i };
@@ -354,28 +353,6 @@ function tierDesc(L) {
   return s;
 }
 
-const PP_EMPTY = '태어날 나라가 정해지면 여권이 여기에 놓입니다';
-const PP_NONE = '공개 자료에서 이 나라의 여권 표지를 찾지 못했습니다';
-function passportHTML(L) {
-  const frame = msg => '<div class="pp-frame none"><p class="pp-msg"><span><b>PASSPORT</b>' + msg + '</span></p></div>';
-  if (!L) return frame(PP_EMPTY);
-  const p = PASSPORT[L.code];
-  if (!p) return frame(PP_NONE);
-  const sov = p.via && p.via.indexOf('sov:') === 0 ? BY.get(+p.via.slice(4)) : null;
-  const who = sov || L;
-  const lic = p.license_url ? '<a href="' + esc(p.license_url) + '">' + esc(p.license) + '</a>' : esc(p.license);
-  const cc = /^CC BY/i.test(p.license || '');
-  return '<div class="pp-frame"><img src="assets/' + esc(p.file) + '" alt="' + esc(who.ko) + ' 일반 여권 앞표지" decoding="async"></div>' +
-    '<figcaption class="pp-cap fx-sm">' + (sov ? '본국 ' + esc(sov.ko) + '의 여권. ' : '') +
-    '사진: <a href="' + esc(p.page) + '">' + esc(p.artist || '저작자 미상') + '</a>, ' + lic + (cc && p.changes ? ', ' + esc(p.changes) : '') + '</figcaption>';
-}
-function mountPassport(L) {
-  const fig = $('#passport');
-  fig.innerHTML = passportHTML(L);
-  const img = fig.querySelector('img');
-  if (img) img.onerror = () => { if (current.loc === L) fig.innerHTML = passportHTML(null).replace(PP_EMPTY, PP_NONE); };
-}
-
 function setRank(id, r) {
   const el = $('#' + id);
   el.classList.toggle('off', r == null);
@@ -416,7 +393,6 @@ function renderStage(st, opt = {}) {
       fact('인구', people(L.pop), '세계의 ' + fmtPct(L.pop / TOT.pop)) +
       fact('중위연령', L.med.toFixed(1) + '세', '세계 ' + WR.med.toFixed(1) + '세') +
       fact('합계출산율', L.tfr.toFixed(2) + '명', '세계 ' + WR.tfr.toFixed(2) + '명');
-  mountPassport(L);
 
   /* read-outs */
   const bl = $('#tierBarL');
@@ -1065,17 +1041,6 @@ function renderMethod() {
     '<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + T.count.DEV + '곳, ' + T.p2.DEV + '%입니다.</li>' +
     '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
     '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>';
-  const pp = Object.entries(PASSPORT).map(([c, p]) => [BY.get(+c), p]).filter(x => x[0]).sort((a, b) => a[0].ko.localeCompare(b[0].ko, 'ko'));
-  const own = pp.filter(([, p]) => p.via === 'own').length;
-  $('#ppIntro').textContent = pp.length
-    ? '여권 표지 이미지는 위키데이터와 위키미디어 공용에서 퍼블릭 도메인, CC0, CC BY, CC BY-SA(2.0 이상)로 공개된 것만 골라 크기를 줄여 실었습니다. ' + own + '곳은 자기 여권, ' + (pp.length - own) + '곳은 본국의 여권이고, 나머지 ' + (LOCS.length - pp.length) + '곳은 쓸 수 있는 이미지를 찾지 못해 빈 틀로 둡니다.'
-    : '여권 표지 이미지는 위키데이터와 위키미디어 공용에서 라이선스를 확인할 수 있는 것만 싣습니다. 지금은 수록된 이미지가 없어 모든 나라에 빈 틀을 보여 줍니다.';
-  $('#ppList').innerHTML = pp.length
-    ? pp.map(([L, p]) => {
-      const sov = p.via && p.via.indexOf('sov:') === 0 ? BY.get(+p.via.slice(4)) : null;
-      return '<li>' + esc(L.ko) + (sov ? ' (본국 ' + esc(sov.ko) + ')' : '') + ': <a href="' + esc(p.page) + '">' + esc(p.title) + '</a>, ' + esc(p.artist || '저작자 미상') + ', ' + esc(p.license) + (p.changes ? ', ' + esc(p.changes) : '') + (p.restrictions ? ' (' + esc(p.restrictions) + ')' : '') + '</li>';
-    }).join('')
-    : '<li>수록된 이미지가 없습니다.</li>';
 }
 
 /* ================= 100 people ================= */
@@ -1365,14 +1330,6 @@ $('#clearBtn').addEventListener('click', e => {
 });
 $('#tTitle').textContent = LOCS.length + '개 국가·지역 전체';
 $('#idName').setAttribute('tabindex', '-1');
-if (!D.PASSPORT && window.fetch) {
-  fetch('assets/passports.json').then(r => (r.ok ? r.json() : {})).then(p => {
-    if (!p || typeof p !== 'object' || !Object.keys(p).length) return;
-    PASSPORT = p;
-    renderMethod();
-    if (current.type !== 'empty') mountPassport(current.loc);
-  }).catch(() => { /* credits file missing: every frame stays empty */ });
-}
 
 tierStats();
 paintSpace();
