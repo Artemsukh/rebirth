@@ -99,7 +99,12 @@ latlng[412] = [42.6, 20.9]
 
 gdp = pickle.load(open('gdp.pkl','rb'))
 
-out = []; ages = {}
+# v2 layout (see migrate_v2.py): no age tables, no q0/q5/l65. add_nominal.py fills gdpN/gdpNNote,
+# classify.py fills sov, build_iso.py fills iso2, fetch_passports.py adds PASSPORT.
+LOC_FIELDS = ('code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote '
+              'e0B gdpN gdpNNote iso2 sov').split()
+FI = {k: i for i, k in enumerate(LOC_FIELDS)}
+out = []
 skipped = []
 for code, name, c, s in locs:
     if code not in mxg:
@@ -110,28 +115,20 @@ for code, name, c, s in locs:
     out.append([code, ko[code], EN_SHORT.get(code, name), cont_keys.index(c), sub_keys.index(s),
         round(ll[0], 2), round(ll[1], 2), int(round(r['births'])), int(round(r['pop'])),
         round(float(r['srb']), 3), round(float(r['e0M']), 2), round(float(r['e0F']), 2), round(float(r['tfr']), 3),
-        round(r['q0M'], 2), round(r['q0F'], 2), round(r['q5M'], 2), round(r['q5F'], 2),
-        round(float(r['l65M']), 4), round(float(r['l65F']), 4), round(r['med'], 1),
-        g[0] if g else None, g[1] if g else '', round(float(r['e0B']), 2)])
-    # remaining life expectancy table (x10, base36, 2 chars)
-    def enc_ex(arr): return ''.join(np.base_repr(int(round(v*10)), 36).lower().rjust(2, '0') for v in arr)
-    mxv = max(r['pM'].max(), r['pF'].max())
-    def enc_age(arr): return ''.join(np.base_repr(int(round(v/mxv*46655)), 36).lower().rjust(3, '0') for v in arr)
-    ages[code] = [round(mxv*1000, 1), enc_ex(r['exM']), enc_ex(r['exF']), enc_age(r['pM']), enc_age(r['pF'])]
+        round(r['med'], 1), g[0] if g else None, g[1] if g else '', round(float(r['e0B']), 2),
+        None, '', None, None])
 
 print('skipped', skipped, 'count', len(out))
-tb = sum(o[7] for o in out); tp = sum(o[8] for o in out)
+tb = sum(o[FI['births']] for o in out); tp = sum(o[FI['pop']] for o in out)
 print('total births', tb, 'total pop', tp, 'coverage births %.6f pop %.6f' % (tb/world['births'], tp/world['pop']))
 
 # world reference (pop-weighted GDP avg over covered)
-gw = [(o[20], o[8]) for o in out if o[20]]
+gw = [(o[FI['gdp']], o[FI['pop']]) for o in out if o[FI['gdp']]]
 world_gdp = sum(a*b for a, b in gw)/sum(b for a, b in gw)
 W_REF = dict(births=int(round(world['births'])), pop=int(round(world['pop'])), deaths=int(round(world['deaths'])),
     srb=round(float(world['srb']),3), e0M=round(float(world['e0M']),2), e0F=round(float(world['e0F']),2), e0B=round(float(world['e0B']),2),
-    tfr=round(float(world['tfr']),3), q0M=round(world['q0M'],2), q0F=round(world['q0F'],2), q5M=round(world['q5M'],2), q5F=round(world['q5F'],2),
-    l65M=round(float(world['l65M']),4), l65F=round(float(world['l65F']),4), med=round(world['med'],1), gdp=int(round(world_gdp)),
-    exM=[round(float(v),2) for v in world['exM']], exF=[round(float(v),2) for v in world['exF']])
+    tfr=round(float(world['tfr']),3), med=round(world['med'],1), gdp=int(round(world_gdp)))
 print('world ref', W_REF)
-json.dump({'CONT': list(CONT.values()), 'SUB': list(SUB.values()), 'EX_AGES': EX_AGES, 'WORLD': W_REF, 'LOC': out, 'AGE': ages},
+json.dump({'CONT': list(CONT.values()), 'SUB': list(SUB.values()), 'WORLD': W_REF, 'LOC_FIELDS': LOC_FIELDS, 'LOC': out},
           open('appdata.json','w'), ensure_ascii=False, separators=(',', ':'))
 import os; print('appdata.json bytes', os.path.getsize('appdata.json'))
