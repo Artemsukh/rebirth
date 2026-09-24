@@ -1,0 +1,218 @@
+Monaco|288002|WB 2024
+Liechtenstein|217928|
+Luxembourg|148247|
+Bermuda|142250|WB 2024
+Ireland|130652|
+Switzerland|115620|
+Cayman Islands|104293|WB 2024
+Singapore|99365|
+Iceland|99071|
+Norway|94468|
+Isle of Man|90015|WB 2023
+United States|89991|
+Denmark|77046|
+Macao|74465|
+Faeroe Islands|74175|WB 2024
+Netherlands|73833|
+Qatar|69680|
+Australia|66352|
+San Marino|65543|
+Austria|63161|
+Sweden|62662|
+Belgium|61002|
+Germany|60439|
+Israel|60335|
+Greenland|58499|WB 2023
+United Kingdom|57608|
+Hong Kong|56893|
+Finland|56464|
+Canada|55765|
+Andorra|50379|
+United Arab Emirates|50232|
+Malta|49297|
+France|48930|
+New Zealand|48621|
+U.S. Virgin Islands|44321|WB 2022
+Italy|43270|
+Sint Maarten|42978|WB
+Guam|41833|WB 2022
+Cyprus|41730|
+Aruba|41462|
+Bahamas|40005|
+Puerto Rico|39847|
+Taiwan|39489|
+British Virgin Islands|38627|UN 2023
+Spain|38290|
+Turks and Caicos|37507|WB 2024
+Slovenia|37357|
+South Korea|36227|
+Japan|35973|
+Czech Republic (Czechia)|35678|
+Saudi Arabia|35464|
+Brunei|34678|
+Estonia|34325|
+Lithuania|32839|
+Portugal|32166|
+Kuwait|30877|
+Bahrain|29344|
+New Caledonia|29213|WB 2024
+Anguilla|28850|UN 2023
+Slovakia|28498|
+Poland|28374|
+Barbados|27494|
+Croatia|27376|
+Greece|27041|
+Guyana|26994|
+Latvia|26116|
+Hungary|25826|
+Cook Islands|25750|UN 2023
+Uruguay|24549|
+Northern Mariana Islands|23786|WB 2022
+Curaçao|22833|WB 2024
+Romania|22725|
+French Polynesia|22440|WB 2024
+Antigua and Barbuda|21676|
+Saint Kitts & Nevis|21002|
+Bulgaria|20921|
+Oman|19996|
+Panama|19814|
+Palau|19685|
+Costa Rica|19162|
+Maldives|18658|
+Turkey|18611|
+Seychelles|18479|
+Cuba|18329|UN 2023
+Montserrat|18197|UN 2023
+Trinidad and Tobago|18072|
+American Samoa|18017|WB 2022
+Russia|17972|
+Chile|17735|
+Serbia|15284|
+Kazakhstan|14855|
+Montenegro|14784|
+Saint Lucia|14603|
+Nauru|14584|
+Argentina|14355|
+China|13968|
+Malaysia|13949|
+Mexico|13741|
+Mauritius|12977|
+Grenada|12210|
+Dominican Republic|11749|
+Turkmenistan|11587|
+Albania|11235|
+Brazil|10686|
+St. Vincent & Grenadines|10573|
+North Macedonia|10546|
+Georgia|10346|
+Belarus|10209|
+Peru|9911|
+Dominica|9895|
+Bosnia and Herzegovina|9568|
+Armenia|9521|
+Gabon|9376|
+Colombia|8623|
+Moldova|8542|
+Marshall Islands|8451|
+Jamaica|8106|
+Thailand|8057|
+Belize|7968|
+Paraguay|7692|
+Botswana|7662|
+Equatorial Guinea|7628|
+Azerbaijan|7322|
+Ecuador|7199|
+Suriname|7099|
+Mongolia|7079|
+Tonga|6858|
+South Africa|6769|
+Fiji|6508|
+Ukraine|6499|
+Guatemala|6489|
+Lebanon|6443|
+Samoa|6075|
+Algeria|6047|
+Libya|5999|
+Cabo Verde|5995|
+El Salvador|5839|
+Tuvalu|5823|
+Iraq|5803|
+Jordan|5355|
+Micronesia|5308|
+Bolivia|5107|
+Indonesia|5082|
+Sri Lanka|5002|WB
+Namibia|4862|
+Morocco|4842|
+Vietnam|4829|
+Tunisia|4664|
+Eswatini|4442|
+Bhutan|4394|
+Philippines|4270|
+Iran|4264|
+Djibouti|4145|
+Sao Tome & Principe|4085|
+Vanuatu|3936|
+Uzbekistan|3846|
+Venezuela|3736|
+Angola|3614|
+Honduras|3607|
+Egypt|3379|
+Nicaragua|3337|
+Ghana|3271|
+State of Palestine|3171|WB
+Zimbabwe|3080|
+Côte d'Ivoire|3006|
+Kyrgyzstan|2984|
+Cambodia|2762|
+Kiribati|2701|
+India|2675|
+Mauritania|2655|
+Bangladesh|2636|
+Kenya|2558|
+Haiti|2557|
+Papua New Guinea|2538|
+Congo|2404|
+Laos|2288|
+Solomon Islands|2135|
+Cameroon|1984|
+Senegal|1936|
+Comoros|1769|
+Guinea|1722|
+Pakistan|1696|
+Tajikistan|1693|
+Benin|1634|
+Nepal|1512|
+Myanmar|1502|
+Timor-Leste|1464|
+Uganda|1375|
+Zambia|1318|
+Guinea-Bissau|1311|
+Tanzania|1292|
+Nigeria|1223|
+Togo|1217|
+Lesotho|1206|
+Mali|1190|
+Chad|1165|
+Rwanda|1128|
+Burkina Faso|1126|
+Ethiopia|987|
+Liberia|910|
+Gambia|904|
+Sierra Leone|874|
+DR Congo|871|
+Syria|847|WB 2023
+Sudan|788|
+Somalia|764|
+Niger|750|
+Eritrea|656|UN 2023
+North Korea|640|UN 2023
+Malawi|625|
+Mozambique|623|
+Madagascar|622|
+Central African Republic|579|
+Burundi|478|
+South Sudan|470|
+Afghanistan|448|
+Yemen|420|
+Saint Martin|21668|WB 2021
