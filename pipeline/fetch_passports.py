@@ -10,24 +10,27 @@
   python3 pipeline/fetch_passports.py report    rewrites pipeline/passports_report.md
 
 Verdicts, keyed by M49 code (a value may also be a list of verdicts when several files were looked at):
-  {"250": {"title": "File:...", "ok": true, "crop": [x, y, w, h] or null, "sha1": "...", "note": "..."},
+  {"250": {"title": "File:...", "ok": true, "crop": [x, y, w, h] or null, "sha1": "...",
+           "qid": "Q...", "item": "French passport", "note": "..."},
    "999": {"title": "File:...", "ok": false, "reason": "data page"}}
   ok = a person checked that it is the front cover of an ORDINARY passport, shows no personal data
   (face, name, number, MRZ) and that the cover fills most of the frame. crop is in pixels of the
   original file on Commons and may only cut away background. sha1 (copied from the contact sheet)
   pins the reviewed version; apply refuses the file when Commons now serves a different one.
+  qid/item (also from the contact sheet, Wikidata candidates only) keep the chosen item on record.
 
 Candidates: Wikidata items that are instances or subclasses of passport with country and image,
 joined to places by the ISO alpha-2 or M49 code of their jurisdiction/country; diplomatic, official,
-service ... items dropped; newest design first. Places still without a licence-passing candidate get
-files from Commons categories such as "Passports of <name>". At most 3 candidates per place.
+service ... items dropped; of the rest one item per place, the current (newest, not ended) design,
+gives its image. Places still without a licence-passing candidate get files from Commons categories
+such as "Passports of <name>" for the remaining slots. At most 3 candidates per place in all.
 Licence: Public domain, CC0, CC BY >= 2.0, CC BY-SA >= 2.0 (ported and IGO variants by version).
 Territories (sov) without an approved image of their own use the sovereign's.
 
 Etiquette: fixed User-Agent, at most one request per second, responses cached for a week under
 pipeline/.cache/passports/ (--refresh ignores the cache).
 """
-import argparse, datetime as dt, hashlib, html, io, json, os, re, sys, time
+import argparse, datetime as dt, hashlib, html, io, json, os, re, sys, time, traceback
 from urllib.parse import unquote, urlencode, urlsplit
 
 import requests
@@ -561,7 +564,8 @@ def facts(p):
             'url': ii.get('url'), 'thumb': ii.get('thumburl') or ii.get('url'),
             'width': ii.get('width'), 'height': ii.get('height'), 'mime': ii.get('mime'), 'sha1': ii.get('sha1'),
             'license': strip_html(v('LicenseShortName')), 'license_url': v('LicenseUrl'),
-            'artist': strip_html(v('Artist')) or strip_html(v('Credit')),
+            # Artist only: Credit is the source field ("Own work", a URL), never the author
+            'artist': strip_html(v('Artist')),
             'restrictions': strip_html(v('Restrictions')), 'nonfree': v('NonFree')}
 
 
@@ -596,12 +600,20 @@ def licence_ok(short, nonfree=''):
         return False, '비자유 파일 (%s)' % short
     if s in ('public domain', 'cc0', 'cc0 1.0', 'cc zero'):
         return True, ''
-    m = re.fullmatch(r'cc[ -]by(-sa)?[ -](\d+\.\d+)(?:[ ,][a-z0-9., -]*)?', s)
+    if re.search(r'\bn[cd]\b|non-?commercial|no-?deriv', s):
+        return False, '허용하지 않는 라이선스 (%s)' % short
+    m = LICENCE_RE.fullmatch(s)
     if not m:
         return False, '허용하지 않는 라이선스 (%s)' % short
-    if float(m.group(2)) < 2.0:
+    if m.group(1) < '2.0':
         return False, '2.0 미만 버전 (%s)' % short
     return True, ''
+
+
+# CC BY / CC BY-SA, a real version (several, as in "2.5,2.0,1.0", when the file offers them all),
+# then at most one known suffix: IGO, unported, migrated, scotland or a two-letter jurisdiction port
+LICENCE_RE = re.compile(r'cc[ -]by(?:-sa)?[ -](1\.0|2\.0|2\.1|2\.5|3\.0|4\.0)(?:,[1-4]\.[0-5])*'
+                        r'(?:[ -](?:igo|unported|scotland|migrated(?:-with-disclaimers)?|[a-z]{2}))?')
 
 
 def check_licences(cands, errors):
@@ -620,9 +632,27 @@ def check_licences(cands, errors):
         if f is None:
             x.update(ok=False, why='missing', reason='Commons에 파일 없음')
             continue
+        if f['title'] != x['title']:            # redirect: keep the title we asked for as well
+            x['asked'] = x['title']
         x.update({k: f[k] for k in FACTS})
         ok, reason = licence_ok(f['license'], f['nonfree'])
         x.update(ok=ok, why='' if ok else 'licence', reason=reason)
+
+
+def names_of(x):
+    return {x['title'], x.get('asked')} - {None}
+
+
+def settle(xs, rejected):
+    """After the licence check: drop files a person already rejected (also when reached through a
+    redirect) and files that turned out to be the same file under another name."""
+    out, seen = [], set()
+    for x in xs:
+        if names_of(x) & set(rejected) or x['title'] in seen:
+            continue
+        seen.add(x['title'])
+        out.append(x)
+    return out
 
 
 def category_titles(place, names):
@@ -685,8 +715,8 @@ def subcat_score(title):
     return 3 * ('cover' in n) + 2 * ('ordinary' in n) + ('biometric' in n)
 
 
-def pick_files(cats, skip, errors):
-    """Up to PER_PLACE best-named files from the categories (one level of subcategories if short)."""
+def pick_files(cats, skip, errors, limit=PER_PLACE):
+    """Up to limit best-named files from the categories (one level of subcategories if short)."""
     found, subs = {}, []
 
     def add(cat):
@@ -703,13 +733,15 @@ def pick_files(cats, skip, errors):
         ok = [t for t in found if t not in skip and file_score(t) is not None]
         return sorted(ok, key=lambda t: (-file_score(t), t))
 
+    if limit <= 0:
+        return []
     for cat in cats:
         subs += add(cat)
-    if len(ranked()) < PER_PLACE:
+    if len(ranked()) < limit:
         good = [s for s in dict.fromkeys(subs) if subcat_score(s) is not None]
         for s in sorted(good, key=lambda s: (-subcat_score(s), s))[:2]:
             add(s)
-    return [{'title': t, 'source': 'commons', 'category': found[t]} for t in ranked()[:PER_PLACE]]
+    return [{'title': t, 'source': 'commons', 'category': found[t]} for t in ranked()[:limit]]
 
 
 def download(f):
@@ -731,20 +763,21 @@ def download(f):
 def collect():
     ensure_files()
     st = load_state()
-    c = st['collect'] = {'date': today(), 'status': 'running', 'message': '', 'blocked': [], 'errors': [],
-                         'candidates': {}, 'items': {}, 'dropped': {}, 'categories': {}}
+    c = st['collect'] = {'date': today(), 'status': 'running', 'step': '', 'message': '', 'blocked': [],
+                         'errors': [], 'candidates': {}, 'items': {}, 'dropped': {}, 'categories': {}}
     rc = 0
     try:
         places = load_places()
         decisions = load_review(places)
         print('checking Wikidata identifiers ...')
+        c['step'] = 'identifiers'
         check_identifiers()
         run_collect(places, decisions, c)
         c['status'] = 'ok'
     except NetworkError as e:
         print('network: cannot reach %s (%s)' % (e.host, e.detail))
         print('checking which Wikimedia hosts are reachable ...')
-        c['status'], c['message'], c['blocked'] = 'network', str(e), probe_hosts(e)
+        c['status'], c['message'], c['host'], c['blocked'] = 'network', str(e), e.host, probe_hosts(e)
         rc = 2
     except IdentifierError as e:
         c['status'], c['message'], rc = 'identifier', str(e), 3
@@ -752,6 +785,9 @@ def collect():
         c['status'], c['message'], rc = 'review', str(e), 4
     except FetchError as e:
         c['status'], c['message'], rc = 'error', str(e), 1
+    except Exception as e:                  # anything unexpected: still leave a state and a report
+        traceback.print_exc()
+        c['status'], c['message'], rc = 'error', '%s: %s' % (type(e).__name__, e), 1
     save_state(st)
     write_report(st)
     if rc:
@@ -766,9 +802,10 @@ def run_collect(places, decisions, c):
     approved, rejected = split_verdicts(decisions)
     errors = c['errors']
     print('Wikidata: countries and passport items ...')
+    c['step'] = 'sparql'
     try:
         cmap, names = countries(places)
-        ranked, dropped = passport_items(cmap)
+        ranked, dropped = passport_items(cmap, {k: p['sov'] for k, p in places.items()})
     except FetchError as e:
         errors.append({'step': 'sparql', 'detail': str(e)})
         cmap, names, ranked, dropped = {}, {}, {}, {}
@@ -777,14 +814,27 @@ def run_collect(places, decisions, c):
     cands = {}
     for code in places:
         if code in approved:     # already decided: only the approved file, for the contact sheet
-            cands[code] = [{'title': approved[code]['title'], 'source': 'review'}]
-        else:
-            cands[code] = wikidata_candidates(ranked.get(code, []), rejected.get(code, {}))
+            v = approved[code]
+            x = {'title': v['title'], 'source': 'review'}
+            if v.get('qid'):
+                x.update(qid=v['qid'], item=v.get('item') or '')
+                c['items'][str(code)] = {'qid': v['qid'], 'item': v.get('item') or ''}
+            cands[code] = [x]
+        else:                    # one item: the current ordinary passport, newest design
+            it = (ranked.get(code) or [None])[0]
+            if it:
+                c['items'][str(code)] = item_record(it)
+            cands[code] = wikidata_candidates(it, rejected.get(code, {}))
     c['candidates'] = {str(k): v for k, v in cands.items()}   # same lists, so a crash keeps what we have
+    c['step'] = 'imageinfo'
     check_licences([x for xs in cands.values() for x in xs], errors)
+    for code in places:
+        cands[code] = settle(cands[code], rejected.get(code, {}))
+    c['candidates'] = {str(k): v for k, v in cands.items()}
 
     need = [code for code in places if code not in approved and not any(x['ok'] for x in cands[code])]
     print('Commons categories for %d places ...' % len(need))
+    c['step'] = 'categories'
     titles = {code: category_titles(places[code], names) for code in need}
     try:
         sizes = category_sizes([t for ts in titles.values() for t in ts])
@@ -797,14 +847,19 @@ def run_collect(places, decisions, c):
         c['categories'][str(code)] = cats
         if not cats:
             continue
-        skip = set(rejected.get(code, {})) | {x['title'] for x in cands[code]}
-        got = pick_files(cats, skip, errors)          # up to PER_PLACE on top of the Wikidata ones
+        skip = set(rejected.get(code, {})) | {n for x in cands[code] for n in names_of(x)}
+        got = pick_files(cats, skip, errors, PER_PLACE - len(cands[code]))   # at most 3 per place in all
         cands[code] += got
         new += got
+    c['step'] = 'imageinfo'
     check_licences(new, errors)
+    for code in need:
+        cands[code] = settle(cands[code], rejected.get(code, {}))
+    c['candidates'] = {str(k): v for k, v in cands.items()}
 
     passing = [x for xs in cands.values() for x in xs if x['ok']]
     print('downloading %d licence-passing candidates ...' % len(passing))
+    c['step'] = 'download'
     for x in passing:
         try:
             x['local'] = os.path.relpath(download(x), CACHE).replace(os.sep, '/')
@@ -814,15 +869,8 @@ def run_collect(places, decisions, c):
 
     for code, xs in cands.items():
         for x in xs:
-            if approved.get(code, {}).get('title') == x['title']:
-                x['verdict'] = 'approved'
-            elif x['title'] in rejected.get(code, {}):
-                x['verdict'] = 'rejected'
-            else:
-                x['verdict'] = 'unreviewed'
-        first = next((x for x in xs if x.get('qid') and x['ok']), None) or next((x for x in xs if x.get('qid')), None)
-        if first:
-            c['items'][str(code)] = [first['qid'], first['item']]
+            x['verdict'] = 'approved' if code in approved and approved[code]['title'] in names_of(x) else 'unreviewed'
+    c['step'] = 'done'
     write_sheet(places, c)
     waiting = sum(1 for xs in cands.values() if any(x['ok'] and x['verdict'] == 'unreviewed' for x in xs))
     print('places with candidates awaiting review: %d, approved: %d, without a usable candidate: %d'
@@ -838,19 +886,21 @@ def write_sheet(places, c):
         if shown:
             groups.append((places[int(key)], shown))
     groups.sort(key=lambda g: (not any(x['verdict'] == 'unreviewed' for x in g[1]), g[0]['en']))
-    badge = {'approved': '승인', 'rejected': '거부', 'unreviewed': '미검수'}
+    badge = {'approved': '승인', 'unreviewed': '미검수'}     # rejected files never come back as candidates
     out = ['<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>여권 표지 검수</title><style>',
            'body{font:14px/1.5 system-ui,sans-serif;margin:16px;background:#f6f6f6;color:#222}',
            'section{margin:28px 0;border-top:1px solid #ccc;padding-top:8px}.cards{display:flex;flex-wrap:wrap;gap:16px}',
            'figure{margin:0;width:340px;background:#fff;border:3px solid #aaa;padding:8px}',
-           'figure.approved{border-color:#2a7d2a}figure.rejected{border-color:#b33;opacity:.6}',
+           'figure.approved{border-color:#2a7d2a}',
            'img{display:block;max-width:100%;max-height:440px;margin:0 auto 8px;'
            'background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/16px 16px}',
-           'figcaption div{word-break:break-all}textarea{width:100%;height:6em;font:12px monospace}',
+           'figcaption div{word-break:break-all}textarea{width:100%;height:7em;font:12px monospace}',
+           '.warn{color:#a40;font-weight:600}',
            '</style></head><body><h1>여권 표지 후보 검수</h1>',
            '<p>수집 %s · 후보가 있는 곳 %d · 판정은 <code>pipeline/passports_review.json</code>에 적습니다.</p>'
            % (e(c['date']), len(groups)),
-           '<ol><li>일반 여권의 <b>앞표지</b>인가? 외교관·관용 여권, 신원 정보면, 사증면, 견본 정보면은 거부.</li>',
+           '<ol><li>일반 여권의 <b>현행 디자인</b> <b>앞표지</b>인가? 옛 디자인, 외교관·관용 여권, 신원 정보면, '
+           '사증면, 견본 정보면은 거부. Wikidata 항목의 시작·종료 날짜를 함께 봅니다.</li>',
            '<li>얼굴, 이름, 여권 번호, MRZ 같은 개인 정보가 <b>전혀</b> 보이지 않는가?</li>',
            '<li>표지가 화면 대부분을 차지하는가? 배경만 <code>crop</code> [x, y, w, h]로 잘라 낼 수 있습니다 '
            '(Commons 원본 픽셀 기준). 표지 그림 자체는 고치지 않습니다.</li>',
@@ -860,18 +910,26 @@ def write_sheet(places, c):
         out.append('<section><h2>%s · %s · %s%s</h2><div class="cards">' % (e(p['ko']), e(p['en']), p['code'], sov))
         for x in xs:
             if x.get('qid'):
-                src = 'Wikidata <a href="https://www.wikidata.org/wiki/%s">%s</a> (%s)' % (e(x['qid']), e(x['qid']), e(x['item']))
+                span = ' · %s ~ %s' % (x.get('since') or '?', x.get('until') or '') if x.get('since') or x.get('until') else ''
+                src = 'Wikidata <a href="https://www.wikidata.org/wiki/%s">%s</a> (%s%s)' % (
+                    e(x['qid']), e(x['qid']), e(x.get('item') or ''), e(span))
             elif x.get('category'):
                 src = 'Commons <a href="%s">%s</a>' % (e(page_url(x['category'])), e(x['category']))
             else:
                 src = '검수 파일에 적힌 파일'
-            snippet = '"%s": %s' % (p['code'], json.dumps({'title': x['title'], 'ok': True, 'crop': None,
-                                                             'sha1': x.get('sha1'), 'note': ''}, ensure_ascii=False))
+            verdict = {'title': x['title'], 'ok': True, 'crop': None, 'sha1': x.get('sha1')}
+            if x.get('qid'):                      # the chosen Wikidata item goes on record with the verdict
+                verdict.update(qid=x['qid'], item=x.get('item') or '')
+            snippet = '"%s": %s' % (p['code'], json.dumps(dict(verdict, note=''), ensure_ascii=False))
             out.append('<figure class="%s"><img loading="lazy" src="%s" alt=""><figcaption>' % (x['verdict'], e(x['local'])))
             out.append('<div><b><a href="%s">%s</a></b></div>' % (e(x['page']), e(x['title'])))
             out.append('<div>%s · <a href="%s">%s</a> · 원본 %s×%s px</div>' % (
                 e(badge[x['verdict']]), e(x.get('license_url') or x['page']), e(x['license']), x['width'], x['height']))
             out.append('<div>작가: %s</div><div>출처: %s</div>' % (e(x.get('artist') or '-'), src))
+            if x.get('ended'):
+                out.append('<div class="warn">종료된 디자인의 항목입니다 (현행 항목이 없음). 현행 표지인지 확인하세요.</div>')
+            if not x.get('artist'):
+                out.append('<div class="warn">작가(Artist) 표기가 없습니다. 파일 페이지에서 저작자 표시를 확인하세요.</div>')
             if x.get('restrictions'):
                 out.append('<div>제한: %s</div>' % e(x['restrictions']))
             out.append('<textarea readonly>%s</textarea></figcaption></figure>' % e(snippet))
@@ -945,13 +1003,16 @@ def write_passport(passport):
 def apply():
     ensure_files()
     st = load_state()
-    a = st['apply'] = {'date': today(), 'status': 'running', 'message': '', 'problems': [], 'adopted': {}}
+    a = st['apply'] = {'date': today(), 'status': 'running', 'message': '', 'problems': [], 'warnings': [],
+                       'adopted': {}}
     try:
         places = load_places()
         approved, _ = split_verdicts(load_review(places))
-        # network first: nothing is written unless every lookup could at least be attempted
+        # network first: nothing is written unless every lookup and download succeeded, so a server
+        # hiccup never removes an image that shipped before. Only a file that is gone, fails the
+        # licence rule or changed since review loses its place.
         info = imageinfo([v['title'] for v in approved.values()]) if approved else {}
-        todo = []
+        todo, failed = [], []
         for code, v in sorted(approved.items()):
             f = info.get(v['title'])
             why = None
@@ -969,7 +1030,9 @@ def apply():
             try:
                 todo.append((code, v, f, download(f)))
             except FetchError as e:
-                a['problems'].append([code, v['title'], '내려받기 실패: %s' % e])
+                failed.append('%s %s: %s' % (code, v['title'], e))
+        if failed:
+            raise FetchError('download failed, try again later: ' + '; '.join(failed))
     except NetworkError as e:
         a['status'], a['message'] = 'network', str(e)
         save_state(st)
@@ -981,6 +1044,13 @@ def apply():
         save_state(st)
         write_report(st)
         print('apply stopped, nothing written: %s' % e)
+        return 1
+    except Exception as e:
+        traceback.print_exc()
+        a['status'], a['message'] = 'error', '%s: %s' % (type(e).__name__, e)
+        save_state(st)
+        write_report(st)
+        print('apply stopped, nothing written: %s' % a['message'])
         return 1
 
     own = {}
@@ -995,7 +1065,9 @@ def apply():
         with open(os.path.join(ASSETS, '%d.webp' % code), 'wb') as fh:
             fh.write(data)
         a['adopted'][str(code)] = {'bytes': len(data), 'quality': q, 'sha1': f['sha1'],
-                                   'checked_sha1': bool(v.get('sha1'))}
+                                   'checked_sha1': bool(v.get('sha1')), 'qid': v.get('qid')}
+        if not f['artist']:
+            a['warnings'].append([code, f['title'], '작가 표기 없음, 수동 확인 필요 (%s)' % f['license']])
         own[code] = {'via': 'own', 'file': 'passports/%d.webp' % code, 'title': f['title'], 'page': f['page'],
                      'artist': f['artist'], 'license': f['license'], 'license_url': f['license_url'],
                      'changes': changes, 'restrictions': f['restrictions']}
@@ -1016,10 +1088,25 @@ def apply():
              'updated' if changed else 'unchanged'))
     for p in a['problems']:
         print('  not adopted %s %s: %s' % tuple(p))
+    for p in a['warnings']:
+        print('  check %s %s: %s' % tuple(p))
     return 0
 
 
 # ---------------------------------------------------------------- report
+
+# step of collect -> (what it was doing, the host it needed)
+STEPS = {'identifiers': ('식별자 확인(wbgetentities)', 'www.wikidata.org'),
+         'sparql': ('Wikidata SPARQL 조회', 'query.wikidata.org'),
+         'imageinfo': ('Commons 파일·라이선스 정보 조회', 'commons.wikimedia.org'),
+         'categories': ('Commons 분류 조회', 'commons.wikimedia.org'),
+         'download': ('후보 이미지 내려받기', 'upload.wikimedia.org')}
+
+
+def cell(s):
+    # one Markdown table cell: Commons joins Restrictions with '|'
+    return str(s or '-').replace('|', ', ').replace('\n', ' ')
+
 
 STATUS = {'ok': '완료', 'network': '네트워크 차단으로 중단', 'identifier': 'Wikidata 식별자 확인 실패로 중단',
           'review': '검수 파일 오류로 중단', 'error': '오류로 중단', 'running': '도중에 멈춤'}
@@ -1071,11 +1158,16 @@ def write_report(st=None):
 
     if c.get('status') == 'network':
         got = sum(len(xs) for xs in (c.get('candidates') or {}).values())
+        what, host = STEPS.get(c.get('step'), ('알 수 없는 단계', ''))
+        host = c.get('host') or host
+        if c.get('step') == 'identifiers':
+            said = ('이번 collect는 첫 요청인 식별자 확인에서 `%s`에 접속하지 못해 멈췄습니다. '
+                    '후보를 하나도 모으지 못했고, 이미지를 내려받지 않았습니다. ' % host)
+        else:
+            said = ('이번 collect는 식별자 확인은 통과했지만 %s 단계에서 `%s`에 접속하지 못해 멈췄습니다 '
+                    '(그때까지 본 후보 %d개). 이 결과로는 아무것도 채택하지 않습니다. ' % (what, host, got))
         L += ['## 수집하지 못함: 네트워크 차단', '',
-              ('이번 collect는 Wikimedia 서버에 접속하지 못해 첫 요청(식별자 확인)에서 멈췄습니다. '
-               '후보를 하나도 모으지 못했고, 이미지를 내려받지 않았습니다. ' if not got else
-               '이번 collect는 도중에 Wikimedia 서버에 접속하지 못해 멈췄습니다 (그때까지 본 후보 %d개). ' % got)
-              + '`data/appdata.json`과 `assets/passports/`는 건드리지 않았습니다.', '',
+              said + '`data/appdata.json`과 `assets/passports/`는 건드리지 않았습니다.', '',
               '접속하지 못한 호스트:', '']
         L += ['- `%s`: %s' % (b['host'], b['detail']) for b in c.get('blocked') or []] or ['- (확인 못 함) %s' % c.get('message')]
         reach = [h for h in HOSTS if h not in {b['host'] for b in c.get('blocked') or []}]
@@ -1145,6 +1237,9 @@ def write_report(st=None):
     if a.get('problems'):
         L += ['- 적용(apply) 단계에서 뺀 승인 건: %d건' % len(a['problems'])]
         L += ['  - %s: `%s`, %s' % (name(code), t, why) for code, t, why in a['problems']]
+    if a.get('warnings'):
+        L += ['- 주의: 채택했지만 사람이 확인해야 할 곳 %d곳' % len(a['warnings'])]
+        L += ['  - %s: `%s`, %s' % (name(code), t, why) for code, t, why in a['warnings']]
     nosha = [int(k) for k, v in (a.get('adopted') or {}).items() if not v.get('checked_sha1')]
     if nosha:
         L += ['- 주의: sha1 없이 승인해 검수 뒤 Commons 파일이 바뀌어도 알 수 없는 곳 %d곳 '
@@ -1153,12 +1248,17 @@ def write_report(st=None):
     L += ['']
 
     if own:
-        L += ['## 채택한 이미지', '', '| M49 | 이름 | 파일 | 라이선스 | 작가 | 제한 |', '|---:|---|---|---|---|---|']
+        # the Wikidata item comes from the committed verdict (the snippet carries it), else from the last apply
+        adopted = a.get('adopted') or {}
+        L += ['## 채택한 이미지', '', '| M49 | 이름 | 파일 | 라이선스 | 작가 | 제한 | Wikidata |',
+              '|---:|---|---|---|---|---|---|']
         for k in sorted(own, key=int):
             v = pp[k]
-            L += ['| %s | %s | [%s](%s) | %s | %s | %s |' % (k, places[int(k)]['ko'] if int(k) in places else '',
-                                                           v['title'], v['page'], v['license'],
-                                                           v['artist'].replace('|', '/'), v['restrictions'] or '-')]
+            q = (approved.get(int(k)) or {}).get('qid') or (adopted.get(k) or {}).get('qid')
+            L += ['| %s | %s | [%s](%s) | %s | %s | %s | %s |' % (
+                k, cell(places[int(k)]['ko'] if int(k) in places else ''), cell(v['title']), v['page'],
+                cell(v['license']), cell(v['artist']), cell(v['restrictions']),
+                '[%s](https://www.wikidata.org/wiki/%s)' % (q, q) if q else '-')]
         L += ['']
 
     L += ['## 라이선스 규칙', ''] + LICENCE_RULE + ['',

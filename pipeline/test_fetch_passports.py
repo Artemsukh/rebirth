@@ -5,7 +5,7 @@ Runs against a temp checkout with a small appdata.json; the HTTP layer (fetch_pa
 is replaced by fixtures for wbgetentities, SPARQL, Commons categoryinfo / categorymembers /
 imageinfo and image downloads. Writing the real data/appdata.json makes the test fail.
 """
-import builtins, hashlib, io, json, os, shutil, sys, tempfile, time, unittest
+import builtins, hashlib, html, io, json, os, re, shutil, sys, tempfile, time, unittest
 from urllib.parse import quote, urlsplit
 
 sys.dont_write_bytecode = True
@@ -58,7 +58,7 @@ APPDATA = {
             row(410, '대한민국', 'South Korea', 'KR'), row(124, '캐나다', 'Canada', 'CA'),
             row(4, '아프가니스탄', 'Afghanistan', None),          # iso2 not filled yet: joins by M49 '004'
             row(554, '뉴질랜드', 'New Zealand', 'NZ'), row(184, '쿡 제도', 'Cook Islands', 'CK', 554),
-            row(412, '코소보', 'Kosovo', None)],
+            row(412, '코소보', 'Kosovo', None), row(840, '미국', 'United States', 'US')],
     'CLASS': {'adv': [250, 208], 'ldc': {'4': None}},
 }
 
@@ -74,23 +74,30 @@ COUNTRIES = [('Q142', 'FR', '250', 'France', 'France'), ('Q17070', 'RE', '638', 
              ('Q785', 'JE', '832', 'Jersey', 'Jersey'), ('Q183', 'DE', '276', 'Germany', 'Germany'),
              ('Q884', 'KR', '410', 'South Korea', 'South Korea'), ('Q16', 'CA', '124', 'Canada', 'Canada'),
              ('Q889', 'AF', '004', 'Afghanistan', 'Afghanistan'), ('Q664', 'NZ', '554', 'New Zealand', 'New Zealand'),
-             ('Q26988', 'CK', '184', 'Cook Islands', 'Cook Islands'), ('Q15180', None, None, 'Soviet Union', None)]
+             ('Q26988', 'CK', '184', 'Cook Islands', 'Cook Islands'), ('Q30', 'US', '840', 'United States', 'United States'),
+             ('Q15180', None, None, 'Soviet Union', None)]
+
+GENID = 'http://www.wikidata.org/.well-known/genid/0123456789abcdef'     # WDQS "unknown value"
 
 # passport items: qid, label, country, image, classes, extras
 ITEMS = [
-    ('Q1FR', 'French passport', 'Q142', 'French passport cover.jpg', ['passport', 'biometric passport'], {}),
-    ('Q2FR', 'French passport (1995 design)', 'Q142', 'French passport 1995.jpg', ['passport'],
+    ('Q9001', 'French passport', 'Q142', 'French passport cover.jpg', ['passport', 'biometric passport'], {}),
+    ('Q9002', 'French passport (1995 design)', 'Q142', 'French passport 1995.jpg', ['passport'],
      {'inception': '1995-01-01T00:00:00Z', 'end': '2006-04-12T00:00:00Z'}),
-    ('Q3FR', 'French diplomatic passport', 'Q142', 'French diplomatic passport.jpg', ['diplomatic passport'],
+    ('Q9003', 'French diplomatic passport', 'Q142', 'French diplomatic passport.jpg', ['diplomatic passport'],
      {'inception': '2023-01-01T00:00:00Z'}),
-    ('Q4FR', 'Passeport de service', 'Q142', 'French service passport.jpg', ['service passport'], {}),
-    ('Q1DK', 'Danish passport', 'Q35', 'Danish passport.jpg', ['passport'], {}),
-    ('Q1FO', 'Faroese passport', 'Q35', 'Faroese passport.jpg', ['passport'], {'juris': 'Q4628'}),
-    ('Q1GB', 'British passport', 'Q145', 'British passport.jpg', ['passport'], {}),
-    ('Q1JE', 'Jersey passport', 'Q145', 'Jersey passport.jpg', ['passport'], {}),   # no P1001: label hint
-    ('Q1CA', 'Canadian passport', 'Q16', 'Canadian passport.jpg', ['passport'], {}),
-    ('Q1NZ', 'New Zealand passport', 'Q664', 'New Zealand passport.jpg', ['passport'], {}),
-    ('Q1SU', 'Soviet passport', 'Q15180', 'Soviet passport.jpg', ['passport'], {}),
+    ('Q9004', 'Passeport de service', 'Q142', 'French service passport.jpg', ['service passport'], {}),
+    ('Q9005', 'French passport', 'Q142', 'French passport unknown.jpg', ['passport'],     # unknown start and end
+     {'inception': GENID, 'end': GENID}),
+    # several P1001: the parent's passport that covers its territories, stays with Denmark
+    ('Q9011', 'Danish passport', 'Q35', 'Danish passport.jpg', ['passport'], {'juris': ['Q35', 'Q223', 'Q4628']}),
+    ('Q9012', 'Faroese passport', 'Q35', 'Faroese passport.jpg', ['passport'], {'juris': 'Q4628'}),
+    ('Q9021', 'British passport', 'Q145', 'British passport.jpg', ['passport'], {}),
+    ('Q9022', 'Jersey passport', 'Q145', 'Jersey passport.jpg', ['passport'], {}),   # no P1001: label hint
+    ('Q9031', 'Canadian passport', 'Q16', 'Canadian passport.jpg', ['passport'], {}),
+    ('Q9041', 'United States passport', 'Q30', 'US passport.jpg', ['passport'], {}),      # P18 is a redirect
+    ('Q9051', 'New Zealand passport', 'Q664', 'New Zealand passport.jpg', ['passport'], {}),
+    ('Q9061', 'Soviet passport', 'Q15180', 'Soviet passport.jpg', ['passport'], {}),
 ]
 
 CATS = {
@@ -103,7 +110,12 @@ CATS = {
     'Category:Passports of South Korea': (['File:South Korean passport cover.jpg'], []),
     'Category:Passports of the United Kingdom': (['File:UK passport cover.jpg'], []),
     'Category:Passports of Kosovo': (['File:Kosovo passport cover.jpg'], []),
+    'Category:Passports of Canada': (['File:Canada passport cover old.jpg', 'File:Canada passport front.jpg',
+                                      'File:Canada passport cover 2019.jpg'], []),
+    'Category:Passports of the United States': (['File:US passport cover.jpg'], []),
 }
+
+REDIRECTS = {'File:US passport.jpg': 'File:US passport data page.jpg'}
 
 
 def encode(im, fmt, **kw):
@@ -147,18 +159,19 @@ def files():
     faroe = encode(Image.new('RGB', (600, 850), (90, 30, 30)), 'JPEG', exif=exif_bytes())
     f = lambda lic, w, h, img, **k: dict(lic=lic, w=w, h=h, img=img, **k)
     return {
-        'File:French passport cover.jpg': f('CC BY-SA 4.0', 2000, 3000, french_cover(), restr='insignia',
+        'File:French passport cover.jpg': f('CC BY-SA 4.0', 2000, 3000, french_cover(), restr='trademarked|insignia',
                                             lic_url='https://creativecommons.org/licenses/by-sa/4.0',
                                             artist='<a href="//commons.wikimedia.org/wiki/User:JD" '
                                                    'title="User:JD">Jean&nbsp;Dupont</a>'),
         'File:French passport 1995.jpg': f('Public domain', 300, 400, plain(300, 400)),
+        'File:French passport unknown.jpg': f('Public domain', 300, 400, plain(300, 400)),
         'File:French diplomatic passport.jpg': f('Public domain', 300, 400, plain(300, 400)),
         'File:French service passport.jpg': f('Public domain', 300, 400, plain(300, 400)),
         'File:Danish passport.jpg': f('Public domain', 900, 1600, encode(noise, 'PNG')),
         'File:Faroese passport.jpg': f('CC BY 2.0', 600, 850, faroe, artist='Óli Hansen'),
         'File:Jersey passport.jpg': f('CC BY-SA 3.0', 300, 400, plain(300, 400)),
         'File:British passport.jpg': f(None, 300, 400, plain(300, 400)),
-        'File:UK passport cover.jpg': f('Public domain', 500, 700, encode(rgba, 'PNG'), artist='HM Passport Office'),
+        'File:UK passport cover.jpg': f('Public domain', 500, 700, encode(rgba, 'PNG'), artist=''),   # Credit only
         'File:Canadian passport.jpg': f('Fair use', 300, 400, plain(300, 400), nonfree='true'),
         'File:New Zealand passport.jpg': f('CC BY-SA 4.0', 400, 600, plain(400, 600)),
         'File:South Korean passport cover.jpg': f('CC BY 1.0', 300, 400, plain(300, 400)),
@@ -170,6 +183,11 @@ def files():
         'File:German passport data page.jpg': f('Public domain', 300, 400, plain(300, 400)),
         'File:German passport visa page.jpg': f('Public domain', 300, 400, plain(300, 400)),
         'File:Kosovo passport cover.jpg': f('Public domain', 300, 400, plain(300, 400)),
+        'File:Canada passport cover 2019.jpg': f('CC0', 300, 400, plain(300, 400)),
+        'File:Canada passport front.jpg': f('Public domain', 300, 400, plain(300, 400)),
+        'File:Canada passport cover old.jpg': f('Public domain', 300, 400, plain(300, 400)),
+        'File:US passport data page.jpg': f('Public domain', 300, 400, plain(300, 400)),
+        'File:US passport cover.jpg': f('CC0', 300, 400, plain(300, 400)),
     }
 
 
@@ -183,7 +201,9 @@ class FakeWikimedia:
 
     def __init__(self, labels=None, blocked=False):
         self.labels = dict(LABELS, **(labels or {}))
-        self.blocked = blocked
+        self.blocked = blocked              # True: every host; or a set of hosts
+        self.cut_sparql = False             # answer SPARQL with half a JSON body
+        self.fail = set()                   # URLs answered with 503
         self.files = files()
         self.thumbs = {thumb_of(t): t for t in self.files}
         self.calls = []
@@ -192,15 +212,18 @@ class FakeWikimedia:
         params = dict(params or {})
         self.calls.append((url, params, dict(headers or {})))
         host = urlsplit(url).hostname
-        if self.blocked:
+        if self.blocked is True or (self.blocked and host in self.blocked):
             raise fp.NetworkError(host, 'proxy refused CONNECT (403 Forbidden)')
+        if url in self.fail:
+            return 503, {'Retry-After': '1'}, b'busy'
         if url == fp.WD_API and params.get('action') == 'wbgetentities':
             ents = {i: {'id': i, 'labels': {'en': {'language': 'en', 'value': self.labels[i]}}}
                     for i in params['ids'].split('|')}
             return self.ok({'entities': ents})
         if url == fp.SPARQL:
             q = params['query']
-            return self.ok({'results': {'bindings': self.countries() if 'P297' in q else self.passports()}})
+            status, h, body = self.ok({'results': {'bindings': self.countries() if 'P297' in q else self.passports()}})
+            return status, h, body[:len(body) // 2] if self.cut_sparql else body
         if url == fp.COMMONS_API:
             titles = params.get('titles', '').split('|')
             if params.get('prop') == 'categoryinfo':
@@ -212,7 +235,9 @@ class FakeWikimedia:
                 return self.ok({'query': {'categorymembers': [{'ns': 6, 'title': t} for t in fs] +
                                                              [{'ns': 14, 'title': t} for t in subs]}})
             if params.get('prop') == 'imageinfo':
-                return self.ok({'query': {'pages': [self.imageinfo(t) for t in titles]}})
+                reds = [{'from': t, 'to': REDIRECTS[t]} for t in titles if t in REDIRECTS]
+                pages = {REDIRECTS.get(t, t): self.imageinfo(REDIRECTS.get(t, t)) for t in titles}
+                return self.ok({'query': {'redirects': reds, 'pages': list(pages.values())}})
         if host == 'upload.wikimedia.org' and url in self.thumbs:
             return 200, {}, self.files[self.thumbs[url]]['img']
         return 404, {}, b'not found'
@@ -243,19 +268,21 @@ class FakeWikimedia:
             base = {'item': uri(q), 'itemLabel': lit(label), 'country': uri(country),
                     'image': {'type': 'uri', 'value': 'http://commons.wikimedia.org/wiki/Special:FilePath/'
                               + quote(image)}}
-            if 'juris' in extra:
-                base['juris'] = uri(extra['juris'])
             for k in ('inception', 'end'):
                 if k in extra:
-                    base[k] = lit(extra[k])
-            out += [dict(base, classLabel=lit(c)) for c in classes]
+                    base[k] = {'type': 'uri' if extra[k].startswith('http') else 'literal', 'value': extra[k]}
+            juris = extra.get('juris', [])
+            for j in ([juris] if isinstance(juris, str) else juris) or [None]:   # one row per value, like WDQS
+                row = dict(base, juris=uri(j)) if j else base
+                out += [dict(row, classLabel=lit(c)) for c in classes]
         return out
 
     def imageinfo(self, title):
         f = self.files.get(title)
         if not f:
             return {'ns': 6, 'title': title, 'missing': True}
-        em = {'Artist': {'value': f.get('artist', 'Someone')}, 'Restrictions': {'value': f.get('restr', '')}}
+        em = {'Artist': {'value': f.get('artist', 'Someone')}, 'Restrictions': {'value': f.get('restr', '')},
+              'Credit': {'value': '<span class="int-own-work" lang="en">Own work</span>'}}
         if f['lic']:
             em['LicenseShortName'] = {'value': f['lic']}
             em['LicenseUrl'] = {'value': f.get('lic_url', '')}
@@ -328,12 +355,15 @@ class Base(unittest.TestCase):
 class LicenceRule(unittest.TestCase):
     def test_pass(self):
         for s in ('Public domain', 'CC0', 'CC BY 2.0', 'CC BY-SA 4.0', 'CC BY-SA 3.0 de', 'CC BY-SA 3.0 IGO',
-                  'CC BY 2.5', 'CC BY-SA 2.5,2.0,1.0', 'cc-by-sa-4.0'):
+                  'CC BY 2.5', 'CC BY-SA 2.5,2.0,1.0', 'cc-by-sa-4.0', 'CC-BY-SA-3.0-de', 'CC BY 2.1 jp',
+                  'CC BY-SA 3.0 migrated', 'CC BY-SA 3.0 unported', 'CC BY-SA 2.5 scotland'):
             self.assertTrue(fp.licence_ok(s)[0], s)
 
     def test_fail(self):
         for s in ('CC BY 1.0', 'CC BY-SA 1.0', 'GFDL', 'Fair use', '', None, 'CC BY-NC-SA 4.0', 'CC BY-ND 4.0',
-                  'Copyrighted free use', 'Attribution'):
+                  'Copyrighted free use', 'Attribution', 'CC BY 2.0 non-commercial', 'CC BY-SA 4.0 no derivatives',
+                  'CC BY 4.0 NC-ND', 'CC BY 2.0 nd', 'CC BY 3.0 but only for noncommercial use', 'CC BY 10.0',
+                  'CC BY 3.5', 'CC BY-SA 3.0 de extra', 'CC BY-SA 4.0 or later', 'CC BY-NC 2.0 de'):
             self.assertFalse(fp.licence_ok(s)[0], s)
         self.assertFalse(fp.licence_ok('CC BY-SA 4.0', 'true')[0])     # NonFree flag wins
 
@@ -342,6 +372,30 @@ class LicenceRule(unittest.TestCase):
         self.assertIsNotNone(fp.file_score('File:Italien passport cover.jpg'))   # 'alien' is a word, not a substring
         self.assertIsNone(fp.file_score('File:Passport.pdf'))
         self.assertGreater(fp.file_score('File:X passport front cover.jpg'), fp.file_score('File:X passport.jpg'))
+
+
+class Items(unittest.TestCase):
+    def test_place_of(self):
+        cmap = {'Q35': 208, 'Q223': 304, 'Q4628': 234, 'Q55': 528, 'Q21203': 533, 'Q25279': 531, 'Q145': 826}
+        sovs = {208: None, 304: 208, 234: 208, 528: None, 533: 528, 531: 528, 826: None, 832: 826}
+        it = lambda label, countries, juris: {'label': label, 'countries': set(countries), 'juris': set(juris)}
+        self.assertEqual(fp.place_of(it('Danish passport', ['Q35'], ['Q35', 'Q223', 'Q4628']), cmap, sovs), 208)
+        self.assertEqual(fp.place_of(it('Dutch passport', ['Q55'], ['Q55', 'Q21203', 'Q25279']), cmap, sovs), 528)
+        self.assertEqual(fp.place_of(it('Dutch passport', ['Q55'], ['Q21203', 'Q25279']), cmap, sovs), 528)
+        self.assertEqual(fp.place_of(it('Faroese passport', ['Q35'], ['Q4628']), cmap, sovs), 234)
+        self.assertEqual(fp.place_of(it('Danish passport', [], ['Q35', 'Q4628']), cmap, sovs), 208)
+        self.assertEqual(fp.place_of(it('Jersey passport', ['Q145'], []), cmap, sovs), 832)
+
+    def test_rank(self):
+        it = lambda q, dates=(), end=(): {'qid': q, 'label': 'X passport', 'dates': set(dates), 'end': set(end)}
+        rank = lambda *its: [x['qid'] for x in sorted(its, key=fp.item_rank)]
+        self.assertEqual(rank(it('Qold', ['1995-01-01'], ['2006-04-12']), it('Qnow'), it('Qnew', ['2021-01-01'])),
+                         ['Qnow', 'Qnew', 'Qold'])
+        # all ended: the newest ended design, one with an unknown end date last
+        self.assertEqual(rank(it('Qa', ['1995-01-01'], ['2006-04-12']), it('Qb', ['2006-04-12'], ['2020-01-01']),
+                              it('Qc', [], [fp.UNKNOWN])), ['Qb', 'Qa', 'Qc'])
+        self.assertIsNone(fp.day(GENID))
+        self.assertEqual(fp.day('2021-03-01T00:00:00Z'), '2021-03-01')
 
 
 class Blocked(Base):
@@ -373,6 +427,7 @@ class Blocked(Base):
         self.assertEqual({b['host'] for b in st['blocked']}, set(fp.HOSTS))
         text = self.report_text()
         self.assertIn('네트워크 차단', text)
+        self.assertIn('첫 요청인 식별자 확인에서 `www.wikidata.org`', text)
         for h in fp.HOSTS:
             self.assertIn('`%s`' % h, text)
         self.assertIn('403 Forbidden', text)
@@ -384,6 +439,47 @@ class Blocked(Base):
         with open(fp.GITIGNORE, encoding='utf-8') as f:
             self.assertIn('pipeline/.cache/', f.read().splitlines())
         self.assertEqual(sorted(os.listdir(fp.ASSETS)), ['276.webp', '999.webp'])   # collect never touches assets
+
+    def test_only_sparql_blocked(self):
+        self.fake.blocked = {'query.wikidata.org'}
+        before = self.data_bytes()
+        self.assertEqual(fp.collect(), 2)
+        c = self.state()['collect']
+        self.assertEqual((c['status'], c['step']), ('network', 'sparql'))
+        self.assertEqual([b['host'] for b in c['blocked']], ['query.wikidata.org'])
+        text = self.report_text()
+        self.assertIn('식별자 확인은 통과했지만 Wikidata SPARQL 조회 단계에서 `query.wikidata.org`', text)
+        self.assertNotIn('첫 요청', text)
+        self.assertEqual(self.data_bytes(), before)
+
+    def test_cut_off_sparql_answer(self):
+        self.fake.cut_sparql = True
+        before = self.data_bytes()
+        self.assertEqual(fp.collect(), 0)        # SPARQL failure is recorded; Commons categories still tried
+        c = self.state()['collect']
+        self.assertEqual([e['step'] for e in c['errors']], ['sparql'])
+        self.assertIn('unusable answer', c['errors'][0]['detail'])
+        self.assertIn('sparql: unusable answer', self.report_text())
+        self.assertEqual(c['candidates']['250'], [])
+        n = sum(1 for u, _, _ in self.fake.calls if u == fp.SPARQL)
+        self.fake.cut_sparql = False              # the broken answer was not cached
+        self.assertEqual(fp.collect(), 0)
+        self.assertGreater(sum(1 for u, _, _ in self.fake.calls if u == fp.SPARQL), n)
+        self.assertEqual([x['title'] for x in self.state()['collect']['candidates']['250']],
+                         ['File:French passport cover.jpg'])
+        self.assertEqual(self.data_bytes(), before)
+
+    def test_unexpected_error_still_writes_report(self):
+        def boom(*a):
+            raise RuntimeError('surprise')
+        real, fp.countries = fp.countries, boom
+        err, sys.stderr = sys.stderr, io.StringIO()
+        try:
+            self.assertEqual(fp.collect(), 1)
+        finally:
+            fp.countries, sys.stderr = real, err
+        self.assertEqual(self.state()['collect']['status'], 'error')
+        self.assertIn('RuntimeError: surprise', self.report_text())
 
     def test_bad_review_file(self):
         with open(fp.REVIEW, 'w', encoding='utf-8') as f:
@@ -415,14 +511,19 @@ class Flow(Base):
         c = self.state()['collect']
         titles = lambda k: [x['title'] for x in c['candidates'].get(k, [])]
 
-        # Wikidata: ordinary passport, newest design first; diplomatic/service items dropped
-        self.assertEqual(titles('250'), ['File:French passport cover.jpg', 'File:French passport 1995.jpg'])
-        self.assertEqual(c['items']['250'][0], 'Q1FR')
-        self.assertEqual(sorted(q for q, _, _ in c['dropped']['250']), ['Q3FR', 'Q4FR'])
-        self.assertNotIn('File:French diplomatic passport.jpg', self.fake.requested('imageinfo'))
+        # Wikidata: one item, the current ordinary passport; diplomatic/service items dropped; the ended
+        # 1995 design and the one with unknown dates are never candidates while a current item exists
+        self.assertEqual(titles('250'), ['File:French passport cover.jpg'])
+        self.assertEqual(c['items']['250']['qid'], 'Q9001')
+        self.assertEqual(sorted(q for q, _, _ in c['dropped']['250']), ['Q9003', 'Q9004'])
+        for t in ('File:French diplomatic passport.jpg', 'File:French passport 1995.jpg',
+                  'File:French passport unknown.jpg'):
+            self.assertNotIn(t, self.fake.requested('imageinfo'))
+        self.assertTrue(all(len(xs) <= fp.PER_PLACE for xs in c['candidates'].values()))
         # own editions: Faroe by P1001, Jersey by the label; neither lands on the sovereign
         self.assertEqual(titles('234'), ['File:Faroese passport.jpg'])
-        self.assertEqual(titles('208'), ['File:Danish passport.jpg'])
+        self.assertEqual(titles('208'), ['File:Danish passport.jpg'])        # several P1001: still Denmark
+        self.assertEqual(titles('304'), [])
         self.assertEqual(titles('832'), ['File:Jersey passport.jpg'])
         self.assertIn('Category:Faroese passports', fp.category_titles(fp.load_places()[234], {}))
         self.assertIn('Category:Passports of the Faroe Islands', fp.category_titles(fp.load_places()[234], {}))
@@ -441,7 +542,14 @@ class Flow(Base):
         self.assertTrue(de['File:German passport front.png']['ok'])          # CC0
         self.assertFalse(de['File:Reisepass Deutschland.jpg']['ok'])         # GFDL
         self.assertEqual([x['ok'] for x in c['candidates']['410']], [False])  # CC BY 1.0
-        self.assertEqual([x['ok'] for x in c['candidates']['124']], [False])  # fair use
+        # fair use from Wikidata; Commons only fills the 2 slots left, best names first
+        self.assertEqual([(x['title'], x['ok']) for x in c['candidates']['124']],
+                         [('File:Canadian passport.jpg', False), ('File:Canada passport cover 2019.jpg', True),
+                          ('File:Canada passport front.jpg', True)])
+        self.assertNotIn('File:Canada passport cover old.jpg', self.fake.requested('imageinfo'))
+        # a P18 that redirects: the file behind it is the candidate, the asked title is kept
+        self.assertEqual([(x['title'], x.get('asked'), x['ok']) for x in c['candidates']['840']],
+                         [('File:US passport data page.jpg', 'File:US passport.jpg', True)])
         self.assertEqual(c['candidates']['4'], [])                            # nothing anywhere
         self.assertEqual(titles('412'), ['File:Kosovo passport cover.jpg'])   # iso2 null did not crash
         # only licence-passing candidates were downloaded, all with the User-Agent
@@ -453,21 +561,29 @@ class Flow(Base):
         self.assertIn('File:French passport cover.jpg', sheet)
         self.assertNotIn('diplomatic passport.jpg', sheet)
         self.assertNotIn('Reisepass', sheet)                                  # failed licence: not shown
+        self.assertIn('현행 디자인', sheet)
+        self.assertIn('작가(Artist) 표기가 없습니다', sheet)                   # UK cover: Credit is not the author
+        snip = {k: json.loads(html.unescape(v)) for k, v in
+                re.findall(r'<textarea readonly>&quot;(\d+)&quot;: (\{.*?\})</textarea>', sheet)}
+        self.assertEqual({k: snip['250'][k] for k in ('title', 'qid', 'item')},
+                         {'title': 'File:French passport cover.jpg', 'qid': 'Q9001', 'item': 'French passport'})
+        self.assertNotIn('qid', snip['276'])                                  # Commons file: no item
         # nothing is adopted before a person has decided
         self.assertEqual(fp.apply(), 0)
         self.assertEqual(json.loads(self.data_bytes())['PASSPORT'], {})
         self.assertEqual(os.listdir(fp.ASSETS), [])
 
         sha = lambda t: hashlib.sha1(self.fake.files[t]['img']).hexdigest()
+        self.assertEqual(snip['250']['sha1'], sha('File:French passport cover.jpg'))
         review = {
-            '250': {'title': 'File:French passport cover.jpg', 'ok': True, 'crop': [100, 150, 800, 1200],
-                    'sha1': sha('File:French passport cover.jpg'), 'note': '파란 배경을 잘라 냄'},
+            '250': dict(snip['250'], crop=[100, 150, 800, 1200], note='파란 배경을 잘라 냄'),   # as pasted from the sheet
             '208': {'title': 'File:Danish_passport.jpg', 'ok': True, 'crop': None},
             '234': {'title': 'File:Faroese passport.jpg', 'ok': True, 'crop': None},
             '826': {'title': 'File:UK passport cover.jpg', 'ok': True, 'crop': None},
             '832': {'title': 'File:Jersey passport.jpg', 'ok': False, 'reason': '신원 정보면'},
             '554': {'title': 'File:New Zealand passport.jpg', 'ok': True, 'crop': None, 'sha1': '0' * 40},
             '410': {'title': 'File:South Korean passport cover.jpg', 'ok': True, 'crop': None},
+            '840': {'title': 'File:US passport data page.jpg', 'ok': False, 'reason': '신원 정보면'},
         }
         with open(fp.REVIEW, 'w', encoding='utf-8') as f:
             json.dump(review, f, ensure_ascii=False)
@@ -494,14 +610,15 @@ class Flow(Base):
         self.assertEqual(fr['license'], 'CC BY-SA 4.0')
         self.assertEqual(fr['license_url'], 'https://creativecommons.org/licenses/by-sa/4.0')
         self.assertEqual(fr['changes'], '잘라 냄, 크기 조정')
-        self.assertEqual(fr['restrictions'], 'insignia')
+        self.assertEqual(fr['restrictions'], 'trademarked|insignia')          # as Commons gives it
+        self.assertEqual(pp['826']['artist'], '')                             # never 'Own work' from Credit
         self.assertEqual(pp['208']['changes'], '크기 조정')
         self.assertEqual(pp['638'], dict(fr, via='sov:250'))                  # Réunion shows France's cover
         self.assertEqual(pp['234']['file'], 'passports/234.webp')             # Faroe: own, not Denmark's
         self.assertEqual(pp['234']['license'], 'CC BY 2.0')
         self.assertEqual(pp['304']['file'], 'passports/208.webp')
         self.assertEqual(pp['832']['file'], 'passports/826.webp')             # rejected -> sovereign
-        for k in ('276', '412', '554', '184', '410', '124', '4'):             # unreviewed / refused / none
+        for k in ('276', '412', '554', '184', '410', '124', '4', '840'):      # unreviewed / refused / none
             self.assertNotIn(k, pp)
 
         self.assertEqual(sorted(os.listdir(fp.ASSETS)), ['208.webp', '234.webp', '250.webp', '826.webp'])
@@ -523,17 +640,19 @@ class Flow(Base):
         for name, size in (('208.webp', (405, 720)), ('234.webp', (508, 720))):
             with Image.open(os.path.join(fp.ASSETS, name)) as im:
                 self.assertEqual(im.size, size)
-        q = self.state()['apply']['adopted']['208']['quality']
-        self.assertTrue(fp.MIN_QUALITY <= q <= fp.QUALITY)
+        adopted = self.state()['apply']['adopted']
+        self.assertTrue(fp.MIN_QUALITY <= adopted['208']['quality'] <= fp.QUALITY)
+        self.assertEqual((adopted['250']['qid'], adopted['208']['qid']), ('Q9001', None))
 
         text = self.report_text()
         self.assertIn('| 채택 (자체 이미지) | 4 |', text)
         self.assertIn('| 채택 (주권국 이미지로 대체) | 3 |', text)
-        self.assertIn('| 없음 | 7 |', text)
+        self.assertIn('| 없음 | 8 |', text)
         self.assertIn('신원 정보면', text)
         self.assertIn('sha1 불일치', text)
         self.assertIn('2.0 미만 버전 (CC BY 1.0)', text)
-        self.assertIn('insignia', text)
+        self.assertIn('| trademarked, insignia | [Q9001](https://www.wikidata.org/wiki/Q9001) |', text)
+        self.assertIn('작가 표기 없음, 수동 확인 필요', text)
         self.assertIn('sha1 없이 승인', text)                                # 208, 234, 826 carry no sha1
 
         # the next collect skips the rejected Jersey file and tries its Commons categories instead
@@ -545,7 +664,36 @@ class Flow(Base):
         self.assertIn('Category:Jersey passports', self.fake.requested('categoryinfo'))
         self.assertEqual([(x['title'], x['verdict']) for x in c['candidates']['250']],
                          [('File:French passport cover.jpg', 'approved')])
+        self.assertEqual(c['items']['250']['qid'], 'Q9001')                    # kept from the verdict
         self.assertEqual([x['verdict'] for x in c['candidates']['276']], ['unreviewed'] * 3)
+        # the rejected data page does not come back through its redirect; Commons is tried instead
+        self.assertEqual([(x['title'], x['ok'], x['verdict']) for x in c['candidates']['840']],
+                         [('File:US passport cover.jpg', True, 'unreviewed')])
+        self.assertIn('Category:Passports of the United States', self.fake.requested('categoryinfo'))
+
+    def test_failed_download_keeps_shipped_image(self):
+        self.assertEqual(fp.collect(), 0)
+        with open(fp.REVIEW, 'w', encoding='utf-8') as f:
+            json.dump({'250': {'title': 'File:French passport cover.jpg', 'ok': True, 'crop': None},
+                       '208': {'title': 'File:Danish passport.jpg', 'ok': True, 'crop': None}}, f)
+        self.assertEqual(fp.apply(), 0)
+        with open(os.path.join(fp.ASSETS, '250.webp'), 'rb') as f:
+            shipped = f.read()
+        before = self.data_bytes()
+        self.assertEqual(set(json.loads(before)['PASSPORT']), {'250', '638', '208', '234', '304'})
+        shutil.rmtree(os.path.join(fp.WORK, 'img'))                          # a fresh machine: no image cache
+        self.fake.fail.add(thumb_of('File:French passport cover.jpg'))       # upload.wikimedia.org answers 503
+        sleep, fp.time.sleep = fp.time.sleep, lambda s: None
+        try:
+            self.assertEqual(fp.apply(), 1)
+        finally:
+            fp.time.sleep = sleep
+        self.assertEqual(self.data_bytes(), before)                           # PASSPORT, Réunion included, kept
+        with open(os.path.join(fp.ASSETS, '250.webp'), 'rb') as f:
+            self.assertEqual(f.read(), shipped)
+        self.assertEqual(sorted(os.listdir(fp.ASSETS)), ['208.webp', '250.webp'])
+        self.assertEqual(self.state()['apply']['status'], 'error')
+        self.assertIn('적용 중단', self.report_text())
 
 
 if __name__ == '__main__':

@@ -2,12 +2,12 @@
 
 - 작성일: 2026-09-24
 - 마지막 수집(collect): 2026-09-24, 네트워크 차단으로 중단
-- 마지막 적용(apply): 실행 기록 없음
+- 마지막 적용(apply): 2026-09-24, 완료
 - 스크립트: `pipeline/fetch_passports.py`, 검수 기록: `pipeline/passports_review.json`
 
 ## 수집하지 못함: 네트워크 차단
 
-이번 collect는 Wikimedia 서버에 접속하지 못해 첫 요청(식별자 확인)에서 멈췄습니다. 후보를 하나도 모으지 못했고, 이미지를 내려받지 않았습니다. `data/appdata.json`과 `assets/passports/`는 건드리지 않았습니다.
+이번 collect는 첫 요청인 식별자 확인에서 `www.wikidata.org`에 접속하지 못해 멈췄습니다. 후보를 하나도 모으지 못했고, 이미지를 내려받지 않았습니다. `data/appdata.json`과 `assets/passports/`는 건드리지 않았습니다.
 
 접속하지 못한 호스트:
 
