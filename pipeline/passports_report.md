@@ -1,14 +1,14 @@
 # 여권 표지 이미지 보고서
 
 - 작성일: 2026-09-24
-- 마지막 수집(collect): 2026-09-24, 오류로 중단
+- 마지막 수집(collect): 2026-09-24, Wikidata 식별자 확인 실패로 중단
 - 마지막 적용(apply): 2026-09-24, 완료
 - 스크립트: `pipeline/fetch_passports.py`, 검수 기록: `pipeline/passports_review.json`
 
-## 수집 중단: 오류로 중단
+## 수집 중단: Wikidata 식별자 확인 실패로 중단
 
 ```
-gave up after retries: https://www.wikidata.org/w/api.php
+Q41438 is labelled "Jan Gajek", expected "passport"
 ```
 
 후보를 채택하지 않았고 `data/appdata.json`은 건드리지 않았습니다.
