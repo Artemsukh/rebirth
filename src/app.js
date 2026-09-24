@@ -22,7 +22,7 @@ const RATE_D = WR.deaths / (365 * 86400);
 /* ================= language ================= */
 /* S is the text table for the page language (src/i18n.js); names come from the data columns */
 const LANG_KEY = 'rebirth-simulator-lang';
-let LANG = 'ko', S = I18N.ko;
+let LANG = 'en', S = I18N.en;
 const nm = L => L[LANG] || L.en;
 /* the line under the big name: the English name, except on the English page */
 const nmSub = L => (LANG === 'en' ? '' : L.en);
@@ -1309,14 +1309,13 @@ function lookup(code) {
 }
 
 /* ================= language switch ================= */
-/* ?lang= in the address, then the last choice, then the browser's languages; English otherwise */
+/* ?lang= in the address, then the visitor's last choice; English otherwise (the browser's
+   language is not consulted, so a first visit always opens in English) */
 function pickLang() {
   const ok = l => (l && I18N.LANGS.indexOf(l) >= 0 ? l : null);
   let l = null;
   try { l = ok(new URLSearchParams(location.search).get('lang')); } catch (e) { /* no URLSearchParams */ }
   if (!l) { try { l = ok(localStorage.getItem(LANG_KEY)); } catch (e) { /* storage blocked */ } }
-  const nav = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
-  for (let i = 0; !l && i < nav.length; i++) l = ok(String(nav[i]).slice(0, 2).toLowerCase());
   return l || 'en';
 }
 /* the Japanese web font is large, so its stylesheet is only fetched once Japanese is chosen */

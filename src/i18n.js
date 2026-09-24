@@ -1,4 +1,5 @@
-/* Page text in four languages: I18N.ko, .en, .ja, .es all have the same keys.
+/* Page text in four languages: I18N.en, .ja, .es, .ko all have the same keys. LANGS is the
+   order of the switcher (body.html lists its buttons in the same order); English is the default.
    Plain strings are set with textContent; keys ending in Html are markup written here and are set
    with innerHTML. In body.html, data-t names the key for an element's text, data-th for its markup
    and data-tp for its placeholder. Functions get numbers and dates already formatted for the
@@ -547,5 +548,5 @@ const es = {
   clearArm: 'Pulsa otra vez para borrar', clearArmSay: 'Para borrar los registros, pulsa otra vez.', cleared: 'Registros borrados.'
 };
 
-return { LANGS: ['ko', 'en', 'ja', 'es'], ko, en, ja, es };
+return { LANGS: ['en', 'ja', 'es', 'ko'], en, ja, es, ko };
 })();

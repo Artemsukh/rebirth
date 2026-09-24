@@ -68,12 +68,12 @@ for name, s in (('i18n.js', i18n), ('app.js', app), ('topo.js', tj)):
         sys.exit(name + ' contains </script')
 
 html = f'''<!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rebirth Simulator</title>
-<meta name="description" content="2026년에 태어날 아기 1억 3,250만 명 가운데 한 명으로 무작위로 다시 태어나 봅니다. UN 세계인구전망 2024와 IMF 자료로 236개 국가·지역의 출생 확률, 1인당 GDP, 발전 단계, 기대수명을 보여 줍니다.">
+<meta name="description" content="Be born again at random as one of the 132.5 million babies of 2026. Birth odds, GDP per head, development tier and life expectancy for 236 countries and territories, from UN World Population Prospects 2024 and IMF data.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050716">
 <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rebirth Simulator</title>
-<meta name="description" content="2026년에 태어날 아기 1억 3,250만 명 가운데 한 명으로 무작위로 다시 태어나 봅니다. UN 세계인구전망 2024와 IMF 자료로 236개 국가·지역의 출생 확률, 1인당 GDP, 발전 단계, 기대수명을 보여 줍니다.">
+<meta name="description" content="Be born again at random as one of the 132.5 million babies of 2026. Birth odds, GDP per head, development tier and life expectancy for 236 countries and territories, from UN World Population Prospects 2024 and IMF data.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050716">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,10 +24,10 @@
 <span class="sr-only" id="langL" data-t="langLabel"></span>
 <div class="lang-track" id="langTrack">
 <span class="lang-thumb" aria-hidden="true"></span>
-<label><input type="radio" name="lang" value="ko"><span lang="ko">한국어</span></label>
 <label><input type="radio" name="lang" value="en"><span lang="en">English</span></label>
 <label><input type="radio" name="lang" value="ja"><span lang="ja">日本語</span></label>
 <label><input type="radio" name="lang" value="es"><span lang="es">Español</span></label>
+<label><input type="radio" name="lang" value="ko"><span lang="ko">한국어</span></label>
 </div>
 </div>
 </div>
@@ -733,7 +733,7 @@ reopened: (s, n, t) => 'Se ha vuelto a abrir el registro ' + s + '. ' + n + ', e
 looked: (n, t) => 'Mostrando ' + n + '. Etapa de desarrollo: ' + t + '.',
 clearArm: 'Pulsa otra vez para borrar', clearArmSay: 'Para borrar los registros, pulsa otra vez.', cleared: 'Registros borrados.'
 };
-return { LANGS: ['ko', 'en', 'ja', 'es'], ko, en, ja, es };
+return { LANGS: ['en', 'ja', 'es', 'ko'], en, ja, es, ko };
 })();
 (() => {
 'use strict';
@@ -753,7 +753,7 @@ LOCS.forEach(l => { TOT.births += l.births; TOT.pop += l.pop; });
 const RATE_B = WR.births / (365 * 86400);
 const RATE_D = WR.deaths / (365 * 86400);
 const LANG_KEY = 'rebirth-simulator-lang';
-let LANG = 'ko', S = I18N.ko;
+let LANG = 'en', S = I18N.en;
 const nm = L => L[LANG] || L.en;
 const nmSub = L => (LANG === 'en' ? '' : L.en);
 const contName = i => (LANG === 'ko' ? CONT[i] : D.NAMES[LANG].CONT[i]);
@@ -1932,8 +1932,6 @@ const ok = l => (l && I18N.LANGS.indexOf(l) >= 0 ? l : null);
 let l = null;
 try { l = ok(new URLSearchParams(location.search).get('lang')); } catch (e) { /* no URLSearchParams */ }
 if (!l) { try { l = ok(localStorage.getItem(LANG_KEY)); } catch (e) { /* storage blocked */ } }
-const nav = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
-for (let i = 0; !l && i < nav.length; i++) l = ok(String(nav[i]).slice(0, 2).toLowerCase());
 return l || 'en';
 }
 const JP_FONT = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap';
