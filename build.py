@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the single-file app: src/{style.css, body.html, app.js} + data + topology.
+"""Assemble the single-file app: src/{style.css, body.html, i18n.js, app.js} + data + topology.
 
 Flags under assets/flags/ are not inlined; the page loads the one it needs as a
 same-origin static file (GitHub Pages serves it next to index.html)."""
@@ -54,6 +54,8 @@ def json_script(obj):
 
 css = min_css(read(os.path.join(SRC, 'style.css')))
 body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('\n') if l.strip())
+# page text in four languages, read by app.js (it must come first in the same script)
+i18n = min_js(read(os.path.join(SRC, 'i18n.js')))
 app = min_js(read(os.path.join(SRC, 'app.js')))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))
 topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='utf-8'))
@@ -61,7 +63,7 @@ topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='u
 # (pipeline/check_topo.js compares them) in a seventh of the size
 tj = min_js(read(os.path.join(SRC, 'topo.js')))
 
-for name, s in (('app.js', app), ('topo.js', tj)):
+for name, s in (('i18n.js', i18n), ('app.js', app), ('topo.js', tj)):
     if '</script' in s.lower():
         sys.exit(name + ' contains </script')
 
@@ -90,6 +92,7 @@ html = f'''<!doctype html>
 {tj}
 </script>
 <script>
+{i18n}
 {app}
 </script>
 </body>

@@ -18,11 +18,21 @@ const TOT = { births: 0, pop: 0 };
 LOCS.forEach(l => { TOT.births += l.births; TOT.pop += l.pop; });
 const RATE_B = WR.births / (365 * 86400);
 const RATE_D = WR.deaths / (365 * 86400);
+
+/* ================= language ================= */
+/* S is the text table for the page language (src/i18n.js); names come from the data columns */
+const LANG_KEY = 'rebirth-simulator-lang';
+let LANG = 'ko', S = I18N.ko;
+const nm = L => L[LANG] || L.en;
+/* the line under the big name: the English name, except on the English page */
+const nmSub = L => (LANG === 'en' ? '' : L.en);
+const contName = i => (LANG === 'ko' ? CONT[i] : D.NAMES[LANG].CONT[i]);
+const subName = i => (LANG === 'ko' ? SUB[i] : D.NAMES[LANG].SUB[i]);
 /* source notes such as 'WB 2024', 'UN 2023', 'WB' (World Bank, same year) */
-function noteKo(n) {
+function note(n) {
   if (!n) return '';
   const [src, yr] = n.split(' ');
-  return ({ WB: '세계은행', UN: 'UN', IMF: 'IMF' }[src] || src) + (yr ? ' ' + yr + '년' : '') + ' 값';
+  return S.note(src, yr);
 }
 const REDUCED = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
 
@@ -30,7 +40,6 @@ const REDUCED = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)
 /* computed for today: IMF advanced economies (and their territories), UN least developed
    countries until their graduation date, everything else developing */
 const TIERS = ['ADV', 'DEV', 'LDC'];
-const TIER_KO = { ADV: '선진국', DEV: '개발도상국', LDC: '최저개발국' };
 const TIER_PIPS = { ADV: 3, DEV: 2, LDC: 1 };
 const ADV = new Set(D.CLASS.adv);
 function tierOf(L, now = new Date()) {
@@ -46,7 +55,8 @@ function largestRemainder(exact, total) {
   exact.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { fl[i]++; left--; } });
   return fl;
 }
-/* counts and birth shares per tier; shares are rounded so the three add up to 100 */
+/* counts and birth shares per tier; shares are rounded so the three add up to 100
+   (p2: fraction with two decimals of a percent, p1: babies out of 100 with one decimal) */
 let tierCache = null;
 function tierStats() {
   const day = new Date().toISOString().slice(0, 10);
@@ -56,7 +66,7 @@ function tierStats() {
   const share = {}, p2 = {}, p1 = {};
   const h = largestRemainder(TIERS.map(t => births[t] / TOT.births * 10000), 10000);
   const d = largestRemainder(TIERS.map(t => births[t] / TOT.births * 1000), 1000);
-  TIERS.forEach((t, i) => { share[t] = births[t] / TOT.births; p2[t] = (h[i] / 100).toFixed(2); p1[t] = (d[i] / 10).toFixed(1); });
+  TIERS.forEach((t, i) => { share[t] = births[t] / TOT.births; p2[t] = h[i] / 10000; p1[t] = d[i] / 10; });
   tierCache = { day, count, births, share, p2, p1 };
   return tierCache;
 }
@@ -93,55 +103,68 @@ function drawOne() {
 }
 
 /* ================= formatting ================= */
-const NF = new Intl.NumberFormat('ko-KR');
-const fmtInt = n => NF.format(Math.round(n));
+/* numbers and dates follow the page language (S.locale); formatters are kept per locale */
+const NFS = new Map();
+function nf(o) {
+  const k = S.locale + JSON.stringify(o);
+  if (!NFS.has(k)) NFS.set(k, new Intl.NumberFormat(S.locale, o));
+  return NFS.get(k);
+}
+const fmtInt = n => nf({ maximumFractionDigits: 0 }).format(Math.round(n));
+const fx = (v, d) => nf({ minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+const pctF = (p, d) => nf({ style: 'percent', minimumFractionDigits: d, maximumFractionDigits: d }).format(p);
 function roundSig(n, sig) {
   if (n < 100) return Math.round(n);
   const p = Math.pow(10, Math.floor(Math.log10(n)) - sig + 1);
   return Math.round(n / p) * p;
 }
-function koUnit(n, sig = 3) {
-  const r = roundSig(n, sig);
-  if (r < 1e4) return fmtInt(r);
-  const eok = Math.floor(r / 1e8), man = Math.round((r - eok * 1e8) / 1e4);
-  return (eok ? fmtInt(eok) + '억' : '') + (eok && man ? ' ' : '') + (man ? fmtInt(man) + '만' : '');
+/* a head count in words: 1억 3,250만, 1億3,250万, 132.5 million, 132,5 millones */
+function big(n, sig = 3) {
+  const r = roundSig(n, sig), U = S.units;
+  if (U.cjk) {
+    if (r < 1e4) return fmtInt(r);
+    const eok = Math.floor(r / 1e8), man = Math.round((r - eok * 1e8) / 1e4);
+    return (eok ? fmtInt(eok) + U.cjk[0] : '') + (eok && man ? U.sep : '') + (man ? fmtInt(man) + U.cjk[1] : '');
+  }
+  if (r < 1e6) return fmtInt(r);
+  const [w, d] = r >= 1e9 ? [U.words[0], 1e9] : [U.words[1], 1e6];
+  const v = r / d;
+  return nf({ maximumFractionDigits: 3 }).format(v) + ' ' + w[v === 1 ? 0 : 1];
 }
 function people(n, sig = 3) {
-  if (n < 1) return '1명이 채 안 됩니다';
-  const s = koUnit(n, sig);
-  return /[만억]$/.test(s) ? s + ' 명' : s + '명';
+  return n < 1 ? S.lessThanOne : S.people(big(n, sig), n);
 }
-function koCompact(n) {
-  if (n >= 1e8) return (n / 1e8).toFixed(1) + '억';
-  if (n >= 1e6) return fmtInt(n / 1e4) + '만';
-  if (n >= 1e4) return (n / 1e4).toFixed(1) + '만';
+/* table cells: 1.3억 and 5,280만 (억/万 in Japanese), 132.5M and 132,5 M elsewhere */
+function compact(n) {
+  const U = S.units;
+  if (!U.cjk) return n < 1e4 ? fmtInt(n) : nf({ notation: 'compact', maximumFractionDigits: 1 }).format(n);
+  if (n >= 1e8) return fx(n / 1e8, 1) + U.cjk[0];
+  if (n >= 1e6) return fmtInt(n / 1e4) + U.cjk[1];
+  if (n >= 1e4) return fx(n / 1e4, 1) + U.cjk[1];
   return fmtInt(n);
 }
 function fmtPct(p) {
   const v = p * 100;
-  if (v >= 10) return v.toFixed(1) + '%';
-  if (v >= 0.1) return v.toFixed(2) + '%';
-  if (v >= 0.01) return v.toFixed(3) + '%';
-  return String(Number(v.toPrecision(2))) + '%';
+  if (v >= 10) return pctF(p, 1);
+  if (v >= 0.1) return pctF(p, 2);
+  if (v >= 0.01) return pctF(p, 3);
+  return nf({ style: 'percent', maximumSignificantDigits: 2 }).format(p);
 }
 function oneIn(p) {
-  const n = 1 / p;
-  if (n < 10) return '약 ' + (Math.round(n * 10) / 10).toFixed(1) + '명 중 1명';
-  return '약 ' + people(n, 2) + ' 중 1명';
+  const n = 1 / p, c = n < 10 ? fx(Math.round(n * 10) / 10, 1) : big(n, 2);
+  return S.oneIn(c, S.people(c, n));
 }
 function fmtSmall(v) {
-  if (v >= 1) return v.toFixed(1);
-  if (v >= 0.01) return v.toFixed(2);
-  return String(Number(v.toPrecision(1)));
+  if (v >= 1) return fx(v, 1);
+  if (v >= 0.01) return fx(v, 2);
+  return nf({ maximumSignificantDigits: 1 }).format(v);
 }
 const usd = v => '$' + fmtInt(v);
-const intl = v => fmtInt(v) + ' 국제달러';
-const sexKo = s => (s === 'M' ? '남자' : '여자');
-const hasJong = w => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 !== 0; };
-const topic = w => w + (hasJong(w) ? '은' : '는');
-const withWa = w => w + (hasJong(w) ? '과' : '와');
-function todayKo(t) { const d = t ? new Date(t) : new Date(); return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
-function dateKo(iso) { const [y, m, d] = iso.split('-').map(Number); return y + '년 ' + m + '월 ' + d + '일'; }
+const intl = v => S.intl(fmtInt(v));
+const sexName = s => S.sex[s];
+const DATE_OPT = { year: 'numeric', month: 'long', day: 'numeric' };
+function today(t) { return new Intl.DateTimeFormat(S.locale, DATE_OPT).format(t ? new Date(t) : new Date()); }
+function dateOf(iso) { return new Intl.DateTimeFormat(S.locale, Object.assign({ timeZone: 'UTC' }, DATE_OPT)).format(new Date(iso + 'T00:00:00Z')); }
 function coordText(lat, lng) {
   return Math.abs(lat).toFixed(1) + '°' + (lat >= 0 ? 'N' : 'S') + ' ' + Math.abs(lng).toFixed(1) + '°' + (lng >= 0 ? 'E' : 'W');
 }
@@ -202,9 +225,8 @@ function rankPos(vals, ws, v, higher) {
   return tot ? (worse + eq / 2) / tot : 0.5;
 }
 function rankText(r) {
-  const top = 1 - r;
-  if (top <= 0.5) return '상위 ' + Math.max(1, Math.ceil(top * 100 - 1e-9)) + '%';
-  return '하위 ' + Math.max(1, Math.ceil(r * 100 - 1e-9)) + '%';
+  const top = 1 - r, pc = x => pctF(Math.max(1, Math.ceil(x * 100 - 1e-9)) / 100, 0);
+  return top <= 0.5 ? S.top(pc(top)) : S.bottom(pc(r));
 }
 /* the two headline metrics: life expectancy and GDP per head (nominal US$, PPP below).
    Draws compare with same-sex births, lookups with all births. */
@@ -312,22 +334,24 @@ function flagChip(el, L) {
   if (!L) return;
   const img = new Image();
   img.src = 'assets/flags/' + L.iso2.toLowerCase() + '.svg';
-  img.alt = L.ko + ' 국기';
+  img.alt = S.flagOf(nm(L));
   img.decoding = 'async';
   img.onerror = () => {
     const s = document.createElement('span');
     s.className = 'chip-code';
     s.setAttribute('role', 'img');
-    s.setAttribute('aria-label', L.ko + ' 국기');
+    s.setAttribute('aria-label', img.alt);
     s.textContent = L.iso2;
     img.replaceWith(s);
   };
   el.appendChild(img);
 }
 
-/* font size by name length, then shrink if the name still overflows its box */
-function nameClass(ko) { const n = [...ko].length; return n <= 5 ? '' : n <= 8 ? 'n2' : 'n3'; }
+/* font size by name length (Latin letters are narrower than Hangul or kana, so the limits are
+   per language), then shrink if the name still overflows its box */
+function nameClass(name) { const n = [...name].length, [a, b] = S.nameFit; return n <= a ? '' : n <= b ? 'n2' : 'n3'; }
 function fitName() {
+  fitTier();
   const el = $('#idName');
   el.style.fontSize = '';
   if (el.classList.contains('empty') || !el.clientWidth) return;
@@ -337,19 +361,27 @@ function fitName() {
   while (f > 18 && over()) { f -= 2; el.style.fontSize = f + 'px'; }
   if (f === f0) el.style.fontSize = '';
 }
+/* the tier name stays on one line: Least developed and Menos adelantado are shrunk to fit */
+function fitTier() {
+  const el = $('#vTier');
+  el.style.fontSize = '';
+  if (!el.clientWidth) return;
+  let f = parseFloat(getComputedStyle(el).fontSize);
+  while (f > 18 && el.scrollWidth > el.clientWidth + 1) { f -= 2; el.style.fontSize = f + 'px'; }
+}
 
 function tierDesc(L) {
   const T = tierStats(), t = tierOf(L), sov = L.sov ? BY.get(L.sov) : null;
   let s;
-  if (L.code === 492) s = 'IMF 비회원, 프랑스와 같은 단계로 분류';
-  else if (sov && (L.code === 184 || L.code === 570)) s = withWa(sov.ko) + ' 자유연합 관계, 본국의 단계를 따릅니다';
-  else if (sov) s = sov.ko + '의 속령, 본국의 단계를 따릅니다';
-  else if (t === 'ADV') s = 'IMF 선진경제 ' + D.CLASS.adv.length + '곳 가운데 한 곳';
-  else if (t === 'LDC') s = 'UN 최저개발국 ' + T.count.LDC + '곳 가운데 한 곳';
-  else s = '선진국도 최저개발국도 아닌 ' + T.count.DEV + '곳 가운데 한 곳';
+  if (L.code === 492) s = S.tdMonaco;
+  else if (sov && (L.code === 184 || L.code === 570)) s = S.tdAssoc(nm(sov), sov.code);
+  else if (sov) s = S.tdTerr(nm(sov), sov.code);
+  else if (t === 'ADV') s = S.tdAdv(D.CLASS.adv.length);
+  else if (t === 'LDC') s = S.tdLdc(T.count.LDC);
+  else s = S.tdDev(T.count.DEV);
   const g = D.CLASS.ldc[L.sov || L.code];
-  if (g && t === 'LDC') s += ' (' + dateKo(g) + ' 졸업 예정)';
-  else if (g && t === 'DEV') s += ' (' + dateKo(g) + ' 최저개발국 졸업)';
+  if (g && t === 'LDC') s += S.tdSoon(dateOf(g));
+  else if (g && t === 'DEV') s += S.tdDone(dateOf(g));
   return s;
 }
 
@@ -372,27 +404,28 @@ function renderStage(st, opt = {}) {
 
   /* identity */
   flagChip($('#chip'), L);
-  $('#kindL').textContent = st.type === 'lookup' ? '국가 정보 조회' : '2026년 출생 기록';
+  $('#kindL').textContent = st.type === 'lookup' ? S.kindLookup : S.kindDraw;
   const no = $('#kindNo');
-  if (draw) roll(no, '제 ' + fmtInt(st.serial) + '호', 0, spd, animate);
-  else no.textContent = empty ? '제 — 호' : '';
-  const nm = $('#idName');
-  nm.className = 'id-name' + (empty ? ' empty' : ' ' + nameClass(L.ko));
-  nm.textContent = empty ? '다시 태어나기를 누르면 태어날 나라가 정해집니다.' : L.ko;
-  $('#idSex').textContent = empty ? '' : draw ? sexKo(st.sex) : '남녀 전체';
-  $('#idEn').textContent = empty ? '' : L.en;
+  if (draw) roll(no, S.serial(fmtInt(st.serial)), 0, spd, animate);
+  else no.textContent = empty ? S.serialEmpty : '';
+  const name = $('#idName');
+  name.className = 'id-name' + (empty ? ' empty' : ' ' + nameClass(nm(L)));
+  name.textContent = empty ? S.emptyName : nm(L);
+  const sex = empty ? '' : draw ? sexName(st.sex) : S.both;
+  $('#idSex').textContent = sex;
+  $('#idEn').textContent = empty ? '' : nmSub(L);
   $('#idEn').className = 'id-en fx-sm';
-  $('#idGeo').innerHTML = empty ? '' : esc(SUB[L.sub]) + '<span class="coord">' + coordText(L.lat, L.lng) + '</span>';
+  $('#idGeo').innerHTML = empty ? '' : esc(subName(L.sub)) + '<span class="coord">' + coordText(L.lat, L.lng) + '</span>';
   $('#idGeo').className = 'id-geo fx-sm';
   $('#copyBtn').hidden = empty;
   const dash = '—';
-  const fact = (dt, dd, sm) => '<div class="fact"><dt>' + dt + '</dt><dd>' + dd + (sm ? '<small class="fx-sm">' + sm + '</small>' : '') + '</dd></div>';
+  const fact = (dt, dd, sm) => '<div class="fact"><dt>' + esc(dt) + '</dt><dd>' + esc(dd) + (sm ? '<small class="fx-sm">' + esc(sm) + '</small>' : '') + '</dd></div>';
   $('#facts').innerHTML = empty
-    ? fact('성별', dash) + fact('인구', dash) + fact('중위연령', dash) + fact('합계출산율', dash)
-    : fact('성별', draw ? sexKo(st.sex) : '남녀 전체', '여아 100명당 남아 ' + Math.round(L.srb * 100) + '명') +
-      fact('인구', people(L.pop), '세계의 ' + fmtPct(L.pop / TOT.pop)) +
-      fact('중위연령', L.med.toFixed(1) + '세', '세계 ' + WR.med.toFixed(1) + '세') +
-      fact('합계출산율', L.tfr.toFixed(2) + '명', '세계 ' + WR.tfr.toFixed(2) + '명');
+    ? fact(S.fSex, dash) + fact(S.fPop, dash) + fact(S.fMed, dash) + fact(S.fTfr, dash)
+    : fact(S.fSex, sex, S.srb(fmtInt(L.srb * 100))) +
+      fact(S.fPop, people(L.pop), S.ofWorld(fmtPct(L.pop / TOT.pop))) +
+      fact(S.fMed, S.years(fx(L.med, 1)), S.world(S.years(fx(WR.med, 1)))) +
+      fact(S.fTfr, S.kids(fx(L.tfr, 2)), S.world(S.kids(fx(WR.tfr, 2))));
 
   /* read-outs */
   const bl = $('#tierBarL');
@@ -410,27 +443,26 @@ function renderStage(st, opt = {}) {
     $('#sProb').className = 'p-sub fx-sm';
 
     const vg = $('#vGdp'), sg = $('#sGdp');
-    $('#wGdp').textContent = '세계 ' + usd(WR.gdpN);
+    $('#wGdp').textContent = S.world(usd(WR.gdpN));
     if (M.gdp.v == null) {
       vg.classList.add('na');
-      vg.textContent = '자료 없음';
+      vg.textContent = S.noData;
       $('#nGdp').textContent = '';
       sg.className = 'p-sub memo fx-sm';
       const nNa = LOCS.filter(l => l.gdpN == null).length;
-      sg.textContent = 'IMF 세계경제전망에 환율 기준 값이 없는 ' + nNa + '곳 가운데 한 곳입니다.' +
-        (L.gdp == null ? '' : ' 구매력 기준 ' + intl(L.gdp) + (L.gdpNote ? '(' + noteKo(L.gdpNote) + ')' : '') + '.');
+      sg.textContent = S.gdpNa(nNa, L.gdp == null ? '' : intl(L.gdp) + (L.gdpNote ? S.paren(note(L.gdpNote)) : ''));
       setRank('rGdp', null);
       $('#kGdp').textContent = '';
     } else {
       vg.classList.remove('na');
       roll(vg, usd(M.gdp.v), 150, spd, animate);
-      $('#nGdp').textContent = L.gdpNNote ? noteKo(L.gdpNNote) + ', 환율 기준' : '2025년, 환율 기준';
+      $('#nGdp').textContent = S.gdpLabel(note(L.gdpNNote));
       sg.className = 'p-sub fx-sm';
       sg.textContent = '';
-      if (M.gdp.ppp == null) sg.textContent = '구매력 기준 값 없음';
+      if (M.gdp.ppp == null) sg.textContent = S.noPpp;
       else {
         const n = document.createElement('span');
-        sg.append('구매력 기준 ', n, ' 국제달러' + (L.gdpNote && L.gdpNote !== L.gdpNNote ? '(' + noteKo(L.gdpNote) + ')' : ''));
+        sg.append(S.ppp[0], n, S.ppp[1] + (L.gdpNote && L.gdpNote !== L.gdpNNote ? S.paren(note(L.gdpNote)) : ''));
         roll(n, fmtInt(M.gdp.ppp), 220, spd, animate);
       }
       setRank('rGdp', M.gdp.r);
@@ -438,12 +470,12 @@ function renderStage(st, opt = {}) {
     }
 
     $('#pips').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < TIER_PIPS[tier]));
-    $('#vTier').textContent = TIER_KO[tier];
+    $('#vTier').textContent = S.tier[tier];
     $('#dTier').textContent = tierDesc(L);
     $('#dTier').className = 'tier-desc fx-sm';
     $('#tierBar').innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
-    bl.innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '">' + TIER_KO[t] + ' ' + T.p2[t] + '%</span>').join('');
-    $('#sTier').innerHTML = '2026년 아기 100명 중 <b>' + T.p1[tier] + '명</b>이 이 단계의 나라에서 태어납니다.';
+    bl.innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
+    $('#sTier').innerHTML = S.tierSayHtml(fx(T.p1[tier], 1));
     $('#sTier').className = 'tier-say fx-sm';
 
     const vl = $('#vLife');
@@ -451,13 +483,13 @@ function renderStage(st, opt = {}) {
     const num = document.createElement('span');
     const unit = document.createElement('span');
     unit.className = 'unit';
-    unit.textContent = '세';
+    unit.textContent = S.lifeUnit;
     vl.append(num, unit);
-    roll(num, M.life.v.toFixed(1), 260, spd, animate);
+    roll(num, fx(M.life.v, 1), 260, spd, animate);
     setRank('rLife', M.life.r);
-    $('#wLife').textContent = '세계 ' + M.life.world.toFixed(1) + '세';
+    $('#wLife').textContent = S.world(S.years(fx(M.life.world, 1)));
     $('#kLife').textContent = rankText(M.life.r);
-    $('#fLife').textContent = draw ? '순위는 2026년 세계 ' + (st.sex === 'M' ? '남아' : '여아') + ' 출생아 가운데' : '순위는 2026년 세계 출생아(남녀 전체) 가운데';
+    $('#fLife').textContent = S.rankScope(draw ? st.sex : null);
   }
 
   fitName();
@@ -466,21 +498,16 @@ function renderStage(st, opt = {}) {
 }
 
 function recordText(st) {
-  const L = st.loc, draw = st.type === 'draw', M = metrics(st), lines = [];
-  if (draw) {
-    lines.push('Rebirth Simulator: 2026년 출생 기록 제 ' + fmtInt(st.serial) + '호, ' + todayKo(st.t));
-    lines.push(L.ko + '(' + SUB[L.sub] + '), ' + sexKo(st.sex));
-  } else {
-    lines.push('Rebirth Simulator: 국가 정보 조회, ' + todayKo());
-    lines.push(L.ko + '(' + SUB[L.sub] + '), 남녀 전체');
-  }
-  lines.push('이 나라에 태어날 확률 ' + fmtPct(M.share) + ', ' + oneIn(M.share));
-  const ppp = L.gdp == null ? '' : '(구매력 기준 ' + intl(L.gdp) + ')';
+  const L = st.loc, draw = st.type === 'draw', M = metrics(st), c = S.comma, lines = [];
+  lines.push('Rebirth Simulator: ' + (draw ? S.kindDraw + ' ' + S.serial(fmtInt(st.serial)) + c + today(st.t) : S.kindLookup + c + today()));
+  lines.push(nm(L) + S.paren(subName(L.sub)) + c + (draw ? sexName(st.sex) : S.both));
+  lines.push(S.kv(S.lbProb, fmtPct(M.share) + c + oneIn(M.share)));
+  const ppp = L.gdp == null ? '' : S.paren(S.pppShort + ' ' + intl(L.gdp));
   lines.push(M.gdp.v == null
-    ? '1인당 GDP 자료 없음' + ppp + ', 세계 ' + usd(WR.gdpN)
-    : '1인당 GDP ' + usd(M.gdp.v) + ppp + ', 세계 ' + usd(WR.gdpN) + ', ' + rankText(M.gdp.r));
-  lines.push('발전 단계 ' + TIER_KO[tierOf(L)]);
-  lines.push('기대수명 ' + M.life.v.toFixed(1) + '세, 세계 ' + M.life.world.toFixed(1) + '세, ' + rankText(M.life.r));
+    ? S.kv(S.lbGdp, S.noData) + ppp + c + S.world(usd(WR.gdpN))
+    : S.kv(S.lbGdp, usd(M.gdp.v)) + ppp + c + S.world(usd(WR.gdpN)) + c + rankText(M.gdp.r));
+  lines.push(S.kv(S.lbTier, S.tier[tierOf(L)]));
+  lines.push(S.kv(S.lbLife, S.years(fx(M.life.v, 1))) + c + S.world(S.years(fx(M.life.world, 1))) + c + rankText(M.life.r));
   return lines.join('\n');
 }
 
@@ -498,9 +525,9 @@ async function onCopy(ev) {
   const btn = ev.currentTarget;
   if (current.type === 'empty') return;
   const ok = await copyText(recordText(current));
-  btn.textContent = ok ? '복사했습니다' : '복사하지 못했습니다';
+  btn.textContent = ok ? S.copied : S.copyFail;
   announce(btn.textContent);
-  setTimeout(() => { if (btn.isConnected) btn.textContent = '결과 복사'; }, 1800);
+  setTimeout(() => { if (btn.isConnected) btn.textContent = S.copy; }, 1800);
 }
 
 /* ================= shared geography (needs d3) ================= */
@@ -951,9 +978,9 @@ function initMap() {
     const code = codeAt(ev), L = BY.get(code);
     if (!L) { tip.hidden = true; return; }
     const r = wrap.getBoundingClientRect();
-    let h = '<b>' + esc(L.ko) + '</b> <span class="t t-' + L.tier + '">' + TIER_KO[L.tier] + '</span><br>2026년 출생아 ' + people(L.births) +
-      '<br>이 나라에 태어날 확률 ' + fmtPct(L.births / TOT.births);
-    if (batchCounts && batchCounts.has(code)) h += '<br>이번 연속 추첨에서 ' + batchCounts.get(code) + '번';
+    let h = '<b>' + esc(nm(L)) + '</b> <span class="t t-' + L.tier + '">' + S.tier[L.tier] + '</span><br>' + esc(S.kv(S.births2026, people(L.births))) +
+      '<br>' + esc(S.kv(S.lbProb, fmtPct(L.births / TOT.births)));
+    if (batchCounts && batchCounts.has(code)) h += '<br>' + esc(S.tipBatch(fmtInt(batchCounts.get(code))));
     tip.innerHTML = h;
     tip.hidden = false;
     const x = ev.clientX - r.left, half = tip.offsetWidth / 2 + 4;
@@ -1000,7 +1027,7 @@ function mapFail() {
   GEO.failed = true;
   PLANET.show(current, {});
   const msg = $('#mapMsg');
-  msg.textContent = '지도를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침하세요. 추첨과 표는 지도 없이도 쓸 수 있습니다.';
+  msg.textContent = S.mapFail;
   msg.hidden = false;
 }
 function loadScript(src) {
@@ -1014,13 +1041,13 @@ function loadScript(src) {
 
 /* ================= page text ================= */
 function renderIntro() {
-  $('#lede').innerHTML = '2026년에 태어날 아기 <b>' + koUnit(WR.births, 4) + '</b> 명 가운데 한 명이 됩니다';
-  $('#atlasLede').textContent = '나라는 2026년 출생아 수에 비례해, 성별은 그 나라의 출생 성비에 따라 정해집니다. 원이 클수록 그 나라에 태어날 확률이 큽니다.';
-  $('#legend').textContent = '원의 크기는 2026년 출생아 수, 색은 발전 단계입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.';
-  $('#map').setAttribute('aria-label', '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 발전 단계를 나타냅니다.');
-  $('#keys').innerHTML = TIERS.map(t => '<li class="t-' + t + '">' + pipsHTML(t) + TIER_KO[t] + '</li>').join('');
-  $('#live').innerHTML = '<span class="rate">초당 탄생<b>' + RATE_B.toFixed(1) + '</b></span><span class="rate">초당 사망<b>' + RATE_D.toFixed(1) + '</b></span>' +
-    '<span><span class="dot" aria-hidden="true"></span><span class="since">화면을 연 뒤 </span><b id="liveN">0</b>명 탄생</span>';
+  $('#lede').innerHTML = S.ledeHtml(big(WR.births, 4));
+  $('#atlasLede').textContent = S.atlasLede;
+  $('#legend').textContent = S.legend;
+  $('#map').setAttribute('aria-label', S.mapAria);
+  $('#keys').innerHTML = TIERS.map(t => '<li class="t-' + t + '">' + pipsHTML(t) + S.tier[t] + '</li>').join('');
+  $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span><span class="rate">' + S.liveD + '<b>' + fx(RATE_D, 1) + '</b></span>' +
+    '<span><span class="dot" aria-hidden="true"></span><span class="since">' + S.liveSince + '</span><b id="liveN">0</b>' + S.liveAfter + '</span>';
 }
 const T0 = performance.now();
 function tickLive() {
@@ -1030,17 +1057,15 @@ function tickLive() {
 function renderMethod() {
   const T = tierStats(), C = D.CLASS;
   const now = new Date();
-  const dated = Object.entries(C.ldc).filter(([, d]) => d).sort((a, b) => a[1].localeCompare(b[1]) || BY.get(+a[0]).ko.localeCompare(BY.get(+b[0]).ko, 'ko'));
+  const dated = Object.entries(C.ldc).filter(([, d]) => d).sort((a, b) => a[1].localeCompare(b[1]) || nm(BY.get(+a[0])).localeCompare(nm(BY.get(+b[0])), S.locale));
   const past = dated.filter(([, d]) => now >= new Date(d + 'T00:00:00Z')), next = dated.filter(([, d]) => now < new Date(d + 'T00:00:00Z'));
-  const list = xs => xs.map(([c, d]) => BY.get(+c).ko + ' ' + dateKo(d)).join(', ');
-  const g = (next.length ? '졸업 예정: ' + list(next) + '.' : '') + (past.length ? (next.length ? ' ' : '') + '졸업함: ' + list(past) + '.' : '');
-  $('#tierRules').textContent = '발전 단계는 두 국제기구의 공식 분류를 그대로 따르고, 오늘 날짜(' + todayKo() + ')를 기준으로 계산합니다.';
-  $('#tierList').innerHTML =
-    '<li class="t-ADV"><b>선진국</b>: ' + esc(C.sources.imf) + '의 선진경제 ' + C.adv.length + '곳과 그 속령. 지금 ' + T.count.ADV + '곳, 2026년 출생아의 ' + T.p2.ADV + '%입니다.</li>' +
-    '<li class="t-LDC"><b>최저개발국</b>: ' + esc(C.sources.ldc) + '의 ' + Object.keys(C.ldc).length + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + esc(g) + ' 지금 ' + T.count.LDC + '곳, ' + T.p2.LDC + '%입니다.</li>' +
-    '<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + T.count.DEV + '곳, ' + T.p2.DEV + '%입니다.</li>' +
-    '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
-    '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>';
+  const list = xs => xs.map(([c, d]) => S.gradItem(nm(BY.get(+c)), dateOf(d))).join(S.comma);
+  const g = [next.length ? S.gradSoon(list(next)) : '', past.length ? S.gradDone(list(past)) : ''].filter(Boolean).join(S.sp);
+  $('#tierRules').textContent = S.tierRules(today());
+  $('#tierList').innerHTML = S.tierListHtml({
+    advN: C.adv.length, ldcN: Object.keys(C.ldc).length, count: T.count, grad: esc(g),
+    pct: { ADV: pctF(T.p2.ADV, 2), DEV: pctF(T.p2.DEV, 2), LDC: pctF(T.p2.LDC, 2) }
+  });
 }
 
 /* ================= 100 people ================= */
@@ -1052,22 +1077,24 @@ function renderHundred() {
   const order = CONT.map((_, i) => i).sort((a, b) => exact[b] - exact[a]);
   const named = order.filter(ci => cells[ci] > 0);
   const [a, b] = named, rest = named.slice(2);
-  $('#hLede').textContent = '2026년에 태어나는 아기 100명 가운데 ' + cells[a] + '명은 ' + CONT[a] + ', ' + cells[b] + '명은 ' + CONT[b] + '에서 태어납니다. ' +
-    rest.map(ci => topic(CONT[ci]) + ' ' + cells[ci] + '명').join(', ') + '입니다.' +
-    order.filter(ci => cells[ci] === 0).map(ci => ' ' + topic(CONT[ci]) + ' 1명이 채 안 됩니다.').join('') +
-    ' 발전 단계로 나누면 선진국에서 ' + T.p1.ADV + '명, 개발도상국에서 ' + T.p1.DEV + '명, 최저개발국에서 ' + T.p1.LDC + '명이 태어납니다.';
-  $('#hTier').innerHTML = TIERS.map(t => '<span class="t-' + t + '" style="flex:' + T.p1[t] + ' 1 0">' + T.p1[t] + '</span>').join('');
-  $('#hTier').setAttribute('aria-label', '발전 단계별 아기 수: ' + TIERS.map(t => TIER_KO[t] + ' ' + T.p1[t] + '명').join(', '));
-  $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="t-' + t + '"><i></i>' + TIER_KO[t] + ' <b>' + T.p1[t] + '명</b></li>').join('');
+  $('#hLede').textContent = S.hundredLede({
+    first: [contName(a), cells[a]], second: [contName(b), cells[b]],
+    rest: rest.map(ci => [contName(ci), cells[ci]]),
+    zero: order.filter(ci => cells[ci] === 0).map(contName),
+    tiers: { ADV: fx(T.p1.ADV, 1), DEV: fx(T.p1.DEV, 1), LDC: fx(T.p1.LDC, 1) }
+  });
+  $('#hTier').innerHTML = TIERS.map(t => '<span class="t-' + t + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
+  $('#hTier').setAttribute('aria-label', S.hTierAria(TIERS.map(t => S.tier[t] + ' ' + S.nb(fx(T.p1[t], 1))).join(S.comma)));
+  $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="t-' + t + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');
   const waffle = $('#waffle');
   waffle.innerHTML = order.map(ci => ('<span class="k' + ci + '"></span>').repeat(cells[ci])).join('');
-  waffle.setAttribute('aria-label', order.map(ci => CONT[ci] + ' ' + cells[ci] + '칸').join(', '));
-  $('#hLegend').innerHTML = order.map(ci => '<li class="k' + ci + '"><i></i><span>' + CONT[ci] + '</span><b>' + fmtSmall(exact[ci]) + '명</b></li>').join('');
+  waffle.setAttribute('aria-label', order.map(ci => contName(ci) + ' ' + S.cells(cells[ci])).join(S.comma));
+  $('#hLegend').innerHTML = order.map(ci => '<li class="k' + ci + '"><i></i><span>' + esc(contName(ci)) + '</span><b>' + S.nb(fmtSmall(exact[ci])) + '</b></li>').join('');
   const top = LOCS.slice().sort((x, y) => y.births - x.births).slice(0, 12);
   const max = top[0].births;
-  const row = (l, cls) => '<li class="k' + l.cont + (cls ? ' ' + cls : '') + '"><span class="nm" title="' + esc(l.ko) + '">' + esc(l.ko) + '</span>' +
-    '<span class="bar"><b style="--w:' + (l.births / max * 100).toFixed(2) + '%"></b></span><span class="v">' + fmtSmall(l.births / tot * 100) + '명</span></li>';
-  const refL = current.type !== 'empty' ? current.loc : BY.get(410);
+  const row = (l, cls) => '<li class="k' + l.cont + (cls ? ' ' + cls : '') + '"><span class="nm" title="' + esc(nm(l)) + '">' + esc(nm(l)) + '</span>' +
+    '<span class="bar"><b style="--w:' + (l.births / max * 100).toFixed(2) + '%"></b></span><span class="v">' + S.nb(fmtSmall(l.births / tot * 100)) + '</span></li>';
+  const refL = current.type !== 'empty' ? current.loc : BY.get(S.ref);
   $('#hBars').innerHTML = top.map(l => row(l, l === refL ? 'ref' : '')).join('') + (top.includes(refL) ? '' : row(refL, 'ref extra'));
 }
 
@@ -1077,31 +1104,31 @@ function renderMine() {
   const st = store.stats, T = tierStats();
   const lede = $('#mLede'), wrap = $('#mCmpWrap');
   if (!st.n) {
-    lede.textContent = '아직 뽑은 기록이 없습니다. 위에서 ‘다시 태어나기’를 눌러 첫 기록을 받아 보세요.';
+    lede.textContent = S.mineEmpty;
     wrap.hidden = true;
   } else {
-    lede.textContent = '지금까지 2026년 출생아로 ' + fmtInt(st.n) + '번 다시 태어났습니다.';
+    lede.textContent = S.mineCount(fmtInt(st.n), st.n);
     wrap.hidden = false;
     const tot = TOT.births, exp = CONT.map(() => 0);
     LOCS.forEach(l => { exp[l.cont] += l.births / tot; });
     const order = CONT.map((_, i) => i).sort((a, b) => exp[b] - exp[a]);
-    const li = (cls, name, obs, ex) => '<li class="' + cls + '"><span>' + name + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (ex * 100).toFixed(2) + '%"></i></span>' +
-      '<span class="v">' + (obs * 100).toFixed(1) + '% <small>기대 ' + (ex * 100).toFixed(1) + '%</small></span></li>';
-    $('#mCmp').innerHTML = order.map(ci => li('k' + ci, CONT[ci], st.cont[ci] / st.n, exp[ci])).join('');
-    $('#mTier').innerHTML = TIERS.map((t, i) => li('t-' + t, TIER_KO[t], st.tier[i] / st.n, T.share[t])).join('');
+    const li = (cls, name, obs, ex) => '<li class="' + cls + '"><span>' + esc(name) + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (ex * 100).toFixed(2) + '%"></i></span>' +
+      '<span class="v">' + pctF(obs, 1) + ' <small>' + esc(S.exp(pctF(ex, 1))) + '</small></span></li>';
+    $('#mCmp').innerHTML = order.map(ci => li('k' + ci, contName(ci), st.cont[ci] / st.n, exp[ci])).join('');
+    $('#mTier').innerHTML = TIERS.map((t, i) => li('t-' + t, S.tier[t], st.tier[i] / st.n, T.share[t])).join('');
     const tops = Object.entries(st.top).map(([c, n]) => [BY.get(+c), n]).filter(x => x[0])
       .sort((x, y) => y[1] - x[1] || y[0].births - x[0].births).slice(0, 5);
-    $('#mTop').textContent = '가장 많이 나온 곳: ' + tops.map(([l, n]) => l.ko + ' ' + fmtInt(n) + '번(기대 ' + fmtSmall(st.n * l.births / tot) + '번)').join(', ') + '.';
+    $('#mTop').textContent = S.mostFrequent + tops.map(([l, n]) => S.topItem(nm(l), fmtInt(n), fmtSmall(st.n * l.births / tot))).join(S.comma) + S.period;
   }
   const list = $('#mRecent');
   if (!store.recent.length) {
-    list.innerHTML = '<li><p class="empty-hint">발급된 기록이 여기에 쌓입니다.</p></li>';
+    list.innerHTML = '<li><p class="empty-hint">' + esc(S.emptyHint) + '</p></li>';
   } else {
     list.innerHTML = store.recent.map(r => {
       const l = BY.get(r.c), t = tierOf(l);
       return '<li><button type="button" data-no="' + r.no + '"' + (current.type === 'draw' && current.serial === r.no ? ' aria-current="true"' : '') + '>' +
-        '<span class="r-name t-' + t + '"><span class="sr-only">' + TIER_KO[t] + ', </span><span class="r-txt">' + esc(l.ko) + ', ' + sexKo(r.s) + '</span></span>' +
-        '<span class="r-no">' + (r.b ? '<small>' + r.b + '번 연속의 끝</small>' : '') + '제 ' + fmtInt(r.no) + '호</span></button></li>';
+        '<span class="r-name t-' + t + '"><span class="sr-only">' + S.tier[t] + S.comma + '</span><span class="r-txt">' + esc(nm(l)) + S.comma + sexName(r.s) + '</span></span>' +
+        '<span class="r-no">' + (r.b ? '<small>' + esc(S.lastOf(fmtInt(r.b))) + '</small>' : '') + esc(S.serial(fmtInt(r.no))) + '</span></button></li>';
     }).join('');
   }
   $('#clearBtn').hidden = !store.recent.length && !st.n;
@@ -1109,32 +1136,28 @@ function renderMine() {
 
 /* ================= table ================= */
 const COLS = [
-  { key: 'name', label: '나라' },
-  { key: 'births', label: '2026년 출생아' },
-  { key: 'pop', label: '인구' },
-  { key: 'prob', label: '태어날 확률' },
-  { key: 'tier', label: '발전 단계', cls: 'tl' },
-  { key: 'e0B', label: '기대수명' },
-  { key: 'gdpN', label: '1인당 GDP($)' },
-  { key: 'gdp', label: '구매력 기준' }
+  { key: 'name' }, { key: 'births' }, { key: 'pop' }, { key: 'prob' },
+  { key: 'tier', cls: 'tl' }, { key: 'e0B' }, { key: 'gdpN' }, { key: 'gdp' }
 ];
 const TBL = { key: 'prob', dir: -1, q: '', cont: -1, tier: '' };
-const norm = s => s.toLowerCase().replace(/[\s·,.'’()\-]/g, '');
-/* other names people type: 한국, 남한, 터키, 버마, 스와질란드, USA ... */
-const ALIAS = { 410: '한국 남한 korea', 408: '조선 dprk', 840: 'usa us 미합중국', 826: 'uk 잉글랜드 britain', 180: '민주콩고 drc', 178: '콩고',
-  792: '터키 turkey', 104: '버마 burma', 748: '스와질란드 swaziland', 384: '아이보리코스트 ivorycoast', 132: '케이프베르데 capeverde',
-  807: '마케도니아', 626: '티모르', 784: 'uae 에미리트', 203: 'czechrepublic', 643: 'russianfederation', 158: '타이완', 344: '홍콩', 275: 'palestine' };
-LOCS.forEach(l => { l.key = norm(l.ko) + '|' + norm(l.en) + '|' + norm(ALIAS[l.code] || ''); });
-function colVal(l, k) { return k === 'prob' ? l.births : k === 'name' ? l.ko : k === 'tier' ? tierIdx(l.tier) : l[k]; }
+/* case, accents (Perú, México), spaces and punctuation do not matter; NFC puts Hangul back together */
+const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/[\s·・,.'’()\-]/g, '');
+/* other names people type: 한국, 남한, 터키, 버마, 스와질란드, USA, 米国, EE. UU. ... */
+const ALIAS = { 410: '한국 남한 korea', 408: '조선 dprk', 840: 'usa us 미합중국 米国 アメリカ eeuu', 826: 'uk 잉글랜드 britain 英国', 180: '민주콩고 drc rdc', 178: '콩고',
+  792: '터키 turkey', 104: '버마 burma ビルマ birmania', 748: '스와질란드 swaziland スワジランド suazilandia', 384: '아이보리코스트 ivorycoast', 132: '케이프베르데 capeverde',
+  807: '마케도니아', 626: '티모르', 784: 'uae 에미리트', 203: 'czechrepublic チェコ共和国 republicacheca', 643: 'russianfederation ロシア連邦', 158: '타이완', 344: '홍콩', 275: 'palestine',
+  528: 'holanda' };
+LOCS.forEach(l => { l.key = [l.ko, l.en, l.ja, l.es, ALIAS[l.code] || ''].map(norm).join('|'); });
+function colVal(l, k) { return k === 'prob' ? l.births : k === 'name' ? nm(l) : k === 'tier' ? tierIdx(l.tier) : l[k]; }
 function renderTableHead() {
   $('#tHead').innerHTML = COLS.map(c => {
     const s = TBL.key === c.key ? ' aria-sort="' + (TBL.dir > 0 ? 'ascending' : 'descending') + '"' : '';
-    return '<th scope="col"' + (c.cls ? ' class="' + c.cls + '"' : '') + s + '><button type="button" data-key="' + c.key + '">' + c.label + '</button></th>';
+    return '<th scope="col"' + (c.cls ? ' class="' + c.cls + '"' : '') + s + '><button type="button" data-key="' + c.key + '">' + esc(S.cols[c.key]) + '</button></th>';
   }).join('');
 }
-function gdpCell(v, note, f) {
-  if (v == null) return '<td class="na" title="자료 없음">—</td>';
-  return '<td' + (note ? ' title="' + noteKo(note) + '"' : '') + '>' + f(v) + (note ? '*' : '') + '</td>';
+function gdpCell(v, n, f) {
+  if (v == null) return '<td class="na" title="' + esc(S.noData) + '">—</td>';
+  return '<td' + (n ? ' title="' + esc(note(n)) + '"' : '') + '>' + f(v) + (n ? '*' : '') + '</td>';
 }
 function renderTable() {
   tierStats();
@@ -1146,19 +1169,19 @@ function renderTable() {
     if (x == null && y == null) return 0;
     if (x == null) return 1;
     if (y == null) return -1;
-    if (k === 'name') return dir * x.localeCompare(y, 'ko');
+    if (k === 'name') return dir * x.localeCompare(y, S.locale);
     return dir * (x - y) || b.births - a.births;
   });
   const cur = current.type !== 'empty' ? current.loc.code : 0;
   $('#tBody').innerHTML = rows.length ? rows.map(l =>
     '<tr' + (l.code === cur ? ' class="cur"' : '') + '><th scope="row"><div class="nm-cell"><span class="chip xs"><img src="assets/flags/' + l.iso2.toLowerCase() + '.svg" alt="" width="22" height="16" loading="lazy" decoding="async"></span>' +
-    '<button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(l.ko) + '</button><span class="en">' + esc(l.en) + '</span></div></th>' +
-    '<td>' + koCompact(l.births) + '</td><td>' + koCompact(l.pop) + '</td><td>' + fmtPct(l.births / TOT.births) + '</td>' +
-    '<td class="tier-c t-' + l.tier + '">' + pipsHTML(l.tier) + TIER_KO[l.tier] + '</td>' +
-    '<td>' + l.e0B.toFixed(1) + '</td>' +
+    '<button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(nm(l)) + '</button><span class="en">' + esc(nmSub(l)) + '</span></div></th>' +
+    '<td>' + compact(l.births) + '</td><td>' + compact(l.pop) + '</td><td>' + fmtPct(l.births / TOT.births) + '</td>' +
+    '<td class="tier-c t-' + l.tier + '">' + pipsHTML(l.tier) + S.tier[l.tier] + '</td>' +
+    '<td>' + fx(l.e0B, 1) + '</td>' +
     gdpCell(l.gdpN, l.gdpNNote, usd) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
-    '</tr>').join('') : '<tr><td colspan="8" class="tbl-empty">조건에 맞는 나라가 없습니다. 다른 이름이나 영어 이름으로 찾아 보세요.</td></tr>';
-  $('#tCount').textContent = rows.length === LOCS.length ? LOCS.length + '곳' : LOCS.length + '곳 중 ' + rows.length + '곳';
+    '</tr>').join('') : '<tr><td colspan="8" class="tbl-empty">' + esc(S.tblEmpty) + '</td></tr>';
+  $('#tCount').textContent = S.count(LOCS.length, rows.length);
 }
 /* after a draw only the highlighted row changes, so the 236 rows are not rebuilt */
 function markTableRow() {
@@ -1191,7 +1214,9 @@ function fromRecent(r) {
   return { type: 'draw', loc: BY.get(r.c), sex: r.s, serial: r.no, t: r.t };
 }
 
+let lastBatchArgs = null;
 function renderBatch(n, batch, last, tierN) {
+  lastBatchArgs = [n, batch, last, tierN];
   const box = $('#batch'), tot = TOT.births, T = tierStats();
   const cc = CONT.map(() => 0), exp = CONT.map(() => 0);
   batch.forEach((c, code) => { cc[BY.get(code).cont] += c; });
@@ -1200,18 +1225,18 @@ function renderBatch(n, batch, last, tierN) {
   const seg = vals => order.map(ci => vals[ci] > 0 ? '<b class="k' + ci + '" style="--w:' + (vals[ci] / n * 100).toFixed(3) + '%"></b>' : '').join('');
   const tops = [...batch].sort((x, y) => y[1] - x[1] || BY.get(y[0]).births - BY.get(x[0]).births).slice(0, 5);
   box.innerHTML =
-    '<div class="batch-h"><h3>이번 ' + n + '번</h3><p>지도의 점이 이번에 나온 곳입니다(색은 발전 단계). 위 화면에는 마지막 제 ' + fmtInt(last.serial) + '호를 띄웠습니다.</p></div>' +
-    '<div class="stack" role="img" aria-label="' + esc('대륙별로 이번에 나온 횟수와 기대 횟수. ' + order.map(ci => CONT[ci] + ' ' + cc[ci] + '번, 기대 ' + fmtSmall(exp[ci]) + '번').join('; ')) + '">' +
-      '<div class="stack-row"><span>이번</span><span class="stack-bar">' + seg(cc) + '</span></div>' +
-      '<div class="stack-row"><span>기대</span><span class="stack-bar exp">' + seg(exp) + '</span></div>' +
+    '<div class="batch-h"><h3>' + esc(S.batchTitle(n)) + '</h3><p>' + esc(S.batchNote(S.serial(fmtInt(last.serial)))) + '</p></div>' +
+    '<div class="stack" role="img" aria-label="' + esc(S.batchAria(order.map(ci => S.batchItem(contName(ci), cc[ci], fmtSmall(exp[ci]))).join('; '))) + '">' +
+      '<div class="stack-row"><span>' + esc(S.rowNow) + '</span><span class="stack-bar">' + seg(cc) + '</span></div>' +
+      '<div class="stack-row"><span>' + esc(S.rowExp) + '</span><span class="stack-bar exp">' + seg(exp) + '</span></div>' +
     '</div>' +
-    '<ul class="stack-keys">' + order.map(ci => '<li class="k' + ci + '"><i></i>' + CONT[ci] + ' <b>' + cc[ci] + '</b><small>기대 ' + fmtSmall(exp[ci]) + '</small></li>').join('') + '</ul>' +
-    '<p class="batch-top">가장 많이 나온 곳: ' + tops.map(([c, k]) => esc(BY.get(c).ko) + ' ' + k + '번(기대 ' + fmtSmall(BY.get(c).births / tot * n) + '번)').join(', ') + '.</p>';
+    '<ul class="stack-keys">' + order.map(ci => '<li class="k' + ci + '"><i></i>' + esc(contName(ci)) + ' <b>' + cc[ci] + '</b><small>' + esc(S.exp(fmtSmall(exp[ci]))) + '</small></li>').join('') + '</ul>' +
+    '<p class="batch-top">' + esc(S.mostFrequent + tops.map(([c, k]) => S.topItem(nm(BY.get(c)), fmtInt(k), fmtSmall(BY.get(c).births / tot * n))).join(S.comma) + S.period) + '</p>';
   box.hidden = false;
   const line = $('#batchLine');
-  line.innerHTML = '이번 ' + n + '번: ' + TIERS.map((t, i) => '<span class="t-' + t + '">' + TIER_KO[t] + ' <b>' + tierN[i] + '</b></span>').join(', ') +
-    ' (기대 ' + TIERS.map(t => (T.share[t] * n).toFixed(1)).join(' / ') + ')' +
-    '<a href="#atlas" id="toMap">지도에서 보기</a>';
+  line.innerHTML = S.batchLineHtml(n, TIERS.map((t, i) => '<span class="t-' + t + '">' + S.tier[t] + ' <b>' + tierN[i] + '</b></span>').join(S.comma),
+    TIERS.map(t => fx(T.share[t] * n, 1)).join(' / ')) +
+    '<a href="#atlas" id="toMap">' + esc(S.toMap) + '</a>';
   line.hidden = false;
 }
 function hideBatch() {
@@ -1252,8 +1277,8 @@ function doDraws(n) {
   markTableRow();
   const L = last.loc;
   announce(n === 1
-    ? '제 ' + fmtInt(last.serial) + '호. ' + L.ko + ', ' + sexKo(last.sex) + '로 태어났습니다. 이 나라에 태어날 확률은 ' + fmtPct(L.births / TOT.births) + ', 발전 단계는 ' + TIER_KO[tierOf(L)] + '입니다.'
-    : n + '번을 뽑았습니다. 선진국 ' + tierN[0] + '번, 개발도상국 ' + tierN[1] + '번, 최저개발국 ' + tierN[2] + '번입니다. 마지막은 ' + L.ko + '입니다.');
+    ? S.drawnOne(S.serial(fmtInt(last.serial)), nm(L), sexName(last.sex), fmtPct(L.births / TOT.births), S.tier[tierOf(L)])
+    : S.drawnMany(n, tierN[0], tierN[1], tierN[2], nm(L)));
 }
 
 function reopen(no) {
@@ -1266,7 +1291,7 @@ function reopen(no) {
   renderHundred();
   renderMine();
   markTableRow();
-  announce('제 ' + fmtInt(no) + '호 기록을 다시 펼쳤습니다. ' + st.loc.ko + ', 발전 단계는 ' + TIER_KO[tierOf(st.loc)] + '입니다.');
+  announce(S.reopened(S.serial(fmtInt(no)), nm(st.loc), S.tier[tierOf(st.loc)]));
   reveal();
 }
 
@@ -1279,16 +1304,77 @@ function lookup(code) {
   renderHundred();
   renderMine();
   markTableRow();
-  announce(L.ko + ' 정보를 띄웠습니다. 발전 단계는 ' + TIER_KO[tierOf(L)] + '입니다.');
+  announce(S.looked(nm(L), S.tier[tierOf(L)]));
   reveal();
 }
 
+/* ================= language switch ================= */
+/* ?lang= in the address, then the last choice, then the browser's languages; English otherwise */
+function pickLang() {
+  const ok = l => (l && I18N.LANGS.indexOf(l) >= 0 ? l : null);
+  let l = null;
+  try { l = ok(new URLSearchParams(location.search).get('lang')); } catch (e) { /* no URLSearchParams */ }
+  if (!l) { try { l = ok(localStorage.getItem(LANG_KEY)); } catch (e) { /* storage blocked */ } }
+  const nav = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+  for (let i = 0; !l && i < nav.length; i++) l = ok(String(nav[i]).slice(0, 2).toLowerCase());
+  return l || 'en';
+}
+/* the Japanese web font is large, so its stylesheet is only fetched once Japanese is chosen */
+const JP_FONT = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap';
+let jpFont = false;
+/* switch the text table and every piece of static text; the rendered sections follow in setLang */
+function applyLang(l) {
+  LANG = l; S = I18N[l];
+  document.documentElement.lang = l;
+  if (l === 'ja' && !jpFont) {
+    jpFont = true;
+    const k = document.createElement('link');
+    k.rel = 'stylesheet'; k.href = JP_FONT;
+    document.head.appendChild(k);
+  }
+  const md = $('meta[name="description"]');
+  if (md) md.setAttribute('content', S.metaDesc);
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = S[el.dataset.t]; });
+  document.querySelectorAll('[data-th]').forEach(el => { el.innerHTML = S[el.dataset.th]; });
+  document.querySelectorAll('[data-tp]').forEach(el => { el.setAttribute('placeholder', S[el.dataset.tp]); });
+  const track = $('#langTrack');
+  track.style.setProperty('--i', I18N.LANGS.indexOf(l));
+  track.querySelectorAll('input').forEach(r => { r.checked = r.value === l; });
+  $('#tTitle').textContent = S.tTitle(LOCS.length);
+  $('#draw10').setAttribute('aria-label', S.draw10);
+  $('#draw100').setAttribute('aria-label', S.draw100);
+  $('#contSel').innerHTML = '<option value="-1">' + esc(S.allCont) + '</option>' + CONT.map((c, i) => '<option value="' + i + '">' + esc(contName(i)) + '</option>').join('');
+  $('#contSel').value = String(TBL.cont);
+  $('#tierSel').innerHTML = '<option value="">' + esc(S.allTier) + '</option>' + TIERS.map(t => '<option value="' + t + '">' + S.tier[t] + '</option>').join('');
+  $('#tierSel').value = TBL.tier;
+  const msg = $('#mapMsg');
+  if (!msg.hidden) msg.textContent = S.mapFail;
+  clearArmed = 0;
+}
+function setLang(l) {
+  if (l === LANG || !I18N[l]) return;
+  applyLang(l);
+  try { localStorage.setItem(LANG_KEY, l); } catch (e) { /* choice not kept */ }
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.has('lang')) { u.searchParams.set('lang', l); history.replaceState(history.state, '', u.href); }
+  } catch (e) { /* address left as it is */ }
+  renderIntro(); tickLive(); renderMethod();
+  renderStage(current, {});
+  renderHundred(); renderMine();
+  renderTableHead(); renderTable();
+  if (lastBatchArgs && !$('#batch').hidden) renderBatch(...lastBatchArgs);
+  $('#tip').hidden = true;
+  $('#sr').textContent = '';
+  /* names are measured again once the new language's fonts have arrived */
+  requestAnimationFrame(() => { if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName); });
+}
+
 /* ================= wiring ================= */
+$('#langTrack').addEventListener('change', e => { if (e.target.name === 'lang') setLang(e.target.value); });
 $('#draw1').addEventListener('click', () => doDraws(1));
 $('#draw10').addEventListener('click', () => doDraws(10));
 $('#draw100').addEventListener('click', () => doDraws(100));
-$('#draw10').setAttribute('aria-label', '10번 연속');
-$('#draw100').setAttribute('aria-label', '100번 연속');
 $('#copyBtn').addEventListener('click', onCopy);
 $('#batchLine').addEventListener('click', e => { if (e.target.closest('#toMap')) { e.preventDefault(); smoothTo($('#atlas')); } });
 $('#mRecent').addEventListener('click', e => { const b = e.target.closest('button[data-no]'); if (b) reopen(+b.dataset.no); });
@@ -1303,21 +1389,19 @@ $('#tHead').addEventListener('click', e => {
   const nb = $('#tHead button[data-key="' + k + '"]'); if (nb) nb.focus();
 });
 $('#q').addEventListener('input', e => { TBL.q = e.target.value.trim(); renderTable(); });
-$('#contSel').innerHTML = '<option value="-1">모든 대륙</option>' + CONT.map((c, i) => '<option value="' + i + '">' + c + '</option>').join('');
 $('#contSel').addEventListener('change', e => { TBL.cont = +e.target.value; renderTable(); });
-$('#tierSel').innerHTML = '<option value="">모든 발전 단계</option>' + TIERS.map(t => '<option value="' + t + '">' + TIER_KO[t] + '</option>').join('');
 $('#tierSel').addEventListener('change', e => { TBL.tier = e.target.value; renderTable(); });
 $('#clearBtn').addEventListener('click', e => {
   const btn = e.currentTarget;
   if (Date.now() - clearArmed > 3500) {
     clearArmed = Date.now();
-    btn.textContent = '한 번 더 누르면 지웁니다';
-    announce('기록을 지우려면 한 번 더 누르세요.');
-    setTimeout(() => { if (Date.now() - clearArmed >= 3400) btn.textContent = '기록 지우기'; }, 3500);
+    btn.textContent = S.clearArm;
+    announce(S.clearArmSay);
+    setTimeout(() => { if (Date.now() - clearArmed >= 3400) btn.textContent = S.clear; }, 3500);
     return;
   }
   clearArmed = 0;
-  btn.textContent = '기록 지우기';
+  btn.textContent = S.clear;
   store.serial = 0; store.recent = []; store.stats = freshStats();
   save();
   if (current.type === 'draw') {
@@ -1326,11 +1410,11 @@ $('#clearBtn').addEventListener('click', e => {
   }
   hideBatch();
   renderMine(); renderHundred(); markTableRow();
-  announce('기록을 지웠습니다.');
+  announce(S.cleared);
 });
-$('#tTitle').textContent = LOCS.length + '개 국가·지역 전체';
 $('#idName').setAttribute('tabindex', '-1');
 
+applyLang(pickLang());
 tierStats();
 paintSpace();
 renderIntro();
