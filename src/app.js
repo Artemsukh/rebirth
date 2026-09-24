@@ -16,6 +16,17 @@ const LOCS = D.LOC.map((r, i) => {
 const BY = new Map(LOCS.map(l => [l.code, l]));
 const TOT = { births: 0, pop: 0 };
 LOCS.forEach(l => { TOT.births += l.births; TOT.pop += l.pop; });
+/* development tier, computed for today: IMF advanced economies (and their territories),
+   UN least developed countries until their graduation date, everything else developing */
+const ADV = new Set(D.CLASS.adv);
+function tierOf(L, now = new Date()) {
+  const c = L.sov || L.code;
+  if (ADV.has(c)) return 'ADV';
+  const g = D.CLASS.ldc[c];
+  if (g !== undefined && (g === null || now < new Date(g + 'T00:00:00Z'))) return 'LDC';
+  return 'DEV';
+}
+const TIER_KO = { ADV: '선진국', DEV: '개발도상국', LDC: '최저개발국' };
 const RATE_B = WR.births / (365 * 86400);
 const RATE_D = WR.deaths / (365 * 86400);
 /* source notes such as 'WB 2024', 'UN 2023', 'WB' (World Bank, same year) */
@@ -247,11 +258,12 @@ function renderRecord(st, animate) {
   const kind = isDraw ? '2026년 출생 기록' : '국가 정보 조회';
   const no = isDraw ? '제 ' + fmtInt(st.serial) + '호' : '';
   let facts = '';
+  facts = '<div class="fact wide">발전 단계: <b>' + TIER_KO[tierOf(L)] + '</b></div>';
   if (isDraw) {
-    facts = '<div class="fact"><dt>성별</dt><dd>' + sexKo(st.sex) + '<small>여아 100명당 남아 ' + Math.round(L.srb * 100) + '명</small></dd></div>' +
+    facts += '<div class="fact"><dt>성별</dt><dd>' + sexKo(st.sex) + '<small>여아 100명당 남아 ' + Math.round(L.srb * 100) + '명</small></dd></div>' +
       '<div class="fact"><dt>이 나라가 나올 확률</dt><dd>' + fmtPct(share) + '<small>' + oneIn(share) + '</small></dd></div>';
   } else {
-    facts = '<div class="fact"><dt>인구</dt><dd>' + people(L.pop) + '<small>세계의 ' + fmtPct(L.pop / TOT.pop) + '</small></dd></div>' +
+    facts += '<div class="fact"><dt>인구</dt><dd>' + people(L.pop) + '<small>세계의 ' + fmtPct(L.pop / TOT.pop) + '</small></dd></div>' +
       '<div class="fact"><dt>2026년 출생아</dt><dd>' + people(L.births) + '<small>세계의 ' + fmtPct(L.births / TOT.births) + '</small></dd></div>';
   }
   const demo = '중위연령 ' + L.med.toFixed(1) + '세(세계 ' + WR.med.toFixed(1) + '세), 합계출산율 ' + L.tfr.toFixed(2) + '명(세계 ' + WR.tfr.toFixed(2) + '명)';
