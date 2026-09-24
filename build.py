@@ -37,7 +37,7 @@ html = f'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>다시 태어난다면</title>
+<title>Rebirth Simulator</title>
 <meta name="description" content="2026년에 태어날 아기, 또는 지금 살아 있는 83억 명 가운데 한 명으로 무작위로 다시 태어나 봅니다. UN 세계인구전망 2024와 IMF 자료로 236개 국가·지역을 빠짐없이 담았습니다.">
 <meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -258,7 +258,7 @@ function guillocheSVG() {
 const GUIL = guillocheSVG();
 
 function sealSVG(no, mode, serial, stamp) {
-  const ring = mode === 'births' ? '다시 태어난다면 ★ 2026 출생 등록 ★ ' : '다시 태어난다면 ★ 2026 인구 등록 ★ ';
+  const ring = mode === 'births' ? 'Rebirth Simulator ★ 2026 출생 등록 ★ ' : 'Rebirth Simulator ★ 2026 인구 등록 ★ ';
   const seed = serial % 97 + 1, rot = -7 - (serial * 37 % 9);
   const fs = no.length > 7 ? 8.5 : 10;
   return '<svg class="seal' + (stamp ? ' stamp' : '') + '" style="--rot:' + rot + 'deg" viewBox="0 0 120 120" aria-hidden="true">' +
@@ -357,10 +357,10 @@ function recordText(st) {
   const share = L[st.mode] / TOT[st.mode];
   const lines = [];
   if (isDraw) {
-    lines.push('다시 태어난다면: ' + (st.mode === 'births' ? '2026년 출생 기록' : '2026년 인구 기록') + ' 제 ' + fmtInt(st.serial) + '호, ' + todayKo(st.t));
+    lines.push('Rebirth Simulator: ' + (st.mode === 'births' ? '2026년 출생 기록' : '2026년 인구 기록') + ' 제 ' + fmtInt(st.serial) + '호, ' + todayKo(st.t));
     lines.push(L.ko + '(' + SUB[L.sub] + '), ' + (st.mode === 'births' ? sexKo(st.sex) : ageLabel(st.age) + ' ' + sexKo(st.sex)));
   } else {
-    lines.push('다시 태어난다면: 국가 정보 조회');
+    lines.push('Rebirth Simulator: 국가 정보 조회');
     lines.push(L.ko + '(' + SUB[L.sub] + ')');
   }
   lines.push('이 나라가 나올 확률 ' + fmtPct(share) + ', ' + oneIn(share));
