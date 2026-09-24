@@ -57,9 +57,11 @@ body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('
 app = min_js(read(os.path.join(SRC, 'app.js')))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))
 topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='utf-8'))
-tj = read(os.path.join(HERE, 'vendor', 'topojson-client.min.js'))
+# TopoJSON decoding: src/topo.js gives the same output as topojson-client 3.1.0 for this map
+# (pipeline/check_topo.js compares them) in a seventh of the size
+tj = min_js(read(os.path.join(SRC, 'topo.js')))
 
-for name, s in (('app.js', app), ('topojson', tj)):
+for name, s in (('app.js', app), ('topo.js', tj)):
     if '</script' in s.lower():
         sys.exit(name + ' contains </script')
 

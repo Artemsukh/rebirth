@@ -519,11 +519,10 @@ async function onCopy(ev) {
 const GEO = { ready: false };
 function initGeo() {
   if (GEO.ready) return true;
-  const tj = window.topojson;
-  if (!window.d3 || !tj) return false;
+  if (!window.d3 || typeof topoFeatures !== 'function') return false;
   let topo;
   try { topo = JSON.parse($('#map-data').textContent); } catch (e) { return false; }
-  const fc = tj.feature(topo, topo.objects.countries);
+  const fc = topoFeatures(topo, topo.objects.countries);
   fc.features.forEach(f => { f.code = f.properties && f.properties.id ? +f.properties.id : 0; });
   GEO.fc = fc;
   GEO.feats = fc.features;
