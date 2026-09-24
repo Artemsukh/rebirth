@@ -79,7 +79,7 @@ print('WORLD mid-2026 pop %.0f births %.0f deaths %.0f median %.2f e0 %.2f/%.2f/
 html = open('orig/index_main.html', encoding='utf-8').read()
 arr = re.search(r'const data = \[(.*?)\]\.map', html, re.S).group(1)
 ko = {int(m[0]): m[1] for m in re.findall(r'\["(\d+)","([^"]+)",([\d.]+),([\d.]+)\]', arr)}
-ko[412] = ko.pop(383)          # original used a non-UN code for Kosovo
+ko[412] = ko.pop(383)          # UN code for Kosovo is 412
 ko[583] = '미크로네시아 연방'
 ko.update({175:'마요트',638:'레위니옹',132:'카보베르데',654:'세인트헬레나',344:'홍콩',446:'마카오',51:'아르메니아',
     234:'페로 제도',831:'건지',833:'맨섬',832:'저지',292:'지브롤터',336:'바티칸',660:'앵귈라',533:'아루바',
