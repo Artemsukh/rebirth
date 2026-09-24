@@ -1,22 +1,17 @@
 # 여권 표지 이미지 보고서
 
 - 작성일: 2026-09-24
-- 마지막 수집(collect): 2026-09-24, 네트워크 차단으로 중단
+- 마지막 수집(collect): 2026-09-24, 오류로 중단
 - 마지막 적용(apply): 2026-09-24, 완료
 - 스크립트: `pipeline/fetch_passports.py`, 검수 기록: `pipeline/passports_review.json`
 
-## 수집하지 못함: 네트워크 차단
+## 수집 중단: 오류로 중단
 
-이번 collect는 첫 요청인 식별자 확인에서 `www.wikidata.org`에 접속하지 못해 멈췄습니다. 후보를 하나도 모으지 못했고, 이미지를 내려받지 않았습니다. `data/appdata.json`과 `assets/passports/`는 건드리지 않았습니다.
+```
+gave up after retries: https://www.wikidata.org/w/api.php
+```
 
-접속하지 못한 호스트:
-
-- `www.wikidata.org`: proxy refused CONNECT (403 Forbidden)
-- `query.wikidata.org`: proxy refused CONNECT (403 Forbidden)
-- `commons.wikimedia.org`: proxy refused CONNECT (403 Forbidden)
-- `upload.wikimedia.org`: proxy refused CONNECT (403 Forbidden)
-
-이 스크립트는 Wikidata와 Wikimedia Commons만 출처로 쓰며, 미러나 다른 사이트로 우회하지 않습니다. 아래 네 호스트에 HTTPS로 접속할 수 있는 환경에서 "실행 방법"대로 다시 돌리면 됩니다: `www.wikidata.org`, `query.wikidata.org`, `commons.wikimedia.org`, `upload.wikimedia.org`.
+후보를 채택하지 않았고 `data/appdata.json`은 건드리지 않았습니다.
 
 ## 집계
 
@@ -280,8 +275,7 @@ collect가 끝까지 돌지 않아 후보 단계의 사유(라이선스, 후보 
 - 검수 대기 (라이선스는 통과했지만 아직 판정이 없는 후보가 있는 곳): 0곳
 - Wikidata에서 일반 여권이 아니라서 뺀 항목 (외교관·관용·공무 여권 등): 0개
 - 기타 후보 오류 (파일 없음, 내려받기 실패): 0건
-- 네트워크·서버 실패: 1건
-  - collect 전체 중단: `www.wikidata.org`, `query.wikidata.org`, `commons.wikimedia.org`, `upload.wikimedia.org`
+- 네트워크·서버 실패: 없음
 
 ## 라이선스 규칙
 
