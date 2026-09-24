@@ -1,0 +1,204 @@
+Liechtenstein|192420|
+Singapore|164318|
+Luxembourg|152966|
+Ireland|152632|
+Macao|134485|
+Bermuda|124253|WB 2024
+Qatar|120114|
+Norway|111545|
+Switzerland|102096|
+Brunei|93731|
+Taiwan|90233|
+United States|89991|
+Cayman Islands|88428|WB 2023
+Denmark|86094|
+Netherlands|84738|
+San Marino|83878|
+United Arab Emirates|83343|
+Faeroe Islands|81909|WB 2024
+Guyana|81498|
+Iceland|80662|
+Hong Kong|80323|
+Greenland|78841|WB 2023
+Malta|78689|
+Belgium|76208|
+Austria|75825|
+Saudi Arabia|75792|
+Sweden|74081|
+Andorra|74049|
+Germany|74004|
+Australia|72132|
+Bahrain|69907|
+Canada|67013|
+Finland|66297|
+France|66276|
+United Kingdom|65525|
+South Korea|65405|
+Cyprus|64785|
+Italy|63538|
+Czech Republic (Czechia)|60247|
+Slovenia|57922|
+Lithuania|57818|
+Spain|57034|
+Japan|56854|
+Israel|56528|
+New Zealand|55840|
+Poland|55793|
+Aruba|55565|
+Kuwait|54150|
+Sint Maarten|53769|WB 2024
+Puerto Rico|51692|
+Croatia|51593|
+Portugal|50269|
+Russia|50255|
+U.S. Virgin Islands|49793|WB 2022
+Estonia|49492|
+Romania|48724|
+Hungary|48239|
+Slovakia|47684|
+Kazakhstan|45310|
+Greece|44981|
+Malaysia|44119|
+Turkey|44110|
+Panama|43971|
+Oman|43802|
+Latvia|43509|
+Bulgaria|42816|
+Bahamas|42416|
+Turks and Caicos|37954|WB 2024
+Uruguay|37215|
+Maldives|36293|
+Trinidad and Tobago|35956|
+Chile|35649|
+Seychelles|34857|
+Montenegro|34376|
+Belarus|34035|
+Saint Kitts & Nevis|33515|
+Mauritius|33491|
+Serbia|32724|
+Curaçao|32693|WB 2024
+Costa Rica|32335|
+Antigua and Barbuda|31600|
+Argentina|31484|
+Georgia|31352|
+Dominican Republic|30407|
+North Macedonia|29773|
+China|29352|
+Saint Lucia|29166|
+Thailand|26260|
+Azerbaijan|25795|
+Mexico|25682|
+Barbados|25119|
+Gabon|25000|
+Armenia|24871|
+Albania|23498|
+Brazil|23381|
+Turkmenistan|23323|
+Bosnia and Herzegovina|22887|
+Colombia|22543|
+Egypt|22185|
+Paraguay|21930|
+Suriname|21830|
+Grenada|21547|
+Iran|21200|
+Ukraine|21078|
+St. Vincent & Grenadines|20777|
+Botswana|20732|
+Mongolia|20720|
+Moldova|19846|
+Equatorial Guinea|19585|
+Dominica|19517|
+Palau|19367|
+Peru|19209|
+Algeria|18666|
+Bhutan|18251|
+Vietnam|17971|
+Indonesia|17746|
+Libya|17256|
+Ecuador|16935|
+Fiji|16431|
+South Africa|16326|
+Sri Lanka|15655|IMF 2024
+Iraq|15360|
+Guatemala|15194|
+Belize|15165|
+Tunisia|15154|
+El Salvador|14067|
+Jamaica|13683|
+Eswatini|13456|
+Uzbekistan|13185|
+Lebanon|13110|
+Bolivia|12927|
+Philippines|12877|
+Jordan|12618|
+Cabo Verde|12423|
+Namibia|12252|
+Nauru|11855|
+India|11789|
+Morocco|11538|
+Laos|10380|
+Angola|10275|
+Bangladesh|10271|
+Nicaragua|9765|
+Nigeria|9533|
+Djibouti|9436|
+Kyrgyzstan|9371|
+Venezuela|8911|
+Mauritania|8832|
+Ghana|8613|
+Samoa|8427|
+Cambodia|8403|
+Côte d'Ivoire|8165|
+Tonga|8044|
+Zimbabwe|7985|
+Honduras|7864|
+Marshall Islands|7735|
+Kenya|7591|
+Pakistan|7014|
+Congo|6523|
+Sao Tome & Principe|6435|
+Nepal|6181|
+Tajikistan|6167|
+Tuvalu|6131|
+Cameroon|5783|
+Senegal|5441|
+Timor-Leste|5060|
+Myanmar|5047|
+Micronesia|4879|
+Benin|4758|
+Guinea|4747|
+Syria|4650|WB 2023
+Ethiopia|4499|
+Zambia|4381|
+Tanzania|4355|
+Rwanda|4190|
+State of Palestine|4125|IMF 2024
+Comoros|4031|
+Vanuatu|3938|
+Uganda|3924|
+Papua New Guinea|3813|
+Kiribati|3756|
+Sierra Leone|3710|
+Gambia|3665|
+Togo|3563|
+Mali|3480|
+Guinea-Bissau|3305|
+Chad|3284|
+Lesotho|3212|
+Burkina Faso|3060|
+Haiti|2999|
+Solomon Islands|2596|
+Sudan|2427|
+Afghanistan|2304|
+Niger|2108|
+DR Congo|2033|
+Madagascar|2030|
+Liberia|1979|
+Somalia|1905|
+Malawi|1758|
+Mozambique|1689|
+Yemen|1590|
+South Sudan|1467|
+Central African Republic|1438|
+Burundi|994|
+Eritrea|1821|IMF 2019
