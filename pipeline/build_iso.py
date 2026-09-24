@@ -22,6 +22,9 @@ CACHE = os.path.join(HERE, '.cache')
 FLAG_ICONS = 'flag-icons@7.5.0'
 SVGO = 'svgo@4.1.0'
 MANUAL = {412: 'XK'}   # Kosovo
+# flag-icons file to use when the ISO-named one is not the place's own flag:
+# sh.svg is the Union Jack (Saint Helena, Ascension and Tristan da Cunha), sh-hl.svg is Saint Helena
+SOURCE = {'sh': 'sh-hl'}
 
 
 def iso2_of(code):
@@ -75,7 +78,7 @@ def main():
     os.makedirs(FLAGS, exist_ok=True)
     want = {i.lower() + '.svg' for i in isos}
     for name in sorted(want):
-        p = os.path.join(src, 'flags', '4x3', name)
+        p = os.path.join(src, 'flags', '4x3', SOURCE.get(name[:-4], name[:-4]) + '.svg')
         if not os.path.exists(p):
             sys.exit('flag-icons has no ' + name)
         shutil.copyfile(p, os.path.join(FLAGS, name))

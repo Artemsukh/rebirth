@@ -24,7 +24,7 @@
 - 속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 본국은 `appdata.json`의 `sov` 칸에 M49 코드로 적었습니다.
 - 모나코는 속령이 아니라 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않습니다. 프랑스와 같은 단계(선진국)로 둡니다.
 - 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.
-- 단계는 **보는 날짜 기준으로 실행 중에 계산합니다.** 졸업 예정국(방글라데시, 라오스, 네팔 2026년 11월 24일, 솔로몬제도 2027년 12월 13일, 캄보디아와 세네갈 2029년 12월 19일)은 졸업일 전까지 최저개발국이고 그날부터 개발도상국입니다. 일정이 바뀌면 `pipeline/classify.py`의 날짜만 고치고 다시 돌리면 됩니다.
+- 단계는 **보는 날짜 기준으로 실행 중에 계산합니다.** 졸업 예정국(방글라데시, 라오스, 네팔 2026년 11월 24일, 솔로몬제도 2027년 12월 13일, 캄보디아와 세네갈 2029년 12월 19일)은 졸업일 전까지 최저개발국이고 그날부터 개발도상국입니다. 일정이 바뀌면 `pipeline/classify.py`의 날짜와 그 아래 검증값(`EXPECT`)을 함께 고치고 다시 돌리면 됩니다.
 - 2026년 9월 24일 기준으로 선진국 80곳(출생아의 7.37%), 개발도상국 112곳(64.29%), 최저개발국 44곳(28.34%)입니다. 세 비중은 합이 100%가 되도록 최대잉여 방식으로 반올림합니다.
 
 ## 자료
@@ -48,12 +48,13 @@ build.py          src/와 data/를 index.html 하나로 합칩니다.
 src/              body.html(구조), style.css(모양), app.js(동작), topo.js(TopoJSON 해독)
 data/             appdata.json(가공된 인구·경제·분류 자료), world.topo.json(지도)
 assets/flags/     236곳의 국기 SVG (index.html과 같은 곳에서 필요할 때만 불러옴)
-assets/passports/ 여권 표지 WebP (수집된 것만)
+assets/passports/ 여권 표지 WebP (수집된 것만. 지금은 비어 있음)
+assets/passports.json  여권 출처 목록 (build.py가 appdata.json의 PASSPORT에서 만듦)
 vendor/           flag-icons 라이선스, topojson-client 3.1.0 (src/topo.js 대조 검사용, ISC)
 pipeline/         자료를 만든 스크립트
 ```
 
-`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov`). 그 밖에 `CONT`, `SUB`, `WORLD`, `CLASS`(발전 단계), `PASSPORT`(여권 이미지 출처) 키가 있습니다.
+`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov`). 그 밖에 `CONT`, `SUB`, `WORLD`, `CLASS`(발전 단계), `PASSPORT`(여권 이미지 출처) 키가 있습니다. `PASSPORT`는 크기를 아끼려고 `index.html`에 넣지 않고, 빌드할 때 `assets/passports.json`으로 따로 써서 페이지가 시작할 때 불러옵니다.
 
 ### pipeline/
 

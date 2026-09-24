@@ -6,7 +6,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
-const PASSPORT = D.PASSPORT || {};
+let PASSPORT = D.PASSPORT || {};
 /* rows are plain arrays; LOC_FIELDS names each column so removing one cannot shift the rest */
 const LOCS = D.LOC.map((r, i) => {
   const o = { i };
@@ -247,6 +247,21 @@ function paintSpace() {
 /* each digit is a 1.1em window over a strip 0-9 x3; the strip stops on the target digit
    after two turns, left digits first. The final value is also given as text for screen readers. */
 const STRIP = Array.from({ length: 30 }, (_, i) => i % 10).join(' ');
+/* digit advance widths in em for the element's font, so a stopped number is spaced like plain text */
+const DIGW = new Map();
+function digitWidths(el) {
+  const cs = getComputedStyle(el);
+  if (!el.isConnected || !cs.fontFamily) return Array(10).fill(0.6);
+  const font = cs.fontStyle + ' ' + cs.fontWeight + ' 100px ' + cs.fontFamily;
+  if (DIGW.has(font)) return DIGW.get(font);
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.font = font;
+  const w = Array.from({ length: 10 }, (_, d) => ctx.measureText(String(d)).width / 100);
+  let loaded = true;
+  try { loaded = !document.fonts || document.fonts.check(font); } catch (e) { loaded = false; }
+  if (loaded) DIGW.set(font, w);
+  return w;
+}
 (function rollKeyframes() {
   const css = Array.from({ length: 10 }, (_, d) => '@keyframes r' + d + ' { 0% { transform: translateY(0); filter: blur(0); } 18% { filter: blur(1.3px); } ' +
     '80% { filter: blur(0); } 100% { transform: translateY(-' + ((20 + d) * 1.1).toFixed(1) + 'em); } }').join('\n');
@@ -263,6 +278,7 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
   const vis = document.createElement('span');
   vis.className = 'roller';
   vis.setAttribute('aria-hidden', 'true');
+  const dw = digitWidths(el);
   let k = 0;
   for (const ch of text) {
     if (ch < '0' || ch > '9') {
@@ -275,6 +291,7 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
     const i = k++;
     const win = document.createElement('span');
     win.className = 'rwin';
+    win.style.width = dw[+ch].toFixed(3) + 'em';
     const strip = document.createElement('span');
     strip.className = 'rstrip';
     strip.textContent = STRIP;
@@ -315,17 +332,11 @@ function fitName() {
   const el = $('#idName');
   el.style.fontSize = '';
   if (el.classList.contains('empty') || !el.clientWidth) return;
-  const probe = el.cloneNode(true);
-  probe.removeAttribute('id');
-  probe.style.cssText = 'position:absolute;visibility:hidden;left:0;top:0;animation:none;letter-spacing:normal;width:' + el.clientWidth + 'px';
-  el.parentNode.appendChild(probe);
-  const f0 = parseFloat(getComputedStyle(el).fontSize);
-  let f = f0;
-  const wrap = el.classList.contains('n3');
-  const over = () => wrap ? probe.scrollHeight > f * 1.12 * 2 + 2 : probe.scrollWidth > probe.clientWidth + 1;
-  while (f > 18 && over()) { f -= 2; probe.style.fontSize = f + 'px'; }
-  probe.remove();
-  if (f !== f0) el.style.fontSize = f + 'px';
+  let f = parseFloat(getComputedStyle(el).fontSize);
+  const f0 = f, wrap = el.classList.contains('n3');
+  const over = () => wrap ? el.scrollHeight > f * 1.12 * 2 + 2 : el.scrollWidth > el.clientWidth + 1;
+  while (f > 18 && over()) { f -= 2; el.style.fontSize = f + 'px'; }
+  if (f === f0) el.style.fontSize = '';
 }
 
 function tierDesc(L) {
@@ -362,7 +373,7 @@ function mountPassport(L) {
   const fig = $('#passport');
   fig.innerHTML = passportHTML(L);
   const img = fig.querySelector('img');
-  if (img) img.onerror = () => { fig.innerHTML = passportHTML(null).replace(PP_EMPTY, PP_NONE); };
+  if (img) img.onerror = () => { if (current.loc === L) fig.innerHTML = passportHTML(null).replace(PP_EMPTY, PP_NONE); };
 }
 
 function setRank(id, r) {
@@ -412,7 +423,7 @@ function renderStage(st, opt = {}) {
   if (empty) {
     ['vProb', 'vGdp', 'vLife', 'vTier'].forEach(id => { $('#' + id).textContent = dash; $('#' + id).classList.remove('na'); });
     ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier', 'sTier', 'fLife'].forEach(id => { $('#' + id).textContent = ''; });
-    setRank('rGdp', 0); setRank('rLife', 0);
+    setRank('rGdp', null); setRank('rLife', null);
     $('#pips').querySelectorAll('i').forEach(i => i.classList.remove('on'));
     $('#tierBar').innerHTML = '';
     bl.innerHTML = '';
@@ -443,8 +454,8 @@ function renderStage(st, opt = {}) {
       if (M.gdp.ppp == null) sg.textContent = '구매력 기준 값 없음';
       else {
         const n = document.createElement('span');
-        roll(n, fmtInt(M.gdp.ppp), 220, spd, animate);
         sg.append('구매력 기준 ', n, ' 국제달러' + (L.gdpNote && L.gdpNote !== L.gdpNNote ? '(' + noteKo(L.gdpNote) + ')' : ''));
+        roll(n, fmtInt(M.gdp.ppp), 220, spd, animate);
       }
       setRank('rGdp', M.gdp.r);
       $('#kGdp').textContent = rankText(M.gdp.r);
@@ -462,11 +473,11 @@ function renderStage(st, opt = {}) {
     const vl = $('#vLife');
     vl.textContent = '';
     const num = document.createElement('span');
-    roll(num, M.life.v.toFixed(1), 260, spd, animate);
     const unit = document.createElement('span');
     unit.className = 'unit';
     unit.textContent = '세';
     vl.append(num, unit);
+    roll(num, M.life.v.toFixed(1), 260, spd, animate);
     setRank('rLife', M.life.r);
     $('#wLife').textContent = '세계 ' + M.life.world.toFixed(1) + '세';
     $('#kLife').textContent = rankText(M.life.r);
@@ -512,6 +523,7 @@ async function onCopy(ev) {
   if (current.type === 'empty') return;
   const ok = await copyText(recordText(current));
   btn.textContent = ok ? '복사했습니다' : '복사하지 못했습니다';
+  announce(btn.textContent);
   setTimeout(() => { if (btn.isConnected) btn.textContent = '결과 복사'; }, 1800);
 }
 
@@ -773,7 +785,20 @@ const PLANET = (() => {
   }
 
   /* the empty state: a grey world slowly turning */
-  function stopIdle() { cancelAnimationFrame(idleRaf); idleRaf = 0; }
+  let idling = false, last = 0;
+  function stopIdle() { cancelAnimationFrame(idleRaf); idleRaf = 0; idling = false; }
+  const canSpin = () => idling && visible && !document.hidden && !REDUCED.matches;
+  function spin(now) {
+    idleRaf = 0;
+    if (!canSpin()) return;
+    if (now - last > 33) {
+      view.lon = (view.lon + Math.min(now - last, 100) * 0.006) % 360;
+      last = now;
+      frame(view, false);
+    }
+    idleRaf = requestAnimationFrame(spin);
+  }
+  function resume() { if (canSpin() && !idleRaf) { last = performance.now(); idleRaf = requestAnimationFrame(spin); } }
   function idle() {
     stopIdle();
     cancelAnimationFrame(raf);
@@ -785,25 +810,24 @@ const PLANET = (() => {
     brackets(1.6);
     cross.style.opacity = '.35';
     frame(view, true);
-    if (REDUCED.matches) return;
-    let last = performance.now();
-    const spin = now => {
-      if (visible && !document.hidden) {
-        if (now - last > 33) {
-          view.lon = (view.lon + (now - last) * 0.006) % 360;
-          last = now;
-          frame(view, false);
-        }
-      } else last = now;
-      idleRaf = requestAnimationFrame(spin);
-    };
-    idleRaf = requestAnimationFrame(spin);
+    idling = true;
+    resume();
   }
+  document.addEventListener('visibilitychange', resume);
+  if (REDUCED.addEventListener) REDUCED.addEventListener('change', resume);
 
   function show(st, opt = {}) {
     body.classList.toggle('enter', !!opt.animate && !view);
     if (st.type === 'empty') {
-      if (!setup()) { clear(); status(GEO.failed ? 'NO MAP DATA' : 'STANDBY'); hud.code.textContent = 'AWAITING DRAW'; return; }
+      if (!setup()) {
+        clear();
+        svg.classList.remove('flying', 'locked');
+        brackets(1.6);
+        cross.style.opacity = '.35';
+        status(GEO.failed ? 'NO MAP DATA' : 'STANDBY');
+        hud.code.textContent = 'AWAITING DRAW';
+        return;
+      }
       idle();
       return;
     }
@@ -828,13 +852,13 @@ const PLANET = (() => {
     fly(target, Math.round(2000 * (opt.speed || 1)));
   }
 
-  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; }).observe(svg);
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; resume(); }).observe(svg);
   return { show };
 })();
 
 /* ================= world map (needs d3) ================= */
 const MAP = { ready: false };
-let batchCounts = null;
+let batchCounts = null, lastBatch = null;
 
 function initMap() {
   if (MAP.ready) return;
@@ -938,6 +962,7 @@ function initMap() {
       .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r / K).attr('data-code', d => d.code);
   };
   MAP.clearBatch = () => { batchCounts = null; batchG.selectAll('*').remove(); };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') tip.hidden = true; });
 
   /* tooltip + click */
   const tip = $('#tip'), wrap = $('#mapWrap');
@@ -958,6 +983,7 @@ function initMap() {
     const x = ev.clientX - r.left, half = tip.offsetWidth / 2 + 4;
     tip.style.left = Math.min(Math.max(x, half), r.width - half) + 'px';
     tip.style.top = (ev.clientY - r.top) + 'px';
+    tip.classList.toggle('below', ev.clientY - r.top < tip.offsetHeight + 24);
   }).on('pointerleave', () => { tip.hidden = true; })
     .on('click', ev => { const code = codeAt(ev); if (BY.has(code)) { tip.hidden = true; lookup(code); } });
 
@@ -991,6 +1017,7 @@ function initMap() {
 
   MAP.ready = true;
   if (current.type !== 'empty') MAP.pick(current.loc.code, false);
+  if (lastBatch && !$('#batch').hidden) MAP.showBatch(lastBatch);
 }
 
 function mapFail() {
@@ -1026,11 +1053,15 @@ function tickLive() {
 
 function renderMethod() {
   const T = tierStats(), C = D.CLASS;
-  const g = Object.entries(C.ldc).filter(([, d]) => d).map(([c, d]) => BY.get(+c).ko + ' ' + dateKo(d)).join(', ');
+  const now = new Date();
+  const dated = Object.entries(C.ldc).filter(([, d]) => d).sort((a, b) => a[1].localeCompare(b[1]) || BY.get(+a[0]).ko.localeCompare(BY.get(+b[0]).ko, 'ko'));
+  const past = dated.filter(([, d]) => now >= new Date(d + 'T00:00:00Z')), next = dated.filter(([, d]) => now < new Date(d + 'T00:00:00Z'));
+  const list = xs => xs.map(([c, d]) => BY.get(+c).ko + ' ' + dateKo(d)).join(', ');
+  const g = (next.length ? '졸업 예정: ' + list(next) + '.' : '') + (past.length ? (next.length ? ' ' : '') + '졸업함: ' + list(past) + '.' : '');
   $('#tierRules').textContent = '발전 단계는 두 국제기구의 공식 분류를 그대로 따르고, 오늘 날짜(' + todayKo() + ')를 기준으로 계산합니다.';
   $('#tierList').innerHTML =
     '<li class="t-ADV"><b>선진국</b>: ' + esc(C.sources.imf) + '의 선진경제 ' + C.adv.length + '곳과 그 속령. 지금 ' + T.count.ADV + '곳, 2026년 출생아의 ' + T.p2.ADV + '%입니다.</li>' +
-    '<li class="t-LDC"><b>최저개발국</b>: ' + esc(C.sources.ldc) + '의 ' + Object.keys(C.ldc).length + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. 졸업 예정: ' + esc(g) + '. 지금 ' + T.count.LDC + '곳, ' + T.p2.LDC + '%입니다.</li>' +
+    '<li class="t-LDC"><b>최저개발국</b>: ' + esc(C.sources.ldc) + '의 ' + Object.keys(C.ldc).length + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + esc(g) + ' 지금 ' + T.count.LDC + '곳, ' + T.p2.LDC + '%입니다.</li>' +
     '<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + T.count.DEV + '곳, ' + T.p2.DEV + '%입니다.</li>' +
     '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
     '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>';
@@ -1069,7 +1100,7 @@ function renderHundred() {
   $('#hLegend').innerHTML = order.map(ci => '<li class="k' + ci + '"><i></i><span>' + CONT[ci] + '</span><b>' + fmtSmall(exact[ci]) + '명</b></li>').join('');
   const top = LOCS.slice().sort((x, y) => y.births - x.births).slice(0, 12);
   const max = top[0].births;
-  const row = (l, cls) => '<li class="k' + l.cont + (cls ? ' ' + cls : '') + '"><span class="nm">' + esc(l.ko) + '</span>' +
+  const row = (l, cls) => '<li class="k' + l.cont + (cls ? ' ' + cls : '') + '"><span class="nm" title="' + esc(l.ko) + '">' + esc(l.ko) + '</span>' +
     '<span class="bar"><b style="--w:' + (l.births / max * 100).toFixed(2) + '%"></b></span><span class="v">' + fmtSmall(l.births / tot * 100) + '명</span></li>';
   const refL = current.type !== 'empty' ? current.loc : BY.get(410);
   $('#hBars').innerHTML = top.map(l => row(l, l === refL ? 'ref' : '')).join('') + (top.includes(refL) ? '' : row(refL, 'ref extra'));
@@ -1172,7 +1203,14 @@ function markTableRow() {
   if (b) b.closest('tr').classList.add('cur');
 }
 /* a missing flag file leaves an empty chip frame instead of a broken image */
-$('#tBody').addEventListener('error', e => { if (e.target.tagName === 'IMG') e.target.remove(); }, true);
+$('#tBody').addEventListener('error', e => {
+  const img = e.target;
+  if (img.tagName !== 'IMG') return;
+  const code = img.getAttribute('src').replace(/^.*\/|\.svg$/g, '').toUpperCase(), s = document.createElement('span');
+  s.className = 'chip-code';
+  s.textContent = code;
+  img.replaceWith(s);
+}, true);
 
 /* ================= actions ================= */
 function announce(t) { const s = $('#sr'); s.textContent = ''; setTimeout(() => { s.textContent = t; }, 30); }
@@ -1180,6 +1218,7 @@ function smoothTo(el) { el.scrollIntoView({ behavior: REDUCED.matches ? 'auto' :
 /* after a lookup or reopening a record from further down the page, bring the result screen back */
 function reveal() {
   const r = stage.getBoundingClientRect();
+  $('#idName').focus({ preventScroll: true });
   if (r.top < -window.innerHeight * 0.35 || r.top > window.innerHeight * 0.5) smoothTo(document.body);
 }
 
@@ -1239,6 +1278,7 @@ function doDraws(n) {
     hideBatch();
     if (MAP.ready) MAP.pick(last.loc.code, true);
   } else {
+    lastBatch = batch;
     renderBatch(n, batch, last, tierN);
     if (MAP.ready) { MAP.showBatch(batch); MAP.pick(last.loc.code, false); MAP.reset(); }
   }
@@ -1307,6 +1347,7 @@ $('#clearBtn').addEventListener('click', e => {
   if (Date.now() - clearArmed > 3500) {
     clearArmed = Date.now();
     btn.textContent = '한 번 더 누르면 지웁니다';
+    announce('기록을 지우려면 한 번 더 누르세요.');
     setTimeout(() => { if (Date.now() - clearArmed >= 3400) btn.textContent = '기록 지우기'; }, 3500);
     return;
   }
@@ -1323,6 +1364,15 @@ $('#clearBtn').addEventListener('click', e => {
   announce('기록을 지웠습니다.');
 });
 $('#tTitle').textContent = LOCS.length + '개 국가·지역 전체';
+$('#idName').setAttribute('tabindex', '-1');
+if (!D.PASSPORT && window.fetch) {
+  fetch('assets/passports.json').then(r => (r.ok ? r.json() : {})).then(p => {
+    if (!p || typeof p !== 'object' || !Object.keys(p).length) return;
+    PASSPORT = p;
+    renderMethod();
+    if (current.type !== 'empty') mountPassport(current.loc);
+  }).catch(() => { /* credits file missing: every frame stays empty */ });
+}
 
 tierStats();
 paintSpace();

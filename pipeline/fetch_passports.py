@@ -118,6 +118,9 @@ ALIASES = {"Côte d'Ivoire": 'Ivory Coast', 'Türkiye': 'Turkey', 'Viet Nam': 'V
            'Sint Maarten (Dutch part)': 'Sint Maarten', 'Palestine': 'State of Palestine'}
 
 
+# places whose sov column is not a real dependency (Monaco shares France's tier only)
+NOT_DEPENDENT = {492}
+
 def configure(root):
     """Point every path at a checkout rooted at root (the tests use a temp dir)."""
     global ROOT, DATA, ASSETS, REVIEW, REPORT, GITIGNORE, CACHE, WORK, SHEET, STATE
@@ -1073,7 +1076,8 @@ def apply():
                      'changes': changes, 'restrictions': f['restrictions']}
     passport = dict(own)
     for code, p in places.items():
-        if code not in own and p['sov'] in own:
+        # Monaco (492) is sovereign; its sov only places it in France's tier
+        if code not in own and code not in NOT_DEPENDENT and p['sov'] in own:
             passport[code] = dict(own[p['sov']], via='sov:%d' % p['sov'])
     keep = {'%d.webp' % code for code in own}
     stale = [n for n in os.listdir(ASSETS) if n.endswith('.webp') and n not in keep]
