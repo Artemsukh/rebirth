@@ -21,9 +21,19 @@
   --clip-btn: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
   --spd: 1;
   --tier: var(--tier-none);
+  --rail: 34px;
   color-scheme: dark;
   box-sizing: border-box;
 }
+/* Japanese: kanji and kana from a Japanese font (the Korean one would draw kanji in Korean forms),
+   and lines may break between characters (keep-all would only break at spaces, which Japanese lacks) */
+:root:lang(ja) {
+  --jp: 'IBM Plex Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif;
+  --display: var(--jp);
+  --num: 'Chakra Petch', var(--jp);
+  --sans: var(--jp);
+}
+:root:lang(ja) body { word-break: normal; line-break: strict; }
 *, *::before, *::after { box-sizing: inherit; }
 html { background: var(--space); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
@@ -50,6 +60,34 @@ a:hover { text-decoration-color: currentColor; }
 .space { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--space); }
 .space svg { display: block; width: 100%; height: 100%; max-width: none; }
 
+/* ---------- language switcher: a segmented bar whose highlight slides to the chosen language ---------- */
+.lang-bar {
+  position: relative; z-index: 4; height: var(--rail); padding: 0 40px;
+  display: flex; justify-content: flex-end; align-items: center;
+  background: rgba(5, 7, 22, .9); border-bottom: 1px solid var(--line-2);
+}
+.lang-sw { display: flex; align-items: center; gap: 10px; }
+.globe { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--ink-3); stroke-width: 1.1; }
+/* equal columns, so the highlight is a quarter of the track moved by --i (set in app.js) */
+.lang-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; box-shadow: inset 0 0 0 1px var(--line); }
+.lang-thumb {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 25%; pointer-events: none;
+  transform: translateX(calc(var(--i, 0) * 100%));
+  background: rgba(230, 240, 255, .1);
+  box-shadow: inset 0 0 0 1px rgba(230, 240, 255, .38), inset 0 -2px 0 var(--tier);
+  transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .6s;
+}
+.lang-track label { position: relative; display: block; cursor: pointer; }
+.lang-track input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.lang-track label span { display: block; padding: 3px 13px; text-align: center; font-size: .8125rem; line-height: 1.5; color: var(--ink-3); white-space: nowrap; transition: color .2s; }
+.lang-track label:hover span { color: var(--ink); }
+.lang-track input:checked + span { color: var(--ink-hi); }
+.lang-track input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: -2px; }
+.lang-track [lang="ko"] { font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+.lang-track [lang="ja"] { font-family: 'IBM Plex Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif; }
+.lang-track [lang="en"], .lang-track [lang="es"] { font-family: 'IBM Plex Sans KR', sans-serif; }
+@media (forced-colors: active) { .lang-thumb { border: 2px solid Highlight; } }
+
 /* ---------- header ---------- */
 .hud-head {
   position: relative; z-index: 3; height: 72px; padding: 0 40px;
@@ -61,7 +99,7 @@ a:hover { text-decoration-color: currentColor; }
 .logo { width: 34px; height: 34px; flex: none; fill: none; stroke: var(--ink); stroke-width: 1.4; }
 .logo ellipse { stroke: var(--tier); transition: stroke .6s; }
 .logo .logo-dot { fill: var(--tier); stroke: none; }
-.brand-name { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.25rem; letter-spacing: .04em; white-space: nowrap; }
+.brand-name { margin: 0; font-family: 'Orbit', 'IBM Plex Sans KR', sans-serif; font-weight: 400; font-size: 1.25rem; letter-spacing: .04em; white-space: nowrap; }
 .head-mid { margin: 0; font-size: .9375rem; color: var(--ink-2); text-align: center; white-space: nowrap; }
 .head-mid b { color: var(--ink); font-family: var(--num); font-weight: 600; }
 .head-live { margin: 0; justify-self: end; display: flex; gap: 18px; align-items: center; font-size: .8125rem; color: var(--ink-3); white-space: nowrap; font-family: var(--num); font-variant-numeric: tabular-nums; }
@@ -78,7 +116,7 @@ a:hover { text-decoration-color: currentColor; }
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 340px minmax(0, 1fr) 390px; column-gap: 24px;
   grid-template-areas: "id center read";
-  min-height: calc(100vh - 72px); min-height: calc(100svh - 72px);
+  min-height: calc(100vh - 72px - var(--rail)); min-height: calc(100svh - 72px - var(--rail));
   padding: 20px 40px 32px;
 }
 .center-col { grid-area: center; position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; }
@@ -208,7 +246,7 @@ a:hover { text-decoration-color: currentColor; }
 .pips { display: inline-flex; gap: 5px; flex: none; }
 .pips i { display: block; width: 21px; height: 8px; transform: skewX(-24deg); background: var(--pip-off); transition: background-color .6s; }
 .pips i.on { background: var(--tier); box-shadow: 0 0 8px color-mix(in srgb, var(--tier) 60%, transparent); }
-.tier-name { margin: 0; font-family: var(--display); font-size: 40px; line-height: 1.15; color: var(--tier); min-height: 1.15em; }
+.tier-name { margin: 0; min-width: 0; white-space: nowrap; font-family: var(--display); font-size: 40px; line-height: 1.15; color: var(--tier); min-height: 1.15em; }
 .tier-desc { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
 .tier-bar { display: flex; margin-top: 12px; height: 8px; gap: 2px; }
 .tier-bar span { position: relative; height: 100%; background: var(--k); opacity: .26; transition: opacity .6s; }
@@ -357,6 +395,9 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .cmp { list-style: none; margin: 0; padding: 0; font-size: .875rem; }
 .cmp li { display: grid; grid-template-columns: 6.2em minmax(0, 1fr) 8.6em; gap: 12px; align-items: center; padding: 5px 0; }
 .cmp.tiers li { grid-template-columns: 6.2em minmax(0, 1fr) 8.6em; }
+/* English and Spanish continent and tier names are longer than the Korean and Japanese ones */
+:root:lang(en) .cmp li, :root:lang(es) .cmp li { grid-template-columns: 8.8em minmax(0, 1fr) 9.4em; }
+:root:lang(en) .stack-row, :root:lang(es) .stack-row { grid-template-columns: 3.2em minmax(0, 1fr); }
 .cmp .bar { position: relative; height: 12px; background: rgba(234, 242, 255, .06); }
 .cmp .bar b { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); background: var(--k); }
 .cmp .bar i { position: absolute; left: var(--x); top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); }
@@ -420,6 +461,10 @@ td.na { color: var(--ink-3); }
 @media (min-width: 1180px) {
   .center-col { margin-right: -50px; }
 }
+/* the English, Japanese and Spanish header lines are longer; the counter keeps its number and unit */
+@media (min-width: 1180px) and (max-width: 1439px) {
+  :root:not(:lang(ko)) .head-live .since { display: none; }
+}
 @media (min-width: 1180px) and (max-width: 1379px) {
   .stage { grid-template-columns: 300px minmax(0, 1fr) 350px; }
   .planet-wrap { height: 480px; }
@@ -431,6 +476,7 @@ td.na { color: var(--ink-3); }
 
 /* ---------- tablet 760..1179 ---------- */
 @media (max-width: 1179px) {
+  .lang-bar { padding: 0 24px; }
   .hud-head { padding: 0 24px; grid-template-columns: auto minmax(0, 1fr) auto; }
   .head-mid { font-size: .875rem; overflow: hidden; text-overflow: ellipsis; }
   .head-live .rate { display: none; }
@@ -473,6 +519,9 @@ td.na { color: var(--ink-3); }
 
 /* ---------- phone < 760 ---------- */
 @media (max-width: 759px) {
+  :root { --rail: 40px; }
+  .lang-bar { padding: 0 16px; }
+  .lang-track label span { padding: 6px 9px; }
   .hud-head { height: 56px; padding: 0 16px; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
   .logo { width: 28px; height: 28px; }
   .brand-name { font-size: 1.0625rem; }
@@ -539,10 +588,18 @@ td.na { color: var(--ink-3); }
   .waffle, .legend { max-width: 360px; }
   .bars li { grid-template-columns: 7em minmax(0, 1fr) 4.4em; gap: 8px; }
   .cmp li, .cmp.tiers li { grid-template-columns: 5.4em minmax(0, 1fr) 7.8em; gap: 8px; }
+  :root:lang(en) .cmp li, :root:lang(es) .cmp li { grid-template-columns: 7.2em minmax(0, 1fr) 8.6em; }
   .tbl-wrap { max-height: 70vh; }
   tbody th { white-space: normal; min-width: 9em; max-width: 11em; }
   tbody td, tbody th { padding-left: 10px; padding-right: 10px; }
   .tier-strip span { font-size: .8125rem; }
+}
+
+@media (max-width: 379px) {
+  .globe { display: none; }
+  /* room for "Volver a nacer" and "Be born again" on the narrowest phones */
+  .actions { grid-template-columns: minmax(0, 1fr) 56px 56px; }
+  .actions .btn-primary { font-size: .9375rem; letter-spacing: 0; }
 }
 
 #idName { transition: none !important; }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble the single-file app: src/{style.css, body.html, app.js} + data + topology.
+"""Assemble the single-file app: src/{style.css, body.html, i18n.js, app.js} + data + topology.
 
 Flags under assets/flags/ are not inlined; the page loads the one it needs as a
 same-origin static file (GitHub Pages serves it next to index.html)."""
@@ -54,6 +54,8 @@ def json_script(obj):
 
 css = min_css(read(os.path.join(SRC, 'style.css')))
 body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('\n') if l.strip())
+# page text in four languages, read by app.js (it must come first in the same script)
+i18n = min_js(read(os.path.join(SRC, 'i18n.js')))
 app = min_js(read(os.path.join(SRC, 'app.js')))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))
 topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='utf-8'))
@@ -61,17 +63,17 @@ topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='u
 # (pipeline/check_topo.js compares them) in a seventh of the size
 tj = min_js(read(os.path.join(SRC, 'topo.js')))
 
-for name, s in (('app.js', app), ('topo.js', tj)):
+for name, s in (('i18n.js', i18n), ('app.js', app), ('topo.js', tj)):
     if '</script' in s.lower():
         sys.exit(name + ' contains </script')
 
 html = f'''<!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rebirth Simulator</title>
-<meta name="description" content="2026년에 태어날 아기 1억 3,250만 명 가운데 한 명으로 무작위로 다시 태어나 봅니다. UN 세계인구전망 2024와 IMF 자료로 236개 국가·지역의 출생 확률, 1인당 GDP, 발전 단계, 기대수명을 보여 줍니다.">
+<meta name="description" content="Be born again at random as one of the 132.5 million babies of 2026. Birth odds, GDP per head, development tier and life expectancy for 236 countries and territories, from UN World Population Prospects 2024 and IMF data.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050716">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,6 +92,7 @@ html = f'''<!doctype html>
 {tj}
 </script>
 <script>
+{i18n}
 {app}
 </script>
 </body>

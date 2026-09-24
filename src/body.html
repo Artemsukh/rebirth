@@ -1,5 +1,19 @@
 <div class="space" id="space" aria-hidden="true"></div>
-<a class="skip" href="#readCol">판독값으로 건너뛰기</a>
+<a class="skip" href="#readCol" data-t="skip"></a>
+
+<div class="lang-bar">
+  <div class="lang-sw" role="radiogroup" aria-labelledby="langL">
+    <svg class="globe" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><ellipse cx="10" cy="10" rx="3.2" ry="7.5"/><path d="M2.5 10h15M4 6h12M4 14h12"/></svg>
+    <span class="sr-only" id="langL" data-t="langLabel"></span>
+    <div class="lang-track" id="langTrack">
+      <span class="lang-thumb" aria-hidden="true"></span>
+      <label><input type="radio" name="lang" value="en"><span lang="en">English</span></label>
+      <label><input type="radio" name="lang" value="ja"><span lang="ja">日本語</span></label>
+      <label><input type="radio" name="lang" value="es"><span lang="es">Español</span></label>
+      <label><input type="radio" name="lang" value="ko"><span lang="ko">한국어</span></label>
+    </div>
+  </div>
+</div>
 
 <header class="hud-head">
   <div class="brand">
@@ -17,9 +31,9 @@
         <svg id="planet" viewBox="0 0 720 600" aria-hidden="true"></svg>
       </div>
       <div class="actions" id="actions">
-        <button type="button" class="btn btn-primary" id="draw1">다시 태어나기</button>
-        <button type="button" class="btn btn-ghost" id="draw10"><span class="lg">10번 연속</span><span class="sm" aria-hidden="true">×10</span></button>
-        <button type="button" class="btn btn-ghost" id="draw100"><span class="lg">100번 연속</span><span class="sm" aria-hidden="true">×100</span></button>
+        <button type="button" class="btn btn-primary" id="draw1" data-t="draw1"></button>
+        <button type="button" class="btn btn-ghost" id="draw10"><span class="lg" data-t="draw10"></span><span class="sm" aria-hidden="true">×10</span></button>
+        <button type="button" class="btn btn-ghost" id="draw100"><span class="lg" data-t="draw100"></span><span class="sm" aria-hidden="true">×100</span></button>
       </div>
       <p class="batch-line" id="batchLine" hidden></p>
     </div>
@@ -27,23 +41,23 @@
     <div class="id-col" id="idCol">
       <div class="id-head">
         <span class="chip" id="chip"></span>
-        <div class="id-kind"><span class="kind-l" id="kindL">2026년 출생 기록</span><span class="kind-no" id="kindNo"></span></div>
+        <div class="id-kind"><span class="kind-l" id="kindL"></span><span class="kind-no" id="kindNo"></span></div>
         <h2 class="id-name" id="idName"></h2>
         <span class="id-sex" id="idSex"></span>
         <div class="id-sub"><p class="id-en" id="idEn"></p><p class="id-geo" id="idGeo"></p></div>
-        <button type="button" class="btn btn-mini" id="copyBtn" hidden>결과 복사</button>
+        <button type="button" class="btn btn-mini" id="copyBtn" data-t="copy" hidden></button>
       </div>
       <dl class="facts" id="facts"></dl>
     </div>
 
     <div class="read-col" id="readCol" tabindex="-1">
       <section class="panel p-prob" aria-labelledby="lbProb">
-        <h3 class="p-label" id="lbProb">이 나라에 태어날 확률</h3>
+        <h3 class="p-label" id="lbProb" data-t="lbProb"></h3>
         <p class="p-val big" id="vProb"></p>
         <p class="p-sub" id="sProb"></p>
       </section>
       <section class="panel p-gdp" aria-labelledby="lbGdp">
-        <h3 class="p-label" id="lbGdp">1인당 GDP <small id="nGdp"></small></h3>
+        <h3 class="p-label" id="lbGdp"><span data-t="lbGdp"></span> <small id="nGdp"></small></h3>
         <p class="p-val big" id="vGdp"></p>
         <p class="p-sub" id="sGdp"></p>
         <div class="rank" id="rGdp">
@@ -52,7 +66,7 @@
         </div>
       </section>
       <section class="panel p-tier" aria-labelledby="lbTier">
-        <h3 class="p-label" id="lbTier">발전 단계</h3>
+        <h3 class="p-label" id="lbTier" data-t="lbTier"></h3>
         <div class="tier-row">
           <span class="pips" id="pips" aria-hidden="true"><i></i><i></i><i></i></span>
           <p class="tier-name" id="vTier"></p>
@@ -63,7 +77,7 @@
         <p class="tier-say" id="sTier"></p>
       </section>
       <section class="panel p-life" aria-labelledby="lbLife">
-        <h3 class="p-label" id="lbLife">기대수명</h3>
+        <h3 class="p-label" id="lbLife" data-t="lbLife"></h3>
         <p class="p-val mid" id="vLife"></p>
         <div class="rank thin" id="rLife">
           <span class="bar" aria-hidden="true"><b></b><i></i></span>
@@ -77,15 +91,15 @@
   <section class="block atlas" id="atlas" aria-labelledby="atlasTitle">
     <div class="block-h">
       <span class="idx" aria-hidden="true">01</span>
-      <h2 id="atlasTitle">세계 지도</h2>
+      <h2 id="atlasTitle" data-t="atlasTitle"></h2>
     </div>
     <p class="sub" id="atlasLede"></p>
     <div class="atlas-top">
       <ul class="keys" id="keys"></ul>
-      <button type="button" class="btn btn-mini" id="resetMap" hidden>세계 전체 보기</button>
+      <button type="button" class="btn btn-mini" id="resetMap" data-t="resetMap" hidden></button>
     </div>
     <div class="map-wrap" id="mapWrap">
-      <svg id="map" viewBox="0 0 1000 486" role="img" aria-label="세계 지도"></svg>
+      <svg id="map" viewBox="0 0 1000 486" role="img"></svg>
       <div class="tip" id="tip" hidden></div>
       <p class="map-msg" id="mapMsg" hidden></p>
     </div>
@@ -96,22 +110,22 @@
   <section class="block" id="hundred" aria-labelledby="hTitle">
     <div class="block-h">
       <span class="idx" aria-hidden="true">02</span>
-      <h2 id="hTitle">세계 출생아를 100명으로 줄이면</h2>
+      <h2 id="hTitle" data-t="hTitle"></h2>
     </div>
     <p class="sub" id="hLede"></p>
     <div class="h-tier">
-      <h3 class="minor">발전 단계로 나누면</h3>
+      <h3 class="minor" data-t="hByTier"></h3>
       <div class="tier-strip" id="hTier" role="img"></div>
       <ul class="tier-keys" id="hTierKeys"></ul>
     </div>
     <div class="h-grid">
       <div>
-        <h3 class="minor">대륙으로 나누면</h3>
+        <h3 class="minor" data-t="hByCont"></h3>
         <div class="waffle" id="waffle" role="img"></div>
         <ul class="legend" id="hLegend"></ul>
       </div>
       <div>
-        <h3 class="minor">나라별로 보면</h3>
+        <h3 class="minor" data-t="hByCountry"></h3>
         <ol class="bars" id="hBars"></ol>
       </div>
     </div>
@@ -120,22 +134,22 @@
   <section class="block" id="mine" aria-labelledby="mTitle">
     <div class="block-h">
       <span class="idx" aria-hidden="true">03</span>
-      <h2 id="mTitle">나의 기록</h2>
+      <h2 id="mTitle" data-t="mTitle"></h2>
     </div>
     <p class="sub" id="mLede"></p>
     <div class="m-grid">
       <div id="mCmpWrap">
-        <h3 class="minor">대륙별로 나온 비율</h3>
+        <h3 class="minor" data-t="mByCont"></h3>
         <ul class="cmp" id="mCmp"></ul>
-        <h3 class="minor gap">발전 단계별로 나온 비율</h3>
+        <h3 class="minor gap" data-t="mByTier"></h3>
         <ul class="cmp tiers" id="mTier"></ul>
-        <p class="note">막대는 실제로 나온 비율, 세로선은 출생아 자료로 기대하는 비율입니다. 많이 뽑을수록 둘이 가까워집니다.</p>
+        <p class="note" data-t="mNote"></p>
         <p class="mtop" id="mTop"></p>
       </div>
       <div>
-        <h3 class="minor">최근 기록</h3>
+        <h3 class="minor" data-t="mRecent"></h3>
         <ol class="recent" id="mRecent"></ol>
-        <button type="button" class="btn btn-mini" id="clearBtn">기록 지우기</button>
+        <button type="button" class="btn btn-mini" id="clearBtn" data-t="clear"></button>
       </div>
     </div>
   </section>
@@ -143,21 +157,21 @@
   <section class="block" id="all" aria-labelledby="tTitle">
     <div class="block-h">
       <span class="idx" aria-hidden="true">04</span>
-      <h2 id="tTitle">236개 국가·지역 전체</h2>
+      <h2 id="tTitle"></h2>
     </div>
-    <p class="sub">이름을 누르면 그 나라의 정보를 위 화면에 띄웁니다. 1인당 GDP는 2025년 값으로, 앞 열은 시장 환율로 바꾼 미국 달러, 뒤 열은 물가 차이를 걷어 낸 구매력 기준 국제달러입니다. *표는 IMF 대신 세계은행이나 UN 값을 쓴 곳입니다.</p>
+    <p class="sub" data-t="tSub"></p>
     <div class="tbl-tools">
-      <label class="sr-only" for="q">나라 이름 검색</label>
-      <input id="q" type="search" placeholder="나라 이름 검색 (한글 또는 영어)" autocomplete="off" spellcheck="false">
-      <label class="sr-only" for="contSel">대륙 선택</label>
+      <label class="sr-only" for="q" data-t="qLabel"></label>
+      <input id="q" type="search" data-tp="qPh" autocomplete="off" spellcheck="false">
+      <label class="sr-only" for="contSel" data-t="contLabel"></label>
       <select id="contSel"></select>
-      <label class="sr-only" for="tierSel">발전 단계 선택</label>
+      <label class="sr-only" for="tierSel" data-t="tierLabel"></label>
       <select id="tierSel"></select>
       <span class="count" id="tCount" aria-live="polite"></span>
     </div>
     <div class="tbl-wrap">
       <table id="tbl">
-        <caption class="sr-only">나라별 2026년 출생아, 인구, 태어날 확률, 발전 단계, 기대수명, 1인당 GDP(환율 기준, 구매력 기준)</caption>
+        <caption class="sr-only" data-t="tCaption"></caption>
         <thead><tr id="tHead"></tr></thead>
         <tbody id="tBody"></tbody>
       </table>
@@ -167,31 +181,31 @@
   <section class="block method" id="method" aria-labelledby="dTitle">
     <div class="block-h">
       <span class="idx" aria-hidden="true">05</span>
-      <h2 id="dTitle">자료와 계산 방법</h2>
+      <h2 id="dTitle" data-t="dTitle"></h2>
     </div>
 
-    <h3>어디서 온 숫자인가</h3>
-    <p><b>출생아, 인구, 성비, 기대수명, 합계출산율</b>은 국제연합(UN)의 『세계인구전망 2024(World Population Prospects 2024)』 중위 추계에서 2026년 값을 가져왔습니다. 인구는 한 해의 가운데인 7월 1일 기준이며, 세계 합계는 83억 67만 8,396명으로 UN 공식 값과 같습니다. 출생아는 2026년 한 해 동안 태어날 1억 3,250만 3,469명입니다. 중위연령은 UN과 같은 방식으로 한 살 단위 누적 분포를 보간해 구했습니다.</p>
-    <p><b>1인당 GDP</b>는 국제통화기금(IMF) 세계경제전망(2026년 4월)의 2025년 추정치를 두 가지로 적었습니다. 큰 숫자는 시장 환율로 바꾼 미국 달러(명목)이고, 순위도 이 값으로 매깁니다. 작은 숫자는 나라 사이 물가 차이를 걷어 낸 구매력평가(PPP) 기준 국제달러입니다. 두 값은 같은 경제를 다른 자로 잰 것이라 차이가 큽니다. 한국은 환율 기준 36,227달러, 구매력 기준 65,405국제달러이고, 인도는 2,675달러와 11,789국제달러입니다. Worldometers가 정리한 IMF 표에서 옮겼고, IMF 값이 없는 곳은 세계은행이나 UN의 다른 해 값을 쓰고 화면과 표에 그 사실을 적었습니다. 환율 기준으로 레위니옹, 코소보, 저지섬처럼 값이 없는 18곳은 비워 두었습니다.</p>
-    <p><b>지도</b>는 Natural Earth의 1:5천만 경계를 단순화한 것입니다. UN 통계 단위와 맞추려고 프랑스령 기아나, 과들루프, 마르티니크, 레위니옹, 마요트와 카리브 네덜란드를 본국 윤곽에서 떼어 냈습니다. 지브롤터, 토켈라우, 투발루처럼 윤곽이 남지 않을 만큼 작은 곳은 점으로 표시합니다.</p>
+    <h3 data-t="mhSrc"></h3>
+    <p data-th="mpSrc1Html"></p>
+    <p data-th="mpSrc2Html"></p>
+    <p data-th="mpSrc3Html"></p>
 
-    <h3>발전 단계는 어떻게 나누는가</h3>
+    <h3 data-t="mhTier"></h3>
     <p id="tierRules"></p>
     <ul class="rules" id="tierList"></ul>
 
-    <h3>어떻게 뽑는가</h3>
-    <p>난수는 브라우저의 암호학적 난수 생성기(crypto.getRandomValues)에서 53비트를 꺼내 씁니다. 나라를 2026년 출생아 수에 비례해 고른 뒤, 성별을 그 나라의 출생 성비로 정합니다. 성비가 1.06이면 남자아이가 나올 확률은 1.06 ÷ 2.06, 약 51.5%입니다.</p>
+    <h3 data-t="mhDraw"></h3>
+    <p data-t="mpDraw"></p>
 
-    <h3>순위를 읽는 법</h3>
-    <p>순위는 나라 수가 아니라 아기 수로 셉니다. 기록의 ‘상위 3%’는 2026년에 태어나는 같은 성별 아기 가운데 이 나라보다 지표가 좋은 나라에서 태어나는 아기가 약 3%라는 뜻입니다. 같은 나라에서 태어나는 아기는 절반만 셉니다. 지도나 표에서 나라를 골라 조회할 때는 남녀를 합친 2026년 출생아 전체와 비교합니다.</p>
+    <h3 data-t="mhRank"></h3>
+    <p data-t="mpRank"></p>
 
-    <h3>숫자가 말해 주지 않는 것</h3>
-    <p>나라 평균은 나라 안의 격차를 가립니다. 같은 나라라도 지역과 소득, 도시와 농촌에 따라 출발선은 크게 다릅니다. 2026년 값은 모두 추계라서 추계 뒤에 벌어진 전쟁이나 재난은 반영되지 않았을 수 있습니다. 1인당 GDP는 환율 기준이든 구매력 기준이든 평균 생산량을 거칠게 보여 줄 뿐 분배는 말해 주지 않습니다. 발전 단계는 국제기구의 행정 분류일 뿐, 그 나라에서 태어난 한 사람의 삶을 말해 주지 않습니다.</p>
+    <h3 data-t="mhLimits"></h3>
+    <p data-t="mpLimits"></p>
 
-    <h3>국기</h3>
-    <p>국기는 <a href="https://github.com/lipis/flag-icons">flag-icons</a>(MIT 라이선스)의 4:3 SVG를 그대로 씁니다. 색과 비율은 바꾸지 않았습니다.</p>
+    <h3 data-t="mhFlags"></h3>
+    <p data-th="mpFlagsHtml"></p>
 
-    <p class="colophon">자료 기준일: UN WPP 2024 중위 추계(2026년), IMF 세계경제전망 2026년 4월판, UN 최저개발국 목록(2024년 12월 19일).</p>
+    <p class="colophon" data-t="colophon"></p>
   </section>
 </main>
 <p class="sr-only" aria-live="polite" id="sr"></p>

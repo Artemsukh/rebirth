@@ -12,6 +12,7 @@
 - **순위:** 나라 수가 아니라 사람 수로 셉니다. "상위 7%"는 같은 해에 태어나는 같은 성별 아기 가운데 이 나라보다 지표가 좋은 나라에서 태어나는 아기가 약 7%라는 뜻입니다.
 - **결과 화면:** 우주 탐사선 스캐너처럼 꾸몄습니다. 뽑힌 나라를 가운데 둔 행성이 떠오르는데, 카메라가 지구본 전체로 물러났다가 그 나라 쪽으로 돌아 들어가며 확대합니다. 작은 나라도 보이도록 중심에서 멀어지는 각도를 최대 22배까지 늘린 뒤 구에 감쌉니다. 숫자는 슬롯머신처럼 굴러가다 멈춥니다. 동작 줄이기 설정에서는 모든 움직임을 끕니다.
 - **지도:** Natural Earth 1:5천만 경계를 씁니다. UN 통계 단위에 맞추려고 프랑스 해외 레지옹과 카리브 네덜란드를 본국에서 떼어 냈습니다. 원 크기는 출생아 수, 색은 발전 단계입니다.
+- **언어:** English, 日本語, Español, 한국어. 기본은 영어입니다. 페이지 맨 위 막대에서 고르면 강조 표시가 그 언어로 미끄러져 가고, 새로 고침 없이 모든 글과 숫자 표기(1억 3,250만 / 132.5 million / 1億3,250万 / 132,5 millones), 날짜, 나라 이름이 바뀝니다.
 
 ## 발전 단계
 
@@ -27,6 +28,15 @@
 - 단계는 **보는 날짜 기준으로 실행 중에 계산합니다.** 졸업 예정국(방글라데시, 라오스, 네팔 2026년 11월 24일, 솔로몬제도 2027년 12월 13일, 캄보디아와 세네갈 2029년 12월 19일)은 졸업일 전까지 최저개발국이고 그날부터 개발도상국입니다. 일정이 바뀌면 `pipeline/classify.py`의 날짜와 그 아래 검증값(`EXPECT`)을 함께 고치고 다시 돌리면 됩니다.
 - 2026년 9월 24일 기준으로 선진국 80곳(출생아의 7.37%), 개발도상국 112곳(64.29%), 최저개발국 44곳(28.34%)입니다. 세 비중은 합이 100%가 되도록 최대잉여 방식으로 반올림합니다.
 
+## 언어
+
+- **처음 고르는 언어:** 주소의 `?lang=en|ja|es|ko`, 지난번에 고른 언어(localStorage `rebirth-simulator-lang`) 순서로 찾고, 둘 다 없으면 영어로 엽니다. 브라우저 언어는 보지 않으므로 처음 온 사람은 누구나 영어 화면을 봅니다. 막대에서 바꾸면 그 선택을 저장하고, 주소에 `?lang=`이 있으면 그 값도 바꿉니다. 한국어 화면으로 바로 보내려면 `?lang=ko`를 붙인 주소를 쓰면 됩니다.
+- **순서:** 막대의 순서는 `src/i18n.js`의 `LANGS`(`en ja es ko`)와 `body.html`의 버튼 순서가 같아야 합니다. 강조 칸이 `LANGS`의 순번만큼 움직이기 때문입니다.
+- **글:** 화면의 모든 문장은 `src/i18n.js`에 언어별로 같은 열쇠(key)로 들어 있습니다. `body.html`의 고정 문구는 `data-t`(글), `data-th`(마크업), `data-tp`(입력 안내)로 열쇠를 가리키고, 숫자와 날짜는 `app.js`가 그 언어의 `Intl` 형식(ko-KR, en-US, ja-JP, es-ES)으로 만든 뒤 넘깁니다. 문장을 고치거나 언어를 더하려면 이 파일만 고치고 다시 빌드하면 됩니다.
+- **이름:** 한국어와 영어 나라 이름은 원래의 `ko`, `en` 칸을 씁니다. 일본어와 스페인어 이름(`ja`, `es` 칸)과 대륙·하위 지역 이름(`NAMES`)은 `pipeline/names.py`가 Unicode CLDR(Node에 들어 있는 ICU)에서 가져오고, 홍콩·마카오·두 콩고·미얀마·팔레스타인·코트디부아르의 이름 12개(일본어 6, 스페인어 6)는 스크립트 안의 값으로 바꿉니다.
+- **검색:** 표의 나라 검색은 화면 언어와 관계없이 네 언어 이름과 별칭을 모두 찾고, 악센트는 무시합니다(`japon` → Japón).
+- **글꼴:** 일본어 글꼴(IBM Plex Sans JP)은 스타일시트만 90KB가 넘어서, 일본어를 고를 때에만 불러옵니다. 그 전에는 시스템 일본어 글꼴로 보입니다.
+
 ## 자료
 
 | 항목 | 출처 |
@@ -35,6 +45,7 @@
 | 1인당 GDP | IMF World Economic Outlook, 2026년 4월판의 2025년 추정치 (Worldometers 정리표 경유). IMF 값이 없는 곳은 세계은행이나 UN 값을 쓰고 표시함 |
 | 발전 단계 | IMF WEO 2026년 4월 통계 부록 Table B, UN 최저개발국 목록 |
 | 국기 | [flag-icons](https://github.com/lipis/flag-icons) 7.5.0의 4:3 SVG (MIT 라이선스, `vendor/flag-icons.LICENSE`) |
+| 일본어·스페인어 나라 이름 | Unicode CLDR 48 (Node 22의 ICU), 일부는 `pipeline/names.py`에서 바꿈 |
 | 지도 | Natural Earth (퍼블릭 도메인), world-atlas 경유 |
 
 1인당 GDP는 두 값을 함께 적습니다. 큰 숫자는 시장 환율로 바꾼 미국 달러이고, 순위도 이 값으로 매깁니다. 작은 숫자는 물가 차이를 걷어 낸 구매력평가(PPP) 기준 국제달러입니다. 예를 들어 한국은 36,227달러와 65,405국제달러, 인도는 2,675달러와 11,789국제달러입니다.
@@ -44,14 +55,14 @@
 ```
 index.html        빌드 결과물. 국기를 뺀 모든 것이 이 파일 하나에 들어 있습니다.
 build.py          src/와 data/를 index.html 하나로 합칩니다.
-src/              body.html(구조), style.css(모양), app.js(동작), topo.js(TopoJSON 해독)
+src/              body.html(구조), style.css(모양), i18n.js(네 언어의 글), app.js(동작), topo.js(TopoJSON 해독)
 data/             appdata.json(가공된 인구·경제·분류 자료), world.topo.json(지도)
 assets/flags/     236곳의 국기 SVG (index.html과 같은 곳에서 필요할 때만 불러옴)
 vendor/           flag-icons 라이선스, topojson-client 3.1.0 (src/topo.js 대조 검사용, ISC)
 pipeline/         자료를 만든 스크립트
 ```
 
-`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov`). 그 밖에 `CONT`, `SUB`, `WORLD`, `CLASS`(발전 단계) 키가 있습니다.
+`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov ja es`). 그 밖에 `CONT`, `SUB`(한국어 대륙·하위 지역 이름), `NAMES`(같은 순서의 영어·일본어·스페인어 이름), `WORLD`, `CLASS`(발전 단계) 키가 있습니다.
 
 ### pipeline/
 
@@ -61,6 +72,7 @@ pipeline/         자료를 만든 스크립트
 | `migrate_v2.py` | v1 `appdata.json`에서 인구 기준 모드 자료와 사망·생존 지표를 지우고 `LOC_FIELDS` 형식으로 바꿉니다. 이미 v2면 검사만 합니다. |
 | `classify.py` | 발전 단계 목록(`CLASS`)과 본국(`sov`)을 넣고 단계별 곳 수와 비중을 검증합니다. |
 | `build_iso.py` | ISO 두 글자 코드(`iso2`)를 채우고 flag-icons에서 국기를 복사해 svgo로 줄입니다. `pip install pycountry`와 npm이 필요합니다. |
+| `names.py` | 일본어·스페인어 나라 이름(`ja`, `es`)과 대륙·하위 지역 이름(`NAMES`)을 넣습니다. Node가 필요하고, 여러 번 돌려도 결과가 같습니다. |
 | `check_topo.js` | `src/topo.js`가 topojson-client와 똑같이 지도를 풀어내는지 확인합니다. |
 
 ## 고친 뒤 다시 빌드하기
@@ -69,7 +81,7 @@ pipeline/         자료를 만든 스크립트
 python3 build.py
 ```
 
-빌드는 CSS와 JS의 주석과 들여쓰기만 걷어 냅니다. 외부에서 불러오는 것은 d3 7.9.0(cdnjs, 실패 시 jsDelivr)과 Google Fonts(Orbit, Chakra Petch, IBM Plex Sans KR)뿐입니다. d3를 불러오지 못해도 추첨, 판독값, 표는 작동하고, 행성은 땅 없이 그려지며, 지도 자리에 안내 문구가 나옵니다. 국기 파일이 없으면 두 글자 코드 칩을 보여 줍니다.
+빌드는 CSS와 JS의 주석과 들여쓰기만 걷어 냅니다. 외부에서 불러오는 것은 d3 7.9.0(cdnjs, 실패 시 jsDelivr)과 Google Fonts(Orbit, Chakra Petch, IBM Plex Sans KR, 일본어를 고르면 IBM Plex Sans JP)뿐입니다. d3를 불러오지 못해도 추첨, 판독값, 표는 작동하고, 행성은 땅 없이 그려지며, 지도 자리에 안내 문구가 나옵니다. 국기 파일이 없으면 두 글자 코드 칩을 보여 줍니다.
 
 기록은 브라우저의 localStorage(`rebirth-simulator-v2`)에만 저장됩니다. 예전 형식(`dasi-taeeonandamyeon-v1`)이 있으면 처음 열 때 한 번 옮깁니다. 출생아 기준 통계와 기록은 그대로 가져오고, 인구 기준 기록은 버리며, 일련번호는 이어서 씁니다.
 
