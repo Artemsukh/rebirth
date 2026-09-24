@@ -15,15 +15,16 @@ d=json.load(open('/home/claude/appdata_ppp_only.json',encoding='utf-8'))
 codes={r[0] for r in d['LOC']}
 assert set(nom) <= codes, set(nom)-codes
 assert set(ppp) <= set(nom), set(ppp)-set(nom)
+FI={k:i for i,k in enumerate(d['LOC_FIELDS'])}   # v2 rows are described by LOC_FIELDS
 num=den=0
 for r in d['LOC']:
-    assert len(r)==23
-    v=nom.get(r[0]); r.append(v[0] if v else None); r.append(v[1] if v else '')
-    if v: num+=v[0]*r[8]; den+=r[8]
+    assert len(r)==len(d['LOC_FIELDS'])
+    v=nom.get(r[FI['code']]); r[FI['gdpN']]=v[0] if v else None; r[FI['gdpNNote']]=v[1] if v else ''
+    if v: num+=v[0]*r[FI['pop']]; den+=r[FI['pop']]
 d['WORLD']['gdpN']=int(round(num/den))
-d['WORLD']['gdpNcov']=round(den/sum(r[8] for r in d['LOC']),5)
+d['WORLD']['gdpNcov']=round(den/sum(r[FI['pop']] for r in d['LOC']),5)
 json.dump(d, open('/home/claude/appdata.json','w',encoding='utf-8'), ensure_ascii=False, separators=(',',':'))
-kor=[r for r in d['LOC'] if r[0]==410][0]
-print('nominal covered', len(nom), 'missing', [ (r[0], r[2]) for r in d['LOC'] if r[23] is None])
+kor=[r for r in d['LOC'] if r[FI['code']]==410][0]
+print('nominal covered', len(nom), 'missing', [ (r[FI['code']], r[FI['en']]) for r in d['LOC'] if r[FI['gdpN']] is None])
 print('world nominal', d['WORLD']['gdpN'], 'cov', d['WORLD']['gdpNcov'], 'world ppp', d['WORLD']['gdp'])
-print('korea', kor[20], kor[21], kor[23], kor[24])
+print('korea', kor[FI['gdp']], kor[FI['gdpNote']], kor[FI['gdpN']], kor[FI['gdpNNote']])
