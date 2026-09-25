@@ -72,7 +72,7 @@ html = f'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rebirth Simulator</title>
+<title>Birth Lottery</title>
 <meta name="description" content="Be born again at random as one of the 132.5 million babies of 2026. Birth odds, GDP per head, development tier and life expectancy for 236 countries and territories, from UN World Population Prospects 2024 and IMF data.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050716">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rebirth Simulator</title>
+<title>Birth Lottery</title>
 <meta name="description" content="Be born again at random as one of the 132.5 million babies of 2026. Birth odds, GDP per head, development tier and life expectancy for 236 countries and territories, from UN World Population Prospects 2024 and IMF data.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#050716">
@@ -34,7 +34,7 @@
 <header class="hud-head">
 <div class="brand">
 <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11"/><ellipse cx="20" cy="20" rx="18" ry="5.4" transform="rotate(-16 20 20)"/><circle class="logo-dot" cx="20" cy="20" r="2.4"/></svg>
-<h1 class="brand-name">Rebirth Simulator</h1>
+<h1 class="brand-name">Birth Lottery</h1>
 </div>
 <p class="head-mid" id="lede"></p>
 <p class="head-live" id="live"></p>
@@ -1185,7 +1185,7 @@ PLANET.show(st, { animate, speed: spd });
 }
 function recordText(st) {
 const L = st.loc, draw = st.type === 'draw', M = metrics(st), c = S.comma, lines = [];
-lines.push('Rebirth Simulator: ' + (draw ? S.kindDraw + ' ' + S.serial(fmtInt(st.serial)) + c + today(st.t) : S.kindLookup + c + today()));
+lines.push('Birth Lottery: ' + (draw ? S.kindDraw + ' ' + S.serial(fmtInt(st.serial)) + c + today(st.t) : S.kindLookup + c + today()));
 lines.push(nm(L) + S.paren(subName(L.sub)) + c + (draw ? sexName(st.sex) : S.both));
 lines.push(S.kv(S.lbProb, fmtPct(M.share) + c + oneIn(M.share)));
 const ppp = L.gdp == null ? '' : S.paren(S.pppShort + ' ' + intl(L.gdp));
