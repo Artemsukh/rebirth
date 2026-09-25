@@ -113,9 +113,12 @@ a:hover { text-decoration-color: currentColor; }
 .head-live .dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 8px var(--live); vertical-align: 1px; }
 
 /* ---------- stage (result screen) ---------- */
-:root[data-tier="ADV"] { --tier: var(--tier-adv); }
-:root[data-tier="DEV"] { --tier: var(--tier-dev); }
-:root[data-tier="LDC"] { --tier: var(--tier-ldc); }
+/* the tier colour is set on the five parts that show it (language bar, header, result screen, map and
+   the 100-babies bars), not on the root: a new tier then restyles those alone, and the records, table
+   and method sections (~3,500 elements) are left alone */
+[data-tier="ADV"] { --tier: var(--tier-adv); }
+[data-tier="DEV"] { --tier: var(--tier-dev); }
+[data-tier="LDC"] { --tier: var(--tier-ldc); }
 .stage {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 340px minmax(0, 1fr) 390px; column-gap: 24px;

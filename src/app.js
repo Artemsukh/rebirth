@@ -271,19 +271,20 @@ function paintSpace() {
    after one turn, left digits first. The final value is also given as text for screen readers.
    When the last strip stops the number becomes plain text, so no moving layer is left behind. */
 const STRIP = Array.from({ length: 20 }, (_, i) => i % 10).join(' ');
-/* digit advance widths in em for the element's font, so a stopped number is spaced like plain text */
+/* digit advance widths in em for the element's font, so a stopped number is spaced like plain text.
+   Kept per font; forgotten whenever web fonts finish loading, since a fallback font may have been measured. */
 const DIGW = new Map();
+let digCtx = null;
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => DIGW.clear());
 function digitWidths(el) {
   const cs = getComputedStyle(el);
   if (!el.isConnected || !cs.fontFamily) return Array(10).fill(0.6);
   const font = cs.fontStyle + ' ' + cs.fontWeight + ' 100px ' + cs.fontFamily;
   if (DIGW.has(font)) return DIGW.get(font);
-  const ctx = document.createElement('canvas').getContext('2d');
-  ctx.font = font;
-  const w = Array.from({ length: 10 }, (_, d) => ctx.measureText(String(d)).width / 100);
-  let loaded = true;
-  try { loaded = !document.fonts || document.fonts.check(font); } catch (e) { loaded = false; }
-  if (loaded) DIGW.set(font, w);
+  digCtx = digCtx || document.createElement('canvas').getContext('2d');
+  digCtx.font = font;
+  const w = Array.from({ length: 10 }, (_, d) => digCtx.measureText(String(d)).width / 100);
+  DIGW.set(font, w);
   return w;
 }
 /* the stop is a share of the strip's own height (20 lines), not (10 + d) x 1.1em: WebKit truncates
@@ -339,6 +340,7 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
 /* ================= result screen ================= */
 let current = { type: 'empty' };
 const stage = $('#stage');
+const TIER_HOSTS = ['.lang-bar', '.hud-head', '#stage', '#atlas', '#hundred'].map(s => $(s));
 
 function flagChip(el, L) {
   el.className = 'chip' + (L ? '' : ' empty');
@@ -411,8 +413,7 @@ function renderStage(st, opt = {}) {
   const empty = st.type === 'empty', L = empty ? null : st.loc, draw = st.type === 'draw';
   const tier = empty ? 'NONE' : tierOf(L);
   const T = tierStats();
-  stage.dataset.tier = tier;
-  document.documentElement.dataset.tier = tier;
+  TIER_HOSTS.forEach(el => { el.dataset.tier = tier; });
 
   /* identity */
   flagChip($('#chip'), L);
