@@ -348,8 +348,7 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .land.picked, .land.picked:hover { fill: color-mix(in srgb, var(--tier) 55%, var(--land)); }
 .bubble { fill: var(--k); fill-opacity: .3; stroke: var(--k); stroke-opacity: .85; stroke-width: .9; vector-effect: non-scaling-stroke; cursor: pointer; }
 .bubble:hover { fill-opacity: .6; }
-.pulse { fill: #EAF2FF; pointer-events: none; transform-box: fill-box; transform-origin: center; animation: pulse 1.7s ease-out forwards; }
-@keyframes pulse { 0% { opacity: .9; transform: scale(.35); } 100% { opacity: 0; transform: scale(1.9); } }
+.map-wrap .pulses { position: absolute; z-index: 1; display: block; pointer-events: none; }
 .bdot { fill: var(--k); fill-opacity: .85; stroke: var(--space); stroke-width: 1; vector-effect: non-scaling-stroke; cursor: pointer; }
 .pin-ring { fill: none; stroke: var(--tier); stroke-width: 1.8; vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: center; pointer-events: none; }
 .pin-ring.ping { animation: ping .45s cubic-bezier(.2, .8, .3, 1) both; }
@@ -624,6 +623,5 @@ td.na { color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
   .rstrip { animation-duration: 1ms !important; animation-delay: 0ms !important; }
-  .pulse { display: none; }
   html { scroll-behavior: auto; }
 }

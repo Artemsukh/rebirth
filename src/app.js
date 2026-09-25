@@ -1173,7 +1173,6 @@ function initMap() {
     .attr('cx', i => pos[i][0]).attr('cy', i => pos[i][1])
     .attr('r', i => rBase[i])
     .attr('data-code', i => LOCS[i].code);
-  const pulseG = zl.append('g');
   const batchG = zl.append('g');
   const pinG = zl.append('g').attr('display', 'none');
   const pinCross = pinG.append('path').attr('class', 'pin-cross');
@@ -1181,7 +1180,7 @@ function initMap() {
   const pinDot = pinG.append('circle').attr('class', 'pin-dot').attr('r', 2.8);
   const crossD = k => 'M' + (-16 / k) + ' 0h' + (6 / k) + 'M' + (10 / k) + ' 0h' + (6 / k) + 'M0 ' + (-16 / k) + 'v' + (6 / k) + 'M0 ' + (10 / k) + 'v' + (6 / k);
 
-  let K = 1;
+  let K = 1, zt = d3.zoomIdentity, visible = true;
   const resetBtn = $('#resetMap');
   function rescale() {
     bub.attr('r', i => rBase[i] / K);
@@ -1192,6 +1191,7 @@ function initMap() {
     const t = ev.transform;
     zl.attr('transform', t);
     K = t.k;
+    zt = t;
     rescale();
     resetBtn.hidden = t.k < 1.001 && Math.abs(t.x) < 0.5 && Math.abs(t.y) < 0.5;
   });
@@ -1209,9 +1209,10 @@ function initMap() {
     ty = Math.min(0, Math.max(Hv - Hv * k, ty));
     return d3.zoomIdentity.translate(tx, ty).scale(k);
   }
+  /* off screen there is nothing to watch, so the view jumps instead of easing for 1.1 s */
   function go(t) {
     svg.interrupt();
-    if (REDUCED.matches) svg.call(zoom.transform, t);
+    if (REDUCED.matches || !visible) svg.call(zoom.transform, t);
     else svg.transition().duration(1100).ease(d3.easeCubicInOut).call(zoom.transform, t);
   }
   MAP.fly = code => go(targetFor(code));
@@ -1270,25 +1271,61 @@ function initMap() {
   }).on('pointerleave', () => { tip.hidden = true; })
     .on('click', ev => { const code = codeAt(ev); if (BY.has(code)) { tip.hidden = true; lookup(code); } });
 
-  /* ambient births at the real rate */
-  let pulseT = 0, visible = true;
+  /* ambient births at the real rate, drawn on a canvas laid over the map (at most about 30 frames a
+     second, and only while the map is on screen), so they never make the map SVG repaint */
+  const pcv = document.createElement('canvas'), pctx = pcv.getContext('2d');
+  pcv.className = 'pulses';
+  pcv.setAttribute('aria-hidden', 'true');
+  wrap.appendChild(pcv);
+  const LIFE = 1700;
+  let pulses = [], pulseT = 0, pulseRaf = 0, drawn = 0, ps = 1, pdpr = 1;
+  function sizePulses() {
+    const r = svg.node().getBoundingClientRect(), rw = wrap.getBoundingClientRect();
+    pdpr = Math.min(window.devicePixelRatio || 1, 2);
+    ps = r.width / Wv;
+    pcv.width = Math.max(1, Math.round(r.width * pdpr));
+    pcv.height = Math.max(1, Math.round(r.height * pdpr));
+    Object.assign(pcv.style, { left: (r.left - rw.left) + 'px', top: (r.top - rw.top) + 'px', width: r.width + 'px', height: r.height + 'px' });
+  }
   function allowed() { return visible && !document.hidden && !REDUCED.matches; }
+  function clearPulses() {
+    pulses = [];
+    cancelAnimationFrame(pulseRaf); pulseRaf = 0;
+    pctx.setTransform(1, 0, 0, 1, 0, 0);
+    pctx.clearRect(0, 0, pcv.width, pcv.height);
+  }
+  function drawPulses(now) {
+    pulseRaf = 0;
+    if (!allowed()) { clearPulses(); return; }
+    pulseRaf = requestAnimationFrame(drawPulses);
+    if (now - drawn < 31) return;
+    drawn = now;
+    pulses = pulses.filter(p => now - p.t0 < LIFE);
+    const s = ps * pdpr, k = s * zt.k;
+    pctx.setTransform(1, 0, 0, 1, 0, 0);
+    pctx.clearRect(0, 0, pcv.width, pcv.height);
+    if (!pulses.length) { cancelAnimationFrame(pulseRaf); pulseRaf = 0; return; }
+    pctx.setTransform(k, 0, 0, k, s * zt.x, s * zt.y);
+    pctx.fillStyle = '#EAF2FF';
+    for (const p of pulses) {
+      const t = Math.max(0, (now - p.t0) / LIFE), e = 1 - (1 - t) * (1 - t);
+      pctx.globalAlpha = 0.9 * (1 - e);
+      pctx.beginPath();
+      pctx.arc(p.x, p.y, 2.3 / K * (0.35 + 1.55 * e), 0, 2 * Math.PI);
+      pctx.fill();
+    }
+    pctx.globalAlpha = 1;
+  }
   function spawn() {
-    const g = pulseG.node();
-    if (g.childElementCount > 48) return;
+    if (pulses.length >= 48) return;
     const i = pickCum(CUM.births, Math.random());
     const rr = rBase[i] * 0.72 / K * Math.sqrt(Math.random()), th = Math.random() * 2 * Math.PI;
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('class', 'pulse');
-    c.setAttribute('cx', pos[i][0] + rr * Math.cos(th));
-    c.setAttribute('cy', pos[i][1] + rr * Math.sin(th));
-    c.setAttribute('r', 2.3 / K);
-    c.addEventListener('animationend', () => c.remove());
-    g.appendChild(c);
+    pulses.push({ x: pos[i][0] + rr * Math.cos(th), y: pos[i][1] + rr * Math.sin(th), t0: performance.now() });
+    if (!pulseRaf) pulseRaf = requestAnimationFrame(drawPulses);
   }
   function schedule() {
     clearTimeout(pulseT);
-    if (!allowed()) return;
+    if (!allowed()) { clearPulses(); return; }
     pulseT = setTimeout(() => { spawn(); schedule(); }, -Math.log(1 - Math.random()) / RATE_B * 1000);
   }
   document.addEventListener('visibilitychange', schedule);
@@ -1296,6 +1333,9 @@ function initMap() {
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; schedule(); }).observe(svg.node());
   }
+  let sizeT = 0;
+  window.addEventListener('resize', () => { clearTimeout(sizeT); sizeT = setTimeout(sizePulses, 150); });
+  sizePulses();
   schedule();
 
   MAP.ready = true;
