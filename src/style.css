@@ -129,7 +129,7 @@ a:hover { text-decoration-color: currentColor; }
 .read-col:focus { outline: none; }
 
 .planet-wrap { position: relative; width: 100%; height: 600px; flex: none; pointer-events: none; }
-#planet { position: absolute; left: 50%; top: 0; width: 720px; height: 600px; max-width: none; margin-left: -360px; overflow: visible; }
+#planet { position: absolute; left: 50%; top: 0; width: 720px; height: 600px; max-width: none; margin-left: -360px; --u: 1px; }
 
 .actions { display: flex; gap: 12px; justify-content: center; margin-top: 8px; position: relative; z-index: 3; }
 .btn {
@@ -279,38 +279,47 @@ a:hover { text-decoration-color: currentColor; }
 /* ---------- entrance effects (re-triggered by toggling .fx on the stage) ---------- */
 .stage.fx .id-name:not(.empty), .stage.fx .tier-name { animation: nameIn 520ms cubic-bezier(.2, .8, .2, 1) both; }
 .stage.fx .fx-sm { animation: smIn 500ms ease-out 250ms both; }
-#planet .p-body.enter { animation: planetIn 950ms cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes nameIn { from { opacity: 0; transform: translateY(10px); } }
 @keyframes smIn { from { transform: translateY(6px); opacity: 0; } }
-@keyframes planetIn { from { transform: scale(.78) rotate(-10deg); opacity: 0; } }
 
 /* ---------- planet ---------- */
-#planet .p-body { transform-box: view-box; transform-origin: 360px 300px; }
+/* a 720 x 600 design box; --u is one design unit in px (set by app.js). Layers, back to front: the far
+   half of the orbit ring, the sphere, the dot globe (the only layer that is redrawn), the near half of
+   the ring, the two turning HUD rings (each its own layer), brackets, cross and read-outs */
+#planet > * { position: absolute; }
+#planet > svg { left: 0; top: 0; width: 100%; height: 100%; max-width: none; overflow: visible; }
 #planet .stop-t { stop-color: var(--tier); }
-#planet .p-grat { fill: none; stroke: var(--tier); stroke-opacity: .2; stroke-width: .7; }
-#planet .p-land { fill: var(--tier); fill-opacity: .1; stroke: var(--tier); stroke-opacity: .28; stroke-width: .6; stroke-linejoin: round; }
-#planet .p-glow { fill: var(--tier); fill-opacity: .55; }
-#planet .p-country { fill: var(--tier); fill-opacity: .82; stroke: #E9FBFF; stroke-opacity: .8; stroke-width: .9; stroke-linejoin: round; }
-#planet .p-dot { fill: var(--tier); }
-#planet .p-dot-ring { fill: none; stroke: #E9FBFF; stroke-opacity: .8; stroke-width: 1; }
-#planet .p-rimline { fill: none; stroke: var(--tier); stroke-opacity: .55; stroke-width: 1.2; }
 #planet .p-ring path { fill: none; stroke: url(#pRingGrad); }
 #planet .p-ring .solid { stroke-width: 1.2; }
 #planet .p-ring .dash { stroke-width: .6; stroke-dasharray: 2 5; }
 #planet .p-ring.front .solid { stroke-width: 1.6; }
+#planet .sphere {
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #0B1A36 0%, #07132B 46%, #030816 100%);
+  background: radial-gradient(circle at 36% 32%, color-mix(in srgb, var(--tier) 13%, #0B1A36) 0%, #07132B 46%, #030816 100%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tier) 38%, transparent), 0 0 44px color-mix(in srgb, var(--tier) 24%, transparent), inset -18px -22px 40px rgba(1, 3, 10, .55);
+}
+#planet .globe-dots { display: block; }
+/* the ring SVGs are squares around their circles: 448 and 476 units, centred on 360, 300 */
+#planet .p-spin { max-width: none; overflow: visible; fill: none; stroke: var(--tier); will-change: transform; animation: spin 60s linear infinite; }
+#planet .p-hud-ring { left: 18.889%; top: 12.667%; width: 62.222%; height: 74.667%; stroke-opacity: .35; stroke-width: 1; stroke-dasharray: 1 7; }
+#planet .p-hud-arcs { left: 16.944%; top: 10.333%; width: 66.111%; height: 79.333%; stroke-opacity: .6; stroke-width: 1.4; animation-duration: 24s; animation-direction: reverse; }
+#planet.still .p-spin { animation-play-state: paused; }
+/* bracket corners: 26 units, placed by app.js with translate() from the centre */
+#planet .brk { left: 50%; top: 50%; width: calc(26 * var(--u)); height: calc(26 * var(--u)); border: 0 solid var(--tier); border-width: 2px 0 0 2px; opacity: .9;
+  transition: transform .5s cubic-bezier(.2, .8, .2, 1), opacity .4s; }
+#planet .brk.tr { border-width: 2px 2px 0 0; }
+#planet .brk.br { border-width: 0 2px 2px 0; }
+#planet .brk.bl { border-width: 0 0 2px 2px; }
+#planet.wide .brk { opacity: .5; }
 #planet .p-cross { fill: none; stroke: #E9FBFF; stroke-opacity: .85; stroke-width: 1.2; }
-#planet .p-hud { font-family: var(--num); font-size: 13px; letter-spacing: .12em; fill: var(--ink-2); }
-#planet .p-hud .hl { fill: var(--tier); }
-#planet .p-hud-ring { fill: none; stroke: var(--tier); stroke-opacity: .35; stroke-width: 1; stroke-dasharray: 1 7; transform-box: view-box; transform-origin: 360px 300px; animation: spin 60s linear infinite; }
-#planet .p-hud-arcs { fill: none; stroke: var(--tier); stroke-opacity: .6; stroke-width: 1.4; transform-box: view-box; transform-origin: 360px 300px; animation: spin 24s linear infinite reverse; }
-#planet .p-brk { fill: none; stroke: var(--tier); stroke-width: 2; stroke-opacity: .9; transform-box: view-box; transform-origin: 360px 300px; transition: transform .5s cubic-bezier(.2, .8, .2, 1), opacity .4s; }
-#planet .p-sweep { fill: url(#pSweepGrad); opacity: 0; }
-#planet.flying .p-sweep { opacity: 1; animation: sweep 1.1s linear infinite; }
-#planet .p-status { transition: fill .3s; }
-#planet.locked .p-body.glitch { animation: glitch .26s steps(2, end) 1; }
+/* read-outs: --x, --y are the old SVG text anchor and baseline in design units */
+#planet .p-hud { inset: 0; font-family: var(--num); font-size: calc(13 * var(--u)); line-height: 1; letter-spacing: .12em; color: var(--ink-2); white-space: nowrap; }
+#planet .p-hud span { position: absolute; left: calc(var(--x) * var(--u)); top: calc((var(--y) - 10.5) * var(--u)); }
+#planet .p-hud .end { left: auto; right: calc((720 - var(--x)) * var(--u)); }
+#planet .p-hud .hl { color: var(--tier); }
+#planet .p-status { transition: color .3s; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes sweep { from { transform: translateY(-400px); } to { transform: translateY(400px); } }
-@keyframes glitch { 0% { transform: translate(2px, 0); filter: hue-rotate(40deg); } 50% { transform: translate(-2px, 1px); } 100% { transform: none; filter: none; } }
 
 /* ---------- sections ---------- */
 main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 72px 40px 0; }
@@ -590,7 +599,7 @@ td.na { color: var(--ink-3); }
   .btn-ghost .lg { display: none; }
   .btn-ghost .sm { display: inline; font-family: var(--num); font-weight: 600; }
   .batch-line { order: 1; margin: 0; text-align: left; }
-  #planet .p-hud text { display: none; }
+  #planet .p-hud { display: none; }
   main > .block { padding: 56px 16px 0; }
   .block h2 { font-size: 1.5rem; }
   .h-grid, .m-grid { grid-template-columns: minmax(0, 1fr); }
@@ -615,6 +624,6 @@ td.na { color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
   .rstrip { animation-duration: 1ms !important; animation-delay: 0ms !important; }
-  .pulse, #planet .p-sweep { display: none; }
+  .pulse { display: none; }
   html { scroll-behavior: auto; }
 }

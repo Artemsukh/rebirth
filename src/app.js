@@ -543,245 +543,506 @@ async function onCopy(ev) {
   setTimeout(() => { if (btn.isConnected) btn.textContent = S.copy; }, 1800);
 }
 
-/* ================= shared geography (needs d3) ================= */
+/* ================= shared geography ================= */
+/* The topology is decoded at start without d3: the planet draws from it straight away and the map
+   waits for d3. Every piece is also kept with continuous longitudes (Russia and Fiji cross the date
+   line, so a jump of more than 180 degrees is taken as a crossing), its bounding box, and its area
+   and centre on an equal-area plane (longitude in radians, sine of latitude). */
+const RAD = Math.PI / 180;
 const GEO = { ready: false };
-function initGeo() {
-  if (GEO.ready) return true;
-  if (!window.d3 || typeof topoFeatures !== 'function') return false;
-  let topo;
-  try { topo = JSON.parse($('#map-data').textContent); } catch (e) { return false; }
-  const fc = topoFeatures(topo, topo.objects.countries);
-  fc.features.forEach(f => { f.code = f.properties && f.properties.id ? +f.properties.id : 0; });
-  GEO.fc = fc;
-  GEO.feats = fc.features;
-  GEO.FEAT = new Map(GEO.feats.filter(f => f.code).map(f => [f.code, f]));
-  GEO.ready = true;
-  return true;
+/* great-circle distance in radians between two [lon, lat] points */
+function gdist(a, b) {
+  const s1 = Math.sin((b[1] - a[1]) * RAD / 2), s2 = Math.sin((b[0] - a[0]) * RAD / 2);
+  return 2 * Math.asin(Math.min(1, Math.sqrt(s1 * s1 + Math.cos(a[1] * RAD) * Math.cos(b[1] * RAD) * s2 * s2)));
 }
-/* the main piece of a country plus the islands near it (drops far-flung territories) */
+const vec3 = p => { const c = Math.cos(p[1] * RAD); return [c * Math.cos(p[0] * RAD), c * Math.sin(p[0] * RAD), Math.sin(p[1] * RAD)]; };
+const lonLat = (x, y, z) => [Math.atan2(y, x) / RAD, Math.atan2(z, Math.hypot(x, y)) / RAD];
+function unwrap(ring) {
+  let off = 0, prev = ring[0][0];
+  return ring.map(p => {
+    let x = p[0] + off;
+    if (x - prev > 180) { off -= 360; x -= 360; } else if (x - prev < -180) { off += 360; x += 360; }
+    prev = x;
+    return [x, p[1]];
+  });
+}
+const meanLon = r => r.reduce((s, p) => s + p[0], 0) / r.length;
+function planePoly(coords) {
+  const rings = coords.map(unwrap), m0 = meanLon(rings[0]);
+  /* a hole goes with its outer ring */
+  for (let i = 1; i < rings.length; i++) {
+    const d = meanLon(rings[i]) - m0, o = d > 180 ? -360 : d < -180 ? 360 : 0;
+    if (o) rings[i] = rings[i].map(p => [p[0] + o, p[1]]);
+  }
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const p of rings[0]) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
+  let A = 0, Mx = 0, My = 0;
+  rings.forEach((r, ri) => {
+    let a = 0, mx = 0, my = 0;
+    for (let i = 0, n = r.length; i < n; i++) {
+      const p = r[i], q = r[(i + 1) % n], px = p[0] * RAD, py = Math.sin(p[1] * RAD), qx = q[0] * RAD, qy = Math.sin(q[1] * RAD);
+      const c = px * qy - qx * py;
+      a += c; mx += (px + qx) * c; my += (py + qy) * c;
+    }
+    /* whatever the winding, the outer ring counts positive and holes negative */
+    const s = (a >= 0) === (ri === 0) ? 1 : -1;
+    A += s * a / 2; Mx += s * mx / 6; My += s * my / 6;
+  });
+  let cen;
+  if (A > 1e-12) cen = [Mx / A / RAD, Math.asin(Math.max(-1, Math.min(1, My / A))) / RAD];
+  else {
+    let x = 0, y = 0, z = 0;
+    for (const p of rings[0]) { const v = vec3(p); x += v[0]; y += v[1]; z += v[2]; }
+    cen = lonLat(x, y, z);
+  }
+  cen[0] = ((cen[0] + 540) % 360) - 180;
+  return { rings, x0, x1, y0, y1, area: Math.max(0, A), cen, c: coords };
+}
+function initGeo() {
+  if (GEO.ready || GEO.failed) return GEO.ready;
+  try {
+    const topo = JSON.parse($('#map-data').textContent);
+    const fc = topoFeatures(topo, topo.objects.countries);
+    fc.features.forEach(f => {
+      f.code = f.properties && f.properties.id ? +f.properties.id : 0;
+      const g = f.geometry;
+      f._p = !g ? [] : (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).map(planePoly);
+    });
+    GEO.fc = fc;
+    GEO.feats = fc.features;
+    GEO.FEAT = new Map(GEO.feats.filter(f => f.code).map(f => [f.code, f]));
+    GEO.ready = true;
+  } catch (e) { GEO.failed = true; }
+  return GEO.ready;
+}
+/* the main piece of a country plus the islands near it (drops far-flung territories); the centre is
+   the area-weighted mean of the pieces' centres as 3-D vectors */
 function emblemGeom(f) {
-  if (f._em) return f._em;
-  const d3 = window.d3, g = f.geometry;
-  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
-  const items = polys.map(c => {
-    const p = { type: 'Polygon', coordinates: c };
-    return { c, area: d3.geoArea(p), cen: d3.geoCentroid(p) };
-  }).sort((a, b) => b.area - a.area);
-  const main = items[0];
+  if (f._em !== undefined) return f._em;
+  if (!f._p.length) return (f._em = null);
+  const items = f._p.slice().sort((a, b) => b.area - a.area), main = items[0];
   let R = 0;
-  for (const pt of main.c[0]) R = Math.max(R, d3.geoDistance(main.cen, pt));
-  const thr = Math.max(10, 1.2 * R * 180 / Math.PI);
+  for (const pt of main.c[0]) R = Math.max(R, gdist(main.cen, pt));
+  const thr = Math.max(10, 1.2 * R / RAD);
   const inc = items.filter(it => {
-    const dd = d3.geoDistance(main.cen, it.cen) * 180 / Math.PI;
+    const dd = gdist(main.cen, it.cen) / RAD;
     return dd <= thr || (it.area >= 0.2 * main.area && dd <= 30);
   });
-  const geo = { type: 'MultiPolygon', coordinates: inc.map(it => it.c) };
-  f._em = { geo, c: d3.geoCentroid(geo), main: { type: 'Polygon', coordinates: main.c } };
+  let x = 0, y = 0, z = 0;
+  for (const it of inc) { const v = vec3(it.cen), w = it.area || 1e-12; x += v[0] * w; y += v[1] * w; z += v[2] * w; }
+  f._em = { inc, c: lonLat(x, y, z), main: { type: 'Polygon', coordinates: main.c } };
   return f._em;
 }
+initGeo();
 
 /* ================= planet ================= */
-/* The drawn country sits at the centre of a globe. To make small countries visible the angle c
-   from the centre is stretched to m*c before the orthographic wrap, so the visible cap shrinks to
-   90/m degrees. A draw flies the camera: pull back to the whole globe, turn, then zoom in. */
+/* A dot-matrix globe on one canvas. The globe is a grid of cells, R across its radius. For a frame
+   every cell is projected back to a longitude and latitude and looked up in a land raster (a world
+   mask made once, and a finer window around the drawn country made per draw); the small cell image
+   is then scaled up and cut into square dots. To make small countries visible the angle c from the
+   centre is stretched to m*c before the orthographic wrap, so the visible cap shrinks to 90/m
+   degrees. A draw flies the camera: pull back to the whole globe, turn, then zoom in.
+   Frames are drawn only while something moves: 8 a second while the empty globe turns (and only
+   while it is on screen), at most about 30 a second in flight, and none once the target is locked.
+   Everything else (sphere, rings, brackets, read-outs) is static HTML and SVG; the two HUD rings
+   turn as separate layers, so turning them never repaints the globe. */
 const PLANET = (() => {
-  const R = 196, CX = 360, CY = 300, RAD = Math.PI / 180;
-  const svg = $('#planet');
+  const box = $('#planet');
+  const CX = 360, CY = 300, RS = 196; // design box 720 x 600, globe radius in it
+  const DOT_PITCH = 3.6; // CSS px from one dot to the next
   const STEPS = [0.5, 1, 2, 5, 10, 15, 20, 30];
   const halfRing = (k, front) => {
-    const rx = 1.62 * R * k, ry = 0.30 * R * k;
+    const rx = 1.62 * RS * k, ry = 0.30 * RS * k;
     return 'M' + (CX - rx).toFixed(2) + ' ' + CY + 'A' + rx.toFixed(2) + ' ' + ry.toFixed(2) + ' 0 0 ' + (front ? 0 : 1) + ' ' + (CX + rx).toFixed(2) + ' ' + CY;
   };
+  const ring = front => '<g transform="rotate(-16 ' + CX + ' ' + CY + ')"><path class="solid" d="' + halfRing(1, front) + '"/><path class="dash" d="' + halfRing(.9, front) + '"/></g>';
   const stops = list => list.map(([o, a]) => '<stop offset="' + o + '" class="stop-t" stop-opacity="' + a + '"/>').join('');
   const arc = (a0, a1, r) => {
     const p = a => [CX + r * Math.cos(a * RAD), CY + r * Math.sin(a * RAD)];
     const [x0, y0] = p(a0), [x1, y1] = p(a1);
     return 'M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + 'A' + r + ' ' + r + ' 0 0 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1);
   };
-  const B = 100, A = 26; // bracket half-size and arm length at scale 1
-  const brk = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) =>
-    'M' + (CX + sx * B) + ' ' + (CY + sy * (B - A)) + 'V' + (CY + sy * B) + 'H' + (CX + sx * (B - A))).join('');
-  svg.innerHTML =
-    '<defs>' +
-      '<radialGradient id="pHalo" gradientUnits="userSpaceOnUse" cx="' + CX + '" cy="' + CY + '" r="' + 1.34 * R + '">' + stops([[0, .34], [.7, .34], [.76, .14], [1, 0]]) + '</radialGradient>' +
-      '<linearGradient id="pRingGrad" gradientUnits="userSpaceOnUse" x1="' + (CX - 1.62 * R) + '" y1="' + CY + '" x2="' + (CX + 1.62 * R) + '" y2="' + CY + '">' + stops([[0, 0], [.3, .55], [.7, .55], [1, 0]]) + '</linearGradient>' +
-      '<radialGradient id="pSea" gradientUnits="userSpaceOnUse" cx="' + (CX - .38 * R) + '" cy="' + (CY - .42 * R) + '" r="' + 1.5 * R + '"><stop offset="0" stop-color="#1A3552"/><stop offset=".55" stop-color="#0A1830"/><stop offset="1" stop-color="#03060F"/></radialGradient>' +
-      '<radialGradient id="pShade" gradientUnits="userSpaceOnUse" cx="' + (CX - .45 * R) + '" cy="' + (CY - .5 * R) + '" r="' + 1.75 * R + '"><stop offset="0" stop-color="#01030A" stop-opacity="0"/><stop offset=".35" stop-color="#01030A" stop-opacity="0"/><stop offset=".72" stop-color="#01030A" stop-opacity=".55"/><stop offset="1" stop-color="#01030A" stop-opacity=".92"/></radialGradient>' +
-      '<radialGradient id="pRim" gradientUnits="userSpaceOnUse" cx="' + CX + '" cy="' + CY + '" r="' + R + '">' + stops([[0, 0], [.86, 0], [1, .42]]) + '</radialGradient>' +
-      '<linearGradient id="pSweepGrad" x1="0" y1="0" x2="0" y2="1">' + stops([[0, 0], [.5, .22], [1, 0]]) + '</linearGradient>' +
-      '<clipPath id="pClip"><circle cx="' + CX + '" cy="' + CY + '" r="' + R + '"/></clipPath>' +
-      '<filter id="pBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>' +
-      '<pattern id="pScan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="#B8E6FF" fill-opacity=".05"/></pattern>' +
-    '</defs>' +
-    '<g class="p-body">' +
-      '<circle cx="' + CX + '" cy="' + CY + '" r="' + 1.34 * R + '" fill="url(#pHalo)"/>' +
-      '<g class="p-ring back" transform="rotate(-16 ' + CX + ' ' + CY + ')"><path class="solid" d="' + halfRing(1, false) + '"/><path class="dash" d="' + halfRing(.9, false) + '"/></g>' +
-      '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pSea)"/>' +
-      '<g clip-path="url(#pClip)">' +
-        '<path class="p-grat"/><path class="p-land"/>' +
-        '<path class="p-glow" filter="url(#pBlur)"/><path class="p-country"/>' +
-        '<g class="p-dotg" display="none"><circle class="p-dot" r="9" filter="url(#pBlur)"/><circle class="p-dot" r="6"/><circle class="p-dot-ring" r="12"/></g>' +
-        '<rect class="p-sweep" x="' + (CX - R) + '" y="' + (CY - 60) + '" width="' + 2 * R + '" height="120"/>' +
-        '<rect x="' + (CX - R) + '" y="' + (CY - R) + '" width="' + 2 * R + '" height="' + 2 * R + '" fill="url(#pScan)"/>' +
-        '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pShade)"/>' +
-      '</g>' +
-      '<circle cx="' + CX + '" cy="' + CY + '" r="' + R + '" fill="url(#pRim)"/>' +
-      '<circle class="p-rimline" cx="' + CX + '" cy="' + CY + '" r="' + R + '"/>' +
-      '<g class="p-ring front" transform="rotate(-16 ' + CX + ' ' + CY + ')"><path class="solid" d="' + halfRing(1, true) + '"/><path class="dash" d="' + halfRing(.9, true) + '"/></g>' +
-      '<g class="p-hud">' +
-        '<circle class="p-hud-ring" cx="' + CX + '" cy="' + CY + '" r="' + (R + 26) + '"/>' +
-        '<path class="p-hud-arcs" d="' + [45, 135, 225, 315].map(a => arc(a - 11, a + 11, R + 40)).join('') + '"/>' +
-        '<path class="p-brk" d="' + brk + '" vector-effect="non-scaling-stroke"/>' +
-        '<text x="112" y="62">TARGET</text>' +
-        '<text x="112" y="84" class="hl" id="hudLat">LAT  --.--</text>' +
-        '<text x="112" y="104" class="hl" id="hudLng">LNG  --.--</text>' +
-        '<text x="112" y="124" id="hudZoom">ZOOM ×1.0</text>' +
-        '<text x="608" y="540" text-anchor="end" class="p-status" id="hudStatus">STANDBY</text>' +
-        '<text x="608" y="560" text-anchor="end" id="hudCode">NO SIGNAL</text>' +
-      '</g>' +
-      '<g class="p-cross"><circle cx="' + CX + '" cy="' + CY + '" r="7"/><path d="M' + CX + ' ' + (CY - 19) + 'v8M' + CX + ' ' + (CY + 11) + 'v8M' + (CX - 19) + ' ' + CY + 'h8M' + (CX + 11) + ' ' + CY + 'h8"/></g>' +
-    '</g>';
-  const body = $('.p-body', svg), grat = $('.p-grat', svg), land = $('.p-land', svg), glow = $('.p-glow', svg), country = $('.p-country', svg);
-  const dotg = $('.p-dotg', svg), brkEl = $('.p-brk', svg), cross = $('.p-cross', svg);
+  /* each HUD ring is its own square SVG around its circle, the smallest layer that holds it */
+  const square = (h, cls, inner) => '<svg class="p-spin ' + cls + '" viewBox="' + (CX - h) + ' ' + (CY - h) + ' ' + 2 * h + ' ' + 2 * h + '">' + inner + '</svg>';
+  const txt = (x, y, s, cls, id) => '<span' + (cls ? ' class="' + cls + '"' : '') + (id ? ' id="' + id + '"' : '') + ' style="--x:' + x + ';--y:' + y + '">' + s + '</span>';
+  box.innerHTML =
+    '<svg class="p-ring back" viewBox="0 0 720 600"><defs><linearGradient id="pRingGrad" gradientUnits="userSpaceOnUse" x1="' + (CX - 1.62 * RS) + '" y1="' + CY + '" x2="' + (CX + 1.62 * RS) + '" y2="' + CY + '">' +
+      stops([[0, 0], [.3, .55], [.7, .55], [1, 0]]) + '</linearGradient></defs>' + ring(false) + '</svg>' +
+    '<div class="sphere"></div>' +
+    '<canvas class="globe-dots"></canvas>' +
+    '<svg class="p-ring front" viewBox="0 0 720 600">' + ring(true) + '</svg>' +
+    square(224, 'p-hud-ring', '<circle cx="' + CX + '" cy="' + CY + '" r="' + (RS + 26) + '"/>') +
+    square(238, 'p-hud-arcs', '<path d="' + [45, 135, 225, 315].map(a => arc(a - 11, a + 11, RS + 40)).join('') + '"/>') +
+    '<i class="brk"></i><i class="brk tr"></i><i class="brk br"></i><i class="brk bl"></i>' +
+    '<svg class="p-cross" viewBox="0 0 720 600"><circle cx="' + CX + '" cy="' + CY + '" r="7"/><path d="M' + CX + ' ' + (CY - 19) + 'v8M' + CX + ' ' + (CY + 11) + 'v8M' + (CX - 19) + ' ' + CY + 'h8M' + (CX + 11) + ' ' + CY + 'h8"/></svg>' +
+    '<div class="p-hud">' + txt(112, 62, 'TARGET') + txt(112, 84, 'LAT --.--', 'hl', 'hudLat') + txt(112, 104, 'LNG --.--', 'hl', 'hudLng') +
+      txt(112, 124, 'ZOOM ×1.0', '', 'hudZoom') + txt(608, 540, 'STANDBY', 'end p-status', 'hudStatus') + txt(608, 560, 'NO SIGNAL', 'end', 'hudCode') + '</div>';
+  const cv = $('canvas', box), ctx = cv.getContext('2d'), sphere = $('.sphere', box), cross = $('.p-cross', box);
+  const brks = Array.from(box.querySelectorAll('.brk'));
   const hud = { lat: $('#hudLat'), lng: $('#hudLng'), zoom: $('#hudZoom'), status: $('#hudStatus'), code: $('#hudCode') };
+  /* the cell image is drawn at one pixel per cell here, then scaled up onto the page canvas */
+  const cellCv = document.createElement('canvas'), cellCtx = cellCv.getContext('2d');
 
-  let mutate = null, proj = null, path = null, lo = null;
-  let view = null, target = null, raf = 0, idleRaf = 0, visible = true;
-  const tcache = new Map();
+  /* ---- colours: one hue per tier; brightness is carried by alpha alone ---- */
+  const hexRGB = s => { const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim()); const n = m ? parseInt(m[1], 16) : 0x8497B8; return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const TIER_RGB = (() => {
+    const cs = getComputedStyle(document.documentElement);
+    return { ADV: hexRGB(cs.getPropertyValue('--tier-adv')), DEV: hexRGB(cs.getPropertyValue('--tier-dev')), LDC: hexRGB(cs.getPropertyValue('--tier-ldc')), NONE: hexRGB(cs.getPropertyValue('--tier-none')) };
+  })();
+  const toWhite = (c, t) => c.map(v => Math.round(v + (255 - v) * t));
+  /* a cell is written as one 32-bit RGBA word: colour bits here, alpha added per cell */
+  const LE = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+  const word = c => LE ? (c[2] << 16 | c[1] << 8 | c[0]) : (c[0] << 24 | c[1] << 16 | c[2] << 8) >>> 0;
+  const ASH = LE ? 24 : 0;
+  let COL = null, WORD = null; // [land, drawn country, its border] as RGB and as words
+  function setTier(t) {
+    const c = TIER_RGB[t] || TIER_RGB.NONE;
+    COL = [c, toWhite(c, .10), toWhite(c, .50)];
+    WORD = COL.map(word);
+  }
+  setTier('NONE');
 
-  function setup() {
-    if (mutate) return true;
-    if (!GEO.ready) return false;
-    const d3 = window.d3;
-    const exRaw = m => {
-      const az = d3.geoAzimuthalEquidistantRaw;
-      return (lambda, phi) => {
-        const [x, y] = az(lambda, phi);
-        const c = Math.hypot(x, y);
-        if (c < 1e-12) return [0, 0];
-        const k = Math.sin(Math.min(m * c, Math.PI / 2)) / c;
-        return [x * k, y * k];
-      };
+  /* ---- land rasters ---- */
+  /* an equirectangular grid of lon0 +- hw by lat0 +- hh: 0 sea, 1 land, 2 the drawn country (painted
+     last, so it wins along shared borders). Each country is one even-odd fill, so lakes and enclaves
+     stay open; a piece is drawn again 360 degrees over when its box reaches across the edge. */
+  function rasterize(W, H, lon0, lat0, hw, hh, code) {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    const sx = W / (2 * hw), sy = H / (2 * hh), X0 = lon0 - hw, X1 = lon0 + hw, Y0 = lat0 - hh, Y1 = lat0 + hh;
+    const fill = (f, col) => {
+      let any = false;
+      g.beginPath();
+      for (const p of f._p) {
+        if (p.y1 < Y0 || p.y0 > Y1) continue;
+        for (const o of [-360, 0, 360]) {
+          if (p.x1 + o < X0 || p.x0 + o > X1) continue;
+          any = true;
+          for (const r of p.rings) {
+            for (let i = 0; i < r.length; i++) {
+              const x = (r[i][0] + o - X0) * sx, y = (Y1 - r[i][1]) * sy;
+              if (i) g.lineTo(x, y); else g.moveTo(x, y);
+            }
+            g.closePath();
+          }
+        }
+      }
+      if (any) { g.fillStyle = col; g.fill('evenodd'); }
     };
-    mutate = d3.geoProjectionMutator(exRaw);
-    proj = mutate(1).scale(R).translate([CX, CY]);
-    path = d3.geoPath(proj).digits(1);
-    /* a lighter copy of the land for whole-globe frames, and a bounding cap per country for culling */
-    const thin = ring => ring.length < 16 ? ring : ring.filter((p, i) => i % 3 === 0 || i === ring.length - 1);
-    lo = GEO.feats.map(f => {
-      const g = f.geometry;
-      const geometry = !g ? g : g.type === 'Polygon' ? { type: 'Polygon', coordinates: g.coordinates.map(thin) }
-        : { type: 'MultiPolygon', coordinates: g.coordinates.map(p => p.map(thin)) };
-      return { type: 'Feature', code: f.code, geometry };
-    });
-    GEO.feats.forEach(f => {
-      f._bc = d3.geoCentroid(f);
-      let r = 0;
-      d3.geoStream(f, { point(x, y) { r = Math.max(r, d3.geoDistance(f._bc, [x, y])); }, lineStart() {}, lineEnd() {}, polygonStart() {}, polygonEnd() {}, sphere() {} });
-      f._br = r;
-    });
-    return true;
+    for (const f of GEO.feats) if (f.code !== code) fill(f, '#F00');
+    const tf = GEO.FEAT.get(code);
+    if (tf) fill(tf, '#0F0');
+    const d = g.getImageData(0, 0, W, H).data, v = new Uint8Array(W * H);
+    for (let i = 0, j = 0; i < v.length; i++, j += 4) v[i] = d[j + 1] > 110 ? 2 : d[j] > 110 ? 1 : 0;
+    return { W, H, lon0, lat0, hw, hh, sx, sy, v, code };
+  }
+  let world = null, win = null;
+  function localRaster(t) {
+    const hh = Math.min(90, 1.3 * (90 / t.m) + 0.5), hw = Math.min(180, hh / Math.max(0.15, Math.cos(t.lat * RAD)));
+    const S = Math.max(256, Math.min(720, 8 * R));
+    if (!win || win.code !== t.code || win.W !== S) win = rasterize(S, S, t.lon, t.lat, hw, hh, t.code);
   }
 
   /* where to look and how much to magnify for a place */
+  const tcache = new Map();
   function targetFor(code) {
     if (tcache.has(code)) return tcache.get(code);
-    const d3 = window.d3, L = BY.get(code), f = GEO.FEAT.get(code);
+    const L = BY.get(code), f = GEO.FEAT.get(code), em = f ? emblemGeom(f) : null;
     let t;
-    const em = f ? emblemGeom(f) : null;
     if (!em || em.main.coordinates[0].length < 10) {
-      /* no outline, or one drawn with a handful of points: a glowing dot at the listed position */
-      t = { code, lon: L.lng, lat: L.lat, m: 22, dot: true, feat: null };
+      /* no outline, or one drawn with a handful of points: a marker at the listed position */
+      t = { code, lon: L.lng, lat: L.lat, m: 22, dot: true };
     } else {
       let cmax = 0;
-      for (const poly of em.geo.coordinates) for (const pt of poly[0]) cmax = Math.max(cmax, d3.geoDistance(em.c, pt));
-      t = { code, lon: em.c[0], lat: em.c[1], m: Math.min(22, Math.max(1, 52 / (cmax / RAD))), dot: false, feat: f };
+      for (const it of em.inc) for (const pt of it.c[0]) cmax = Math.max(cmax, gdist(em.c, pt));
+      t = { code, lon: em.c[0], lat: em.c[1], m: Math.min(22, Math.max(1, 52 / (cmax / RAD))), dot: false };
     }
     tcache.set(code, t);
     return t;
   }
 
-  function graticule(v, vis) {
-    const d3 = window.d3;
-    const step = STEPS.find(s => vis / s <= 6) || 30;
-    const g = d3.geoGraticule().step([step, step]).precision(step / 4);
-    if (vis < 60) {
-      const pad = vis + 2 * step, lat0 = Math.max(-90, v.lat - pad), lat1 = Math.min(90, v.lat + pad);
-      const polar = Math.max(Math.abs(lat0), Math.abs(lat1));
-      const dl = polar > 80 ? 180 : Math.min(180, pad / Math.cos(polar * RAD));
-      const snap = x => Math.floor(x / step) * step;
-      g.extent([[snap(v.lon - dl), snap(lat0)], [snap(v.lon + dl) + step, Math.min(90, snap(lat1) + step)]]);
+  /* ---- the cell grid ---- */
+  let R = 0, K = 0, N = 0, dpr = 1, u = 1;
+  let G = null, img = null, pattern = null;
+  /* per cell, once: asin(rho), bearing (north up), row, and the land and country alpha under the light
+     (the alphas are kept by grid position, the rest by cell number) */
+  function buildGrid() {
+    N = 2 * R + 4;
+    const h = N / 2, NN = N * N, idx = [], asr = [], sb = [], cb = [], row = [], aL = new Uint8Array(NN), aC = new Uint8Array(NN);
+    const ln = Math.hypot(-0.55, 0.6, 0.58), lx = -0.55 / ln, ly = 0.6 / ln, lz = 0.58 / ln;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const x = (i + 0.5 - h) / R, y = (h - j - 0.5) / R, r = Math.hypot(x, y);
+      if (r > 1) continue;
+      const z = Math.sqrt(1 - r * r), lit = Math.max(0, x * lx + y * ly + z * lz) * 0.8 + 0.2 * z, p = j * N + i;
+      idx.push(p); asr.push(Math.asin(r)); sb.push(r ? x / r : 0); cb.push(r ? y / r : 1); row.push(j);
+      aL[p] = Math.round(255 * (0.10 + 0.38 * lit)); aC[p] = Math.round(255 * (0.82 + 0.18 * lit));
     }
-    return path(g());
+    const n = idx.length;
+    G = {
+      n, idx: Int32Array.from(idx), asr: Float64Array.from(asr), sb: Float64Array.from(sb), cb: Float64Array.from(cb),
+      row: Int16Array.from(row), aL, aC, pm: 0, pl: NaN, step: 30,
+      lat: new Float64Array(n), rl: new Float64Array(n), wy: new Int32Array(n),
+      val: new Uint8Array(NN), near: new Uint8Array(NN), kla: new Int16Array(NN).fill(-1), klo: new Int16Array(NN).fill(-1)
+    };
+    cellCv.width = cellCv.height = N;
+    img = cellCtx.createImageData(N, N);
+    G.px = new Uint32Array(img.data.buffer);
+    cv.width = cv.height = N * K;
+    pattern = dotPattern(K);
+  }
+  /* latitude, longitude east of the centre, world-mask row and graticule band of every cell for one
+     tilt and zoom. While the empty globe turns these stay put, so a frame only adds the centre longitude. */
+  function project(v) {
+    if (G.pm === v.m && G.pl === v.lat) return;
+    G.pm = v.m; G.pl = v.lat;
+    const { n, idx, asr, sb, cb, lat, rl, wy, kla } = G, m = v.m, s0 = Math.sin(v.lat * RAD), c0 = Math.cos(v.lat * RAD);
+    const vis = Math.min(90, 90 / m), step = G.step = STEPS.find(s => vis / s <= 6) || 30;
+    for (let q = 0; q < n; q++) {
+      const c = asr[q] / m, sc = Math.sin(c), cc = Math.cos(c);
+      const sl = s0 * cc + c0 * sc * cb[q], la = Math.asin(sl) / RAD;
+      lat[q] = la;
+      rl[q] = Math.atan2(sb[q] * sc * c0, cc - s0 * sl) / RAD;
+      wy[q] = Math.min(511, Math.floor((90 - la) * 512 / 180)) * 1024;
+      kla[idx[q]] = Math.floor((la + 90) / step);
+    }
+  }
+  /* a k x k tile holding one square dot, 0.62k wide, with its edge pixels partly covered */
+  function dotPattern(k) {
+    const t = document.createElement('canvas');
+    t.width = t.height = k;
+    const tc = t.getContext('2d'), id = tc.createImageData(k, k), a = k * 0.19, b = k * 0.81;
+    const cov = i => Math.max(0, Math.min(i + 1, b) - Math.max(i, a));
+    for (let y = 0; y < k; y++) for (let x = 0; x < k; x++) {
+      const o = (y * k + x) * 4;
+      id.data[o] = id.data[o + 1] = id.data[o + 2] = 255;
+      id.data[o + 3] = Math.round(255 * cov(x) * cov(y));
+    }
+    tc.putImageData(id, 0, 0);
+    return ctx.createPattern(t, 'repeat');
   }
 
-  function frame(v, fine) {
-    const d3 = window.d3;
-    mutate(v.m);
-    const vis = Math.min(90, 90 / v.m);
-    proj.rotate([-v.lon, -v.lat]).clipAngle(vis).precision(fine ? 0.3 : 0.9);
-    grat.setAttribute('d', graticule(v, vis) || '');
-    const cap = vis * RAD + 0.03, ctr = [v.lon, v.lat];
-    const skip = target && !target.dot ? target.code : -1;
-    const src = v.m < 2.2 && !fine ? lo : GEO.feats;
-    const list = [];
-    for (let i = 0; i < src.length; i++) {
-      const f = GEO.feats[i];
-      if (f.code === skip || !src[i].geometry) continue;
-      if (vis < 80 && d3.geoDistance(f._bc, ctr) - f._br > cap) continue;
-      list.push(src[i]);
+  /* screen cell of a place for view v, or null when it is on the far side */
+  function cellOf(lon, lat, v) {
+    const c = gdist([v.lon, v.lat], [lon, lat]);
+    if (c * v.m >= Math.PI / 2) return null;
+    const f0 = v.lat * RAD, f = lat * RAD, dl = (lon - v.lon) * RAD;
+    const b = Math.atan2(Math.sin(dl) * Math.cos(f), Math.cos(f0) * Math.sin(f) - Math.sin(f0) * Math.cos(f) * Math.cos(dl));
+    const r = Math.sin(v.m * c);
+    return [Math.floor(N / 2 + r * Math.sin(b) * R), Math.floor(N / 2 - r * Math.cos(b) * R)];
+  }
+
+  /* one frame into img; returns the number of cells of the drawn country. One pass looks every cell up
+     and colours it as if nothing were near the drawn country; a second pass over that country alone
+     then brightens its rim and the cells one and two steps from it (diagonals count). */
+  let locked = false, blip = false;
+  const inCountry = [], ring1 = [], ring2 = [];
+  function compute(v, scan) {
+    project(v);
+    const { n, idx, lat, rl, wy, aL, aC, row, val, near, kla, klo, step, px } = G;
+    const Wm = world.v, w = win;
+    /* longitudes are handled as lon + 180 in 0..360 */
+    let lon0 = v.lon + 180, wl0 = 0;
+    lon0 -= 360 * Math.floor(lon0 / 360);
+    if (w) { wl0 = w.lon0 + 180; wl0 -= 360 * Math.floor(wl0 / 360); }
+    const wv = w ? w.v : null, wW = w ? w.W : 0, wH = w ? w.H : 0, whw = w ? w.hw : 0, wh2 = w ? 2 * w.hh : 0;
+    const wtop = w ? w.lat0 + w.hh : 0, wsx = w ? w.sx : 0, wsy = w ? w.sy : 0;
+    const inv = 1 / step, XW = 1024 / 360, wL = WORD[0], wT = WORD[1], wB = WORD[2];
+    /* the scan line: rows within 2.5 cells of it */
+    const sr = scan >= 0 ? (scan % 1100) / 1100 * N : -99, r0 = sr - 3, r1 = sr + 2;
+    const put = (p, c, a) => { px[p] = (c | (a > 255 ? 255 : a) << ASH) >>> 0; };
+    px.fill(0);
+    inCountry.length = 0;
+    for (let q = 0; q < n; q++) {
+      const p = idx[q];
+      let lw = rl[q] + lon0;
+      if (lw >= 360) lw -= 360; else if (lw < 0) lw += 360;
+      const ko = (lw * inv) | 0;
+      klo[p] = ko;
+      let x = -1;
+      if (wv) {
+        let dl = lw - wl0;
+        if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+        const dy = wtop - lat[q];
+        if (dl > -whw && dl < whw && dy >= 0 && dy < wh2) x = wv[Math.min(wH - 1, (dy * wsy) | 0) * wW + Math.min(wW - 1, ((dl + whw) * wsx) | 0)];
+      }
+      if (x < 0) x = Wm[wy[q] + ((lw * XW) | 0)];
+      val[p] = x;
+      let a = 0, c = wL;
+      if (x === 1) a = aL[p];
+      else if (x === 2) { a = aC[p]; c = wT; inCountry.push(p); }
+      else {
+        /* graticule, sea only: a cell is on a line when the cell to its left or above lies in another
+           band of latitude (or longitude), so every line is one dot wide however it crosses the grid;
+           no meridians beyond 84 degrees, where they crowd together */
+        const k = kla[p], kl = kla[p - 1], ku = kla[p - N];
+        if ((kl >= 0 && kl !== k) || (ku >= 0 && ku !== k)) a = 24;
+        else if (lat[q] < 84 && lat[q] > -84) {
+          const ol = klo[p - 1], ou = klo[p - N];
+          if ((ol >= 0 && ol !== ko) || (ou >= 0 && ou !== ko)) a = 24;
+        }
+      }
+      if (row[q] > r0 && row[q] < r1) a += 60;
+      put(p, c, a);
     }
-    land.setAttribute('d', path({ type: 'FeatureCollection', features: list }) || '');
-    const cd = target && target.feat ? path(target.feat) || '' : '';
-    country.setAttribute('d', cd);
-    glow.setAttribute('d', cd);
-    if (target && target.dot && d3.geoDistance([target.lon, target.lat], ctr) < vis * RAD) {
-      const p = proj([target.lon, target.lat]);
-      dotg.setAttribute('display', 'inline');
-      dotg.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ')');
-    } else dotg.setAttribute('display', 'none');
-    const lon = ((v.lon + 540) % 360) - 180;
-    hud.lat.textContent = 'LAT  ' + Math.abs(v.lat).toFixed(2) + '°' + (v.lat >= 0 ? 'N' : 'S');
-    hud.lng.textContent = 'LNG  ' + Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'E' : 'W');
+    const count = inCountry.length;
+    if (count) {
+      /* near: 1 the country, 2 next to it, 3 two away; cleared again below. Outside the disc kla is -1. */
+      ring1.length = ring2.length = 0;
+      for (const p of inCountry) near[p] = 1;
+      const spread = (from, to, mark) => {
+        for (const p of from) for (let dj = -N; dj <= N; dj += N) for (let di = -1; di <= 1; di++) {
+          const r = p + dj + di;
+          if (!near[r] && kla[r] >= 0) { near[r] = mark; to.push(r); }
+        }
+      };
+      spread(inCountry, ring1, 2);
+      spread(ring1, ring2, 3);
+      const lit = (p, a) => { const j = (p / N) | 0; return j > r0 && j < r1 ? a + 60 : a; };
+      for (const p of inCountry) if (val[p - 1] !== 2 || val[p + 1] !== 2 || val[p - N] !== 2 || val[p + N] !== 2) put(p, wB, 255);
+      for (const p of ring1) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 40 : 92));
+      for (const p of ring2) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 18 : 46));
+      for (const p of inCountry) near[p] = 0;
+      for (const p of ring1) near[p] = 0;
+      for (const p of ring2) near[p] = 0;
+    }
+    return count;
+  }
+  /* a place too small to show its outline: a five-cell cross, white in the middle, with a dot four
+     cells out on each side */
+  function marker(v) {
+    const at = cellOf(target.lon, target.lat, v);
+    if (!at) return;
+    const d = img.data, cB = COL[2];
+    const put = (i, j, c) => {
+      if (i < 0 || j < 0 || i >= N || j >= N) return;
+      const o = (j * N + i) * 4;
+      d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+    };
+    const [i, j] = at;
+    for (let k = -2; k <= 2; k++) { put(i + k, j, cB); put(i, j + k, cB); }
+    put(i - 4, j, cB); put(i + 4, j, cB); put(i, j - 4, cB); put(i, j + 4, cB);
+    put(i, j, [255, 255, 255]);
+  }
+  function output(data) {
+    cellCtx.putImageData(data, 0, 0);
+    const s = N * K;
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalCompositeOperation = 'copy';
+    ctx.drawImage(cellCv, 0, 0, s, s);
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, s, s);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  function render(v, scan = -1) {
+    if (!N || !GEO.ready) return;
+    if (!world) world = rasterize(1024, 512, 0, 0, 180, 90, -1);
+    const count = compute(v, scan);
+    if (locked) blip = count < 6;
+    if (target && (target.dot || (locked && blip))) marker(v);
+    output(img);
+    const lon = ((v.lon % 360) + 540) % 360 - 180;
+    hud.lat.textContent = 'LAT ' + Math.abs(v.lat).toFixed(2) + '°' + (v.lat >= 0 ? 'N' : 'S');
+    hud.lng.textContent = 'LNG ' + Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'E' : 'W');
     hud.zoom.textContent = 'ZOOM ×' + v.m.toFixed(1);
   }
-
-  function clear() {
-    [grat, land, glow, country].forEach(e => e.setAttribute('d', ''));
-    dotg.setAttribute('display', 'none');
+  /* the lock-on flicker: four bands of 1-3 rows pushed 1-3 cells sideways, for one frame */
+  function glitch() {
+    const src = img.data, g = new ImageData(new Uint8ClampedArray(src), N, N), d = g.data;
+    for (let b = 0; b < 4; b++) {
+      const h = 1 + Math.floor(Math.random() * 3), y0 = Math.floor(Math.random() * (N - h));
+      const s = (1 + Math.floor(Math.random() * 3)) * (Math.random() < 0.5 ? -1 : 1);
+      for (let y = y0; y < y0 + h; y++) for (let x = 0; x < N; x++) {
+        const sx = x - s, o = (y * N + x) * 4;
+        if (sx < 0 || sx >= N) { d[o + 3] = 0; continue; }
+        const so = (y * N + sx) * 4;
+        d[o] = src[so]; d[o + 1] = src[so + 1]; d[o + 2] = src[so + 2]; d[o + 3] = src[so + 3];
+      }
+    }
+    output(g);
   }
-  const status = (s, hl) => { hud.status.textContent = s; hud.status.classList.toggle('hl', !!hl); };
-  function brackets(k) { brkEl.style.transform = 'scale(' + k + ')'; brkEl.style.opacity = k > 1.2 ? '.5' : '1'; }
 
+  /* ---- size and place: whole device pixels per dot, the canvas on the device pixel grid ---- */
+  let bk = 1.6;
+  function brackets(k) {
+    bk = k;
+    const dd = 100 * k * u, s = 26 * u, at = [[-dd, -dd], [dd - s, -dd], [dd - s, dd - s], [-dd, dd - s]];
+    brks.forEach((b, i) => { b.style.transform = 'translate(' + at[i][0].toFixed(2) + 'px,' + at[i][1].toFixed(2) + 'px)'; });
+    box.classList.toggle('wide', k > 1.2);
+  }
+  function layout() {
+    const W = box.clientWidth, H = box.clientHeight;
+    if (!W || !H) return false;
+    dpr = window.devicePixelRatio || 1;
+    u = W / 720;
+    box.style.setProperty('--u', u + 'px');
+    const k = Math.max(3, Math.round(DOT_PITCH * dpr)), r = Math.max(8, Math.round(W * (2 * RS / 720) * dpr / (2 * k)));
+    const rebuilt = k !== K || r !== R;
+    if (rebuilt) { K = k; R = r; buildGrid(); }
+    const rc = box.getBoundingClientRect(), ox = rc.left + window.scrollX, oy = rc.top + window.scrollY, side = N * K;
+    const left = Math.round((ox + W / 2) * dpr - side / 2) / dpr - ox, top = Math.round((oy + H / 2) * dpr - side / 2) / dpr - oy;
+    const px = x => x.toFixed(3) + 'px';
+    Object.assign(cv.style, { left: px(left), top: px(top), width: px(side / dpr), height: px(side / dpr) });
+    Object.assign(sphere.style, { left: px(left + 2 * K / dpr), top: px(top + 2 * K / dpr), width: px(2 * R * K / dpr), height: px(2 * R * K / dpr) });
+    brackets(bk);
+    return rebuilt;
+  }
+
+  /* ---- states ---- */
+  let view = null, target = null, raf = 0, idleT = 0, glitchT = 0, idling = false, visible = true;
+  /* kept as a flag: reading the media query right after the read-outs change would force a style pass */
+  let reduced = REDUCED.matches;
+  const status = (s, hl) => { hud.status.textContent = s; hud.status.classList.toggle('hl', !!hl); };
+  function stop() {
+    cancelAnimationFrame(raf); raf = 0;
+    clearTimeout(idleT); idleT = 0;
+    clearTimeout(glitchT); glitchT = 0;
+    idling = false;
+  }
   function lock(animate) {
-    svg.classList.remove('flying');
-    svg.classList.add('locked');
+    locked = true;
     status('TARGET LOCKED', true);
     brackets(0.42);
     cross.style.opacity = '';
-    if (animate) { body.classList.remove('glitch'); void body.getBoundingClientRect(); body.classList.add('glitch'); }
+    render(view);
+    if (animate && !reduced) {
+      glitch();
+      glitchT = setTimeout(() => { glitchT = 0; output(img); }, 110);
+    }
   }
 
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const clamp01 = t => Math.max(0, Math.min(1, t));
+  /* great-circle path between two [lon, lat] points, as d3.geoInterpolate */
+  function interp(a, b) {
+    const d = gdist(a, b), k = Math.sin(d);
+    if (d < 1e-9 || k < 1e-9) return () => [b[0], b[1]];
+    const A0 = vec3(a), B0 = vec3(b);
+    return t => {
+      const p = Math.sin(d - t * d) / k, q = Math.sin(t * d) / k;
+      return lonLat(p * A0[0] + q * B0[0], p * A0[1] + q * B0[1], p * A0[2] + q * B0[2]);
+    };
+  }
   function fly(t, dur) {
-    const d3 = window.d3;
-    stopIdle();
-    cancelAnimationFrame(raf);
     const from = view || { lon: t.lon + 75, lat: 14, m: 1 };
-    const dist = d3.geoDistance([from.lon, from.lat], [t.lon, t.lat]);
-    const rot = d3.geoInterpolate([from.lon, from.lat], [t.lon, t.lat]);
-    const far = dist > 0.03;
+    const far = gdist([from.lon, from.lat], [t.lon, t.lat]) > 0.03;
+    const rot = interp([from.lon, from.lat], [t.lon, t.lat]);
     const zOut = far && from.m > 1.05 ? 0.3 : 0;
     const lf = Math.log(from.m), lt = Math.log(t.m);
-    svg.classList.add('flying');
-    svg.classList.remove('locked');
     status('SCANNING');
     brackets(1.6);
     cross.style.opacity = '.35';
     const t0 = performance.now();
+    let drawn = -1e9;
     const step = now => {
+      raf = 0;
       const p = clamp01((now - t0) / dur);
+      if (p >= 1) { view = { lon: t.lon, lat: t.lat, m: t.m }; lock(true); return; }
+      raf = requestAnimationFrame(step);
+      /* about 30 frames a second, whatever the display rate */
+      if (now - drawn < 31) return;
+      drawn = now;
       let m, r;
       if (!far) { m = Math.exp(lf + (lt - lf) * ease(p)); r = ease(p); }
       else {
@@ -793,82 +1054,88 @@ const PLANET = (() => {
       const c = rot(r);
       view = { lon: c[0], lat: c[1], m };
       if (p > 0.55) brackets(1.6 - 0.6 * ease((p - 0.55) / 0.45));
-      frame(view, p >= 1);
-      if (p < 1) raf = requestAnimationFrame(step);
-      else { raf = 0; view = { lon: t.lon, lat: t.lat, m: t.m }; lock(true); }
+      render(view, now - t0);
     };
     raf = requestAnimationFrame(step);
   }
 
-  /* the empty state: a grey world slowly turning */
-  let idling = false, last = 0;
-  function stopIdle() { cancelAnimationFrame(idleRaf); idleRaf = 0; idling = false; }
-  const canSpin = () => idling && visible && !document.hidden && !REDUCED.matches;
-  function spin(now) {
-    idleRaf = 0;
-    if (!canSpin()) return;
-    if (now - last > 33) {
-      view.lon = (view.lon + Math.min(now - last, 100) * 0.006) % 360;
-      last = now;
-      frame(view, false);
-    }
-    idleRaf = requestAnimationFrame(spin);
+  /* the empty state: the world turning 0.75 degrees eight times a second, on screen only */
+  const canSpin = () => idling && visible && !document.hidden && !reduced;
+  function spin() {
+    if (idleT || raf || !canSpin()) return;
+    idleT = setTimeout(() => {
+      idleT = 0;
+      if (!canSpin()) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (!canSpin()) return;
+        view.lon = (view.lon + 0.75) % 360;
+        render(view);
+        spin();
+      });
+    }, 125);
   }
-  function resume() { if (canSpin() && !idleRaf) { last = performance.now(); idleRaf = requestAnimationFrame(spin); } }
   function idle() {
-    stopIdle();
-    cancelAnimationFrame(raf);
     target = null;
+    win = null;
+    locked = false;
     view = view && view.m === 1 ? view : { lon: 20, lat: 14, m: 1 };
-    svg.classList.remove('flying', 'locked');
-    status('STANDBY');
+    status(GEO.ready ? 'STANDBY' : 'NO MAP DATA');
     hud.code.textContent = 'AWAITING DRAW';
     brackets(1.6);
     cross.style.opacity = '.35';
-    frame(view, true);
+    render(view);
     idling = true;
-    resume();
+    spin();
   }
-  document.addEventListener('visibilitychange', resume);
-  if (REDUCED.addEventListener) REDUCED.addEventListener('change', resume);
+  /* the HUD rings stop turning while the planet is off screen or the tab is hidden */
+  function onScreen() {
+    box.classList.toggle('still', !visible || document.hidden);
+    spin();
+  }
+  document.addEventListener('visibilitychange', onScreen);
+  if (REDUCED.addEventListener) REDUCED.addEventListener('change', () => { reduced = REDUCED.matches; onScreen(); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; onScreen(); }).observe(box);
 
   function show(st, opt = {}) {
-    body.classList.toggle('enter', !!opt.animate && !view);
-    if (st.type === 'empty') {
-      if (!setup()) {
-        clear();
-        svg.classList.remove('flying', 'locked');
-        brackets(1.6);
-        cross.style.opacity = '.35';
-        status(GEO.failed ? 'NO MAP DATA' : 'STANDBY');
-        hud.code.textContent = 'AWAITING DRAW';
-        return;
-      }
-      idle();
-      return;
-    }
+    stop();
+    const empty = st.type === 'empty';
+    setTier(empty ? 'NONE' : tierOf(st.loc));
+    if (empty) { idle(); return; }
     const L = st.loc;
     hud.code.textContent = 'M49 ' + String(L.code).padStart(3, '0') + ' · ' + L.iso2;
-    if (!setup()) {
-      /* no d3 (yet): sea, halo, rim and ring only, in the tier colour */
-      clear();
-      lock(false);
-      status(GEO.failed ? 'NO MAP DATA' : 'LINKING', GEO.failed);
+    if (!GEO.ready) {
+      target = null;
+      locked = true;
+      status('NO MAP DATA');
+      brackets(0.42);
+      cross.style.opacity = '';
       return;
     }
     target = targetFor(L.code);
-    if (!opt.animate || REDUCED.matches) {
-      stopIdle();
-      cancelAnimationFrame(raf);
+    localRaster(target);
+    locked = false;
+    if (!opt.animate || reduced) {
       view = { lon: target.lon, lat: target.lat, m: target.m };
-      frame(view, true);
       lock(false);
       return;
     }
+    /* fresh: come in from the whole globe, as if nothing had been on screen before */
+    if (opt.fresh) view = null;
     fly(target, Math.round(2000 * (opt.speed || 1)));
   }
 
-  if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; resume(); }).observe(svg);
+  /* after a resize the grid is rebuilt only if the dot size or the globe radius changed */
+  let fitT = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(fitT);
+    fitT = setTimeout(() => {
+      if (!layout() || !view) return;
+      if (target) localRaster(target);
+      if (!raf || idling) render(view);
+    }, 150);
+  });
+  layout();
   return { show };
 })();
 
@@ -878,7 +1145,7 @@ let batchCounts = null, lastBatch = null;
 
 function initMap() {
   if (MAP.ready) return;
-  if (!initGeo()) { mapFail(); return; }
+  if (!GEO.ready || !window.d3) { mapFail(); return; }
   const d3 = window.d3, fc = GEO.fc, feats = GEO.feats, FEAT = GEO.FEAT;
   tierStats();
 
@@ -930,10 +1197,10 @@ function initMap() {
   });
 
   function targetFor(code) {
-    const L = BY.get(code), p = proj([L.lng, L.lat]), f = FEAT.get(code);
+    const L = BY.get(code), p = proj([L.lng, L.lat]), f = FEAT.get(code), em = f ? emblemGeom(f) : null;
     let k = 6;
-    if (f) {
-      const b = path.bounds(emblemGeom(f).main);
+    if (em) {
+      const b = path.bounds(em.main);
       const bw = Math.max(1, b[1][0] - b[0][0]), bh = Math.max(1, b[1][1] - b[0][1]);
       k = Math.max(1.6, Math.min(8, 0.42 / Math.max(bw / Wv, bh / Hv)));
     }
@@ -1037,8 +1304,6 @@ function initMap() {
 }
 
 function mapFail() {
-  GEO.failed = true;
-  PLANET.show(current, {});
   const msg = $('#mapMsg');
   msg.textContent = S.mapFail;
   msg.hidden = false;
@@ -1432,6 +1697,8 @@ paintSpace();
 renderIntro();
 renderMethod();
 renderStage(store.recent.length ? fromRecent(store.recent[0]) : { type: 'empty' }, {});
+/* first sight of the planet: from the whole globe down to the last record */
+if (current.type !== 'empty') PLANET.show(current, { animate: true, fresh: true });
 renderHundred();
 renderMine();
 renderTableHead();
@@ -1442,15 +1709,9 @@ let fitT = 0;
 window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitName, 120); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
 
-function geoReady() {
-  if (!initGeo()) { mapFail(); return; }
-  initMap();
-  /* first sight of the planet: from the whole globe down to the last record */
-  if (current.type === 'empty') PLANET.show(current, {});
-  else PLANET.show(current, { animate: true });
-}
-if (window.d3) geoReady();
+/* only the map needs d3; the planet draws from the topology decoded at start */
+if (window.d3) initMap();
 else loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js')
   .catch(() => loadScript('https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js'))
-  .then(geoReady, mapFail);
+  .then(initMap, mapFail);
 })();
