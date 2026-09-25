@@ -513,7 +513,7 @@ function renderStage(st, opt = {}) {
 
 function recordText(st) {
   const L = st.loc, draw = st.type === 'draw', M = metrics(st), c = S.comma, lines = [];
-  lines.push('Rebirth Simulator: ' + (draw ? S.kindDraw + ' ' + S.serial(fmtInt(st.serial)) + c + today(st.t) : S.kindLookup + c + today()));
+  lines.push('Birth Lottery: ' + (draw ? S.kindDraw + ' ' + S.serial(fmtInt(st.serial)) + c + today(st.t) : S.kindLookup + c + today()));
   lines.push(nm(L) + S.paren(subName(L.sub)) + c + (draw ? sexName(st.sex) : S.both));
   lines.push(S.kv(S.lbProb, fmtPct(M.share) + c + oneIn(M.share)));
   const ppp = L.gdp == null ? '' : S.paren(S.pppShort + ' ' + intl(L.gdp));
