@@ -1397,8 +1397,8 @@ function renderHundred() {
   const named = order.filter(ci => cells[ci] > 0);
   const [a, b] = named, rest = named.slice(2);
   $('#hLede').textContent = S.hundredLede({
-    first: [contName(a), cells[a]], second: [contName(b), cells[b]],
-    rest: rest.map(ci => [contName(ci), cells[ci]]),
+    first: [contName(a), cells[a], a], second: [contName(b), cells[b], b],
+    rest: rest.map(ci => [contName(ci), cells[ci], ci]),
     zero: order.filter(ci => cells[ci] === 0).map(contName),
     tiers: { ADV: fx(T.p1.ADV, 1), DEV: fx(T.p1.DEV, 1), LDC: fx(T.p1.LDC, 1) }
   });
@@ -1461,12 +1461,12 @@ const COLS = [
 const TBL = { key: 'prob', dir: -1, q: '', cont: -1, tier: '' };
 /* case, accents (Perú, México), spaces and punctuation do not matter; NFC puts Hangul back together */
 const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').normalize('NFC').toLowerCase().replace(/[\s·・,.'’()\-]/g, '');
-/* other names people type: 한국, 남한, 터키, 버마, 스와질란드, USA, 米国, EE. UU. ... */
-const ALIAS = { 410: '한국 남한 korea', 408: '조선 dprk', 840: 'usa us 미합중국 米国 アメリカ eeuu', 826: 'uk 잉글랜드 britain 英国', 180: '민주콩고 drc rdc', 178: '콩고',
-  792: '터키 turkey', 104: '버마 burma ビルマ birmania', 748: '스와질란드 swaziland スワジランド suazilandia', 384: '아이보리코스트 ivorycoast', 132: '케이프베르데 capeverde',
-  807: '마케도니아', 626: '티모르', 784: 'uae 에미리트', 203: 'czechrepublic チェコ共和国 republicacheca', 643: 'russianfederation ロシア連邦', 158: '타이완', 344: '홍콩', 275: 'palestine',
-  528: 'holanda' };
-LOCS.forEach(l => { l.key = [l.ko, l.en, l.ja, l.es, ALIAS[l.code] || ''].map(norm).join('|'); });
+/* other names people type: 한국, 남한, 터키, 버마, 스와질란드, USA, 米国, EE. UU., КНДР ... */
+const ALIAS = { 410: '한국 남한 korea республика корея', 408: '조선 dprk кндр', 840: 'usa us 미합중국 米国 アメリカ eeuu соединенные штаты америка', 826: 'uk 잉글랜드 britain 英国 англия британия соединенное королевство',
+  180: '민주콩고 drc rdc дрк демократическая республика конго', 178: '콩고', 792: '터키 turkey', 104: '버마 burma ビルマ birmania бирма', 748: '스와질란드 swaziland スワジランド suazilandia свазиленд',
+  384: '아이보리코스트 ivorycoast', 132: '케이프베르데 capeverde', 807: '마케도니아 македония', 626: '티모르', 784: 'uae 에미리트 оаэ эмираты', 203: 'czechrepublic チェコ共和国 republicacheca чешская республика',
+  643: 'russianfederation ロシア連邦 рф российская федерация', 158: '타이완', 344: '홍콩', 275: 'palestine', 528: 'holanda голландия', 710: 'южно-африканская республика южная африка' };
+LOCS.forEach(l => { l.key = [l.ko, l.en, l.ja, l.es, l.ru, ALIAS[l.code] || ''].map(norm).join('|'); });
 function colVal(l, k) { return k === 'prob' ? l.births : k === 'name' ? nm(l) : k === 'tier' ? tierIdx(l.tier) : l[k]; }
 function renderTableHead() {
   $('#tHead').innerHTML = COLS.map(c => {
@@ -1637,17 +1637,21 @@ function pickLang() {
   if (!l) { try { l = ok(localStorage.getItem(LANG_KEY)); } catch (e) { /* storage blocked */ } }
   return l || 'en';
 }
-/* the Japanese web font is large, so its stylesheet is only fetched once Japanese is chosen */
-const JP_FONT = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap';
-let jpFont = false;
+/* stylesheets fetched only once their language is chosen: the Japanese font is large, and Russian
+   needs Cyrillic faces (Orbit and Chakra Petch have none): IBM Plex Sans for text, Jura for headings */
+const LANG_FONTS = {
+  ja: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap',
+  ru: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Jura:wght@400;500;600&display=swap'
+};
+const fontsAdded = {};
 /* switch the text table and every piece of static text; the rendered sections follow in setLang */
 function applyLang(l) {
   LANG = l; S = I18N[l];
   document.documentElement.lang = l;
-  if (l === 'ja' && !jpFont) {
-    jpFont = true;
+  if (LANG_FONTS[l] && !fontsAdded[l]) {
+    fontsAdded[l] = true;
     const k = document.createElement('link');
-    k.rel = 'stylesheet'; k.href = JP_FONT;
+    k.rel = 'stylesheet'; k.href = LANG_FONTS[l];
     document.head.appendChild(k);
   }
   const md = $('meta[name="description"]');
@@ -1656,6 +1660,7 @@ function applyLang(l) {
   document.querySelectorAll('[data-th]').forEach(el => { el.innerHTML = S[el.dataset.th]; });
   document.querySelectorAll('[data-tp]').forEach(el => { el.setAttribute('placeholder', S[el.dataset.tp]); });
   const track = $('#langTrack');
+  track.style.setProperty('--n', I18N.LANGS.length);
   track.style.setProperty('--i', I18N.LANGS.indexOf(l));
   track.querySelectorAll('input').forEach(r => { r.checked = r.value === l; });
   $('#tTitle').textContent = S.tTitle(LOCS.length);
