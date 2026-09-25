@@ -30,6 +30,14 @@
   --sans: var(--jp);
 }
 :root:lang(ja) body { word-break: normal; line-break: strict; }
+/* Russian: Orbit and Chakra Petch have no Cyrillic, so text is set in IBM Plex Sans and headings in
+   Jura, a light geometric face close to Orbit (both fetched once Russian is chosen, see app.js) */
+:root:lang(ru) {
+  --ru: 'IBM Plex Sans', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --display: 'Jura', var(--ru);
+  --num: 'Chakra Petch', var(--ru);
+  --sans: var(--ru);
+}
 *, *::before, *::after { box-sizing: inherit; }
 html { background: var(--space); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
@@ -74,10 +82,10 @@ a:hover { text-decoration-color: currentColor; }
 }
 .lang-sw { display: flex; align-items: center; gap: 10px; }
 .globe { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--ink-3); stroke-width: 1.1; }
-/* equal columns, so the highlight is a quarter of the track moved by --i (set in app.js) */
+/* equal columns, so the highlight is one column wide (1/--n of the track) and moved by --i (both set in app.js) */
 .lang-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; box-shadow: inset 0 0 0 1px var(--line); }
 .lang-thumb {
-  position: absolute; top: 0; bottom: 0; left: 0; width: 25%; pointer-events: none;
+  position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% / var(--n, 5)); pointer-events: none;
   transform: translateX(calc(var(--i, 0) * 100%));
   background: rgba(230, 240, 255, .1);
   box-shadow: inset 0 0 0 1px rgba(230, 240, 255, .38), inset 0 -2px 0 var(--tier);
@@ -92,6 +100,7 @@ a:hover { text-decoration-color: currentColor; }
 .lang-track [lang="ko"] { font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
 .lang-track [lang="ja"] { font-family: 'IBM Plex Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans JP', sans-serif; }
 .lang-track [lang="en"], .lang-track [lang="es"] { font-family: 'IBM Plex Sans KR', sans-serif; }
+.lang-track [lang="ru"] { font-family: 'IBM Plex Sans', 'Segoe UI', Roboto, Arial, sans-serif; }
 @media (forced-colors: active) { .lang-thumb { border: 2px solid Highlight; } }
 
 /* ---------- header ---------- */
@@ -418,8 +427,8 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .cmp li { display: grid; grid-template-columns: 6.2em minmax(0, 1fr) 8.6em; gap: 12px; align-items: center; padding: 5px 0; }
 .cmp.tiers li { grid-template-columns: 6.2em minmax(0, 1fr) 8.6em; }
 /* English and Spanish continent and tier names are longer than the Korean and Japanese ones */
-:root:lang(en) .cmp li, :root:lang(es) .cmp li { grid-template-columns: 8.8em minmax(0, 1fr) 9.4em; }
-:root:lang(en) .stack-row, :root:lang(es) .stack-row { grid-template-columns: 3.2em minmax(0, 1fr); }
+:root:lang(en) .cmp li, :root:lang(es) .cmp li, :root:lang(ru) .cmp li { grid-template-columns: 8.8em minmax(0, 1fr) 9.4em; }
+:root:lang(en) .stack-row, :root:lang(es) .stack-row, :root:lang(ru) .stack-row { grid-template-columns: 3.2em minmax(0, 1fr); }
 .cmp .bar { position: relative; height: 12px; background: rgba(234, 242, 255, .06); }
 .cmp .bar b { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); background: var(--k); }
 .cmp .bar i { position: absolute; left: var(--x); top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); }
@@ -617,15 +626,21 @@ td.na { color: var(--ink-3); }
   .waffle, .legend { max-width: 360px; }
   .bars li { grid-template-columns: 7em minmax(0, 1fr) 4.4em; gap: 8px; }
   .cmp li, .cmp.tiers li { grid-template-columns: 5.4em minmax(0, 1fr) 7.8em; gap: 8px; }
-  :root:lang(en) .cmp li, :root:lang(es) .cmp li { grid-template-columns: 7.2em minmax(0, 1fr) 8.6em; }
+  :root:lang(en) .cmp li, :root:lang(es) .cmp li, :root:lang(ru) .cmp li { grid-template-columns: 7.2em minmax(0, 1fr) 8.6em; }
   .tbl-wrap { max-height: 70vh; }
   tbody th { white-space: normal; min-width: 9em; max-width: 11em; }
   tbody td, tbody th { padding-left: 10px; padding-right: 10px; }
   .tier-strip span { font-size: .8125rem; }
 }
 
-@media (max-width: 379px) {
+/* five languages on a phone: the switcher spans the bar in five equal columns */
+@media (max-width: 479px) {
   .globe { display: none; }
+  .lang-sw, .lang-track { flex: 1; }
+  .lang-track { grid-auto-columns: minmax(0, 1fr); }
+  .lang-track label span { padding: 6px 2px; font-size: .75rem; }
+}
+@media (max-width: 379px) {
   /* room for "Volver a nacer" and "Be born again" on the narrowest phones */
   .actions { grid-template-columns: minmax(0, 1fr) 56px 56px; }
   .actions .btn-primary { font-size: .9375rem; letter-spacing: 0; }

@@ -1,4 +1,4 @@
-/* Page text in four languages: I18N.en, .ja, .es, .ko all have the same keys. LANGS is the
+/* Page text in five languages: I18N.en, .ja, .es, .ko, .ru all have the same keys. LANGS is the
    order of the switcher (body.html lists its buttons in the same order); English is the default.
    Plain strings are set with textContent; keys ending in Html are markup written here and are set
    with innerHTML. In body.html, data-t names the key for an element's text, data-th for its markup
@@ -52,7 +52,7 @@ const ko = {
   mpLimits: '나라 평균은 나라 안의 격차를 가립니다. 같은 나라라도 지역과 소득, 도시와 농촌에 따라 출발선은 크게 다릅니다. 2026년 값은 모두 추계라서 추계 뒤에 벌어진 전쟁이나 재난은 반영되지 않았을 수 있습니다. 1인당 GDP는 환율 기준이든 구매력 기준이든 평균 생산량을 거칠게 보여 줄 뿐 분배는 말해 주지 않습니다. 발전 단계는 국제기구의 행정 분류일 뿐, 그 나라에서 태어난 한 사람의 삶을 말해 주지 않습니다.',
   mhFlags: '국기',
   mpFlagsHtml: '국기는 <a href="https://github.com/lipis/flag-icons">flag-icons</a>(MIT 라이선스)의 4:3 SVG를 그대로 씁니다. 색과 비율은 바꾸지 않았습니다.',
-  colophon: '자료 기준일: UN WPP 2024 중위 추계(2026년), IMF 세계경제전망 2026년 4월판, UN 최저개발국 목록(2024년 12월 19일). 일본어·스페인어 나라 이름: Unicode CLDR.',
+  colophon: '자료 기준일: UN WPP 2024 중위 추계(2026년), IMF 세계경제전망 2026년 4월판, UN 최저개발국 목록(2024년 12월 19일). 일본어·스페인어·러시아어 나라 이름: Unicode CLDR.',
 
   tier: { ADV: '선진국', DEV: '개발도상국', LDC: '최저개발국' },
   sex: { M: '남자', F: '여자' }, both: '남녀 전체',
@@ -187,7 +187,7 @@ const en = {
   mpLimits: 'A national average hides the gaps inside a country. Even within one country, the starting line differs widely by region and income, and between city and countryside. All 2026 values are projections, so wars or disasters since the projection was made may not be reflected. GDP per head, at market rates or at PPP, gives only a rough picture of average output and says nothing about how it is shared. A development tier is an administrative label from international organizations; it says nothing about the life of any one person born in that country.',
   mhFlags: 'Flags',
   mpFlagsHtml: 'Flags are the 4:3 SVGs from <a href="https://github.com/lipis/flag-icons">flag-icons</a> (MIT license), used as they are, with colors and proportions unchanged.',
-  colophon: 'Data as of: UN WPP 2024 medium scenario (2026), IMF World Economic Outlook April 2026, UN list of least developed countries (December 19, 2024). Japanese and Spanish country names: Unicode CLDR.',
+  colophon: 'Data as of: UN WPP 2024 medium scenario (2026), IMF World Economic Outlook April 2026, UN list of least developed countries (December 19, 2024). Japanese, Spanish and Russian country names: Unicode CLDR.',
 
   tier: { ADV: 'Advanced', DEV: 'Developing', LDC: 'Least developed' },
   sex: { M: 'Boy', F: 'Girl' }, both: 'Both sexes',
@@ -319,7 +319,7 @@ const ja = {
   mpLimits: '国の平均は、国内の格差を覆い隠します。同じ国でも、地域や所得、都市か農村かによって出発点は大きく異なります。2026年の値はすべて推計なので、推計のあとに起きた戦争や災害は反映されていないことがあります。1人当たりGDPは、為替レート基準でも購買力平価でも平均的な生産量を大まかに示すだけで、分配については何も語りません。発展段階は国際機関による行政上の分類にすぎず、その国に生まれた一人ひとりの人生を語るものではありません。',
   mhFlags: '国旗',
   mpFlagsHtml: '国旗は<a href="https://github.com/lipis/flag-icons">flag-icons</a>（MITライセンス）の4:3 SVGをそのまま使っています。色と縦横比は変えていません。',
-  colophon: 'データの基準：国連 世界人口推計2024年版 中位推計（2026年）、IMF世界経済見通し2026年4月版、国連 後発開発途上国リスト（2024年12月19日）。日本語とスペイン語の国名：Unicode CLDR。',
+  colophon: 'データの基準：国連 世界人口推計2024年版 中位推計（2026年）、IMF世界経済見通し2026年4月版、国連 後発開発途上国リスト（2024年12月19日）。日本語・スペイン語・ロシア語の国名：Unicode CLDR。',
 
   tier: { ADV: '先進国', DEV: '開発途上国', LDC: '後発開発途上国' },
   sex: { M: '男の子', F: '女の子' }, both: '男女計',
@@ -453,7 +453,7 @@ const es = {
   mpLimits: 'La media nacional oculta las diferencias dentro de cada país. Incluso en un mismo país, el punto de partida cambia mucho según la región, los ingresos o si se nace en la ciudad o en el campo. Todos los valores de 2026 son proyecciones, así que puede que no reflejen guerras o catástrofes posteriores. El PIB per cápita, a tipo de cambio o por PPA, solo da una idea aproximada de la producción media y no dice nada de cómo se reparte. La etapa de desarrollo es una clasificación administrativa de organismos internacionales; no dice nada de la vida de ninguna persona nacida en ese país.',
   mhFlags: 'Banderas',
   mpFlagsHtml: 'Las banderas son los SVG 4:3 de <a href="https://github.com/lipis/flag-icons">flag-icons</a> (licencia MIT), tal cual, sin cambiar colores ni proporciones.',
-  colophon: 'Fecha de los datos: variante media de las WPP 2024 de la ONU (2026), Perspectivas de la Economía Mundial del FMI de abril de 2026, lista de países menos adelantados de la ONU (19 de diciembre de 2024). Nombres de países en japonés y español: Unicode CLDR.',
+  colophon: 'Fecha de los datos: variante media de las WPP 2024 de la ONU (2026), Perspectivas de la Economía Mundial del FMI de abril de 2026, lista de países menos adelantados de la ONU (19 de diciembre de 2024). Nombres de países en japonés, español y ruso: Unicode CLDR.',
 
   tier: { ADV: 'Avanzado', DEV: 'En desarrollo', LDC: 'Menos adelantado' },
   sex: { M: 'Niño', F: 'Niña' }, both: 'Ambos sexos',
@@ -548,5 +548,151 @@ const es = {
   clearArm: 'Pulsa otra vez para borrar', clearArmSay: 'Para borrar los registros, pulsa otra vez.', cleared: 'Registros borrados.'
 };
 
-return { LANGS: ['en', 'ja', 'es', 'ko'], en, ja, es, ko };
+/* Russian: the noun after a number takes one of three forms (1 раз, 2 раза, 5 раз; 21 раз, 11 раз);
+   numbers with a decimal part take the second, even "30,0 года". Numbers may arrive already
+   formatted ("1 234", "2,5"). */
+const ruN = n => (typeof n === 'number' ? n : +String(n).replace(/\s/g, '').replace(',', '.'));
+const ruPl = (n, one, few, many) => {
+  const v = ruN(n);
+  if (v % 1 || /[.,]\d/.test(String(n))) return few;
+  const a = Math.abs(v) % 100, b = a % 10;
+  return a > 10 && a < 20 ? many : b === 1 ? one : b > 1 && b < 5 ? few : many;
+};
+/* "territory of …" needs the genitive of the six sovereign states; continents after "в" the prepositional */
+const ruOf = { 826: 'Великобритании', 250: 'Франции', 528: 'Нидерландов', 840: 'США', 208: 'Дании', 554: 'Новой Зеландии' };
+const ruIn = ['в Африке', 'в Азии', 'в Европе', 'в Латинской Америке', 'в Северной Америке', 'в Океании'];
+const ru = {
+  locale: 'ru-RU',
+  units: { words: [['млрд', 'млрд'], ['млн', 'млн']] },
+  nameFit: [8, 12],
+  ref: 643,
+  metaDesc: 'Родитесь заново случайным образом как один из 132,5 млн детей 2026 года. Вероятность родиться, ВВП на душу населения, этап развития и ожидаемая продолжительность жизни для 236 стран и территорий по данным ООН (World Population Prospects 2024) и МВФ.',
+  langLabel: 'Язык',
+  comma: ', ', period: '.', sp: ' ',
+  paren: s => ' (' + s + ')',
+  kv: (k, v) => k + ': ' + v,
+
+  skip: 'Перейти к результатам',
+  draw1: 'Родиться заново', draw10: '10 раз', draw100: '100 раз',
+  copy: 'Копировать', copied: 'Скопировано', copyFail: 'Не удалось скопировать',
+  lbProb: 'Вероятность родиться здесь', lbGdp: 'ВВП на душу населения', lbTier: 'Этап развития', lbLife: 'Продолжительность жизни',
+  atlasTitle: 'Карта мира', resetMap: 'Показать весь мир',
+  hTitle: 'Если бы новорождённых в мире было 100', hByTier: 'По этапам развития', hByCont: 'По континентам', hByCountry: 'По странам',
+  mTitle: 'Мои записи', mByCont: 'Доля по континентам', mByTier: 'Доля по этапам развития',
+  mNote: 'Полоса — доля, которая выпала у вас; вертикальная линия — доля, которой можно ожидать по данным о рождениях. Чем больше розыгрышей, тем ближе они друг к другу.',
+  mRecent: 'Последние записи', clear: 'Удалить записи',
+  tSub: 'Нажмите на название, чтобы показать страну на экране выше. ВВП на душу населения — за 2025 год: первая колонка — доллары США по рыночному курсу, вторая — международные доллары по паритету покупательной способности, который убирает разницу в ценах. Звёздочкой (*) отмечены места, где вместо данных МВФ использованы данные Всемирного банка или ООН.',
+  qLabel: 'Поиск страны', qPh: 'Поиск страны (по-русски или по-английски)', contLabel: 'Выбор континента', tierLabel: 'Выбор этапа развития',
+  tCaption: 'По странам: рождения в 2026 году, население, вероятность родиться, этап развития, ожидаемая продолжительность жизни и ВВП на душу населения (по рыночному курсу и по ППС)',
+  dTitle: 'Данные и методика',
+  mhSrc: 'Откуда эти числа',
+  mpSrc1Html: '<b>Рождения, население, соотношение полов при рождении, ожидаемая продолжительность жизни и суммарный коэффициент рождаемости</b> — значения на 2026 год из среднего варианта прогноза ООН <i>World Population Prospects 2024</i> («Мировые демографические перспективы»). Население указано на 1 июля, середину года; мировой итог — 8 300 678 396 человек — совпадает с официальной цифрой ООН. Рождения — это 132 503 469 детей, которые родятся в течение 2026 года. Медианный возраст получен интерполяцией накопленного распределения по однолетним возрастам, так же как у ООН.',
+  mpSrc2Html: '<b>ВВП на душу населения</b> — оценка за 2025 год из «Перспектив развития мировой экономики» Международного валютного фонда (МВФ) за апрель 2026 года, в двух вариантах. Крупное число — в долларах США по рыночному обменному курсу (номинальный ВВП), по нему считаются и места. Мелкое число — в международных долларах по паритету покупательной способности (ППС), который убирает разницу в ценах между странами. Это две разные линейки для одной и той же экономики, поэтому значения могут сильно расходиться: у России — 17 972 доллара по курсу и 50 255 международных долларов по ППС, у Индии — 2 675 и 11 789. Данные взяты из таблицы МВФ, собранной Worldometers; где у МВФ нет значения, использованы данные Всемирного банка или ООН за другой год, и это отмечено на экране и в таблице. У 18 мест нет значения по рыночному курсу, например у Реюньона, Косова и Джерси; они оставлены пустыми.',
+  mpSrc3Html: '<b>Карта</b> — упрощённые границы Natural Earth масштаба 1:50 млн. Чтобы совпасть со статистическими единицами ООН, Французская Гвиана, Гваделупа, Мартиника, Реюньон, Майотта и Карибские Нидерланды отделены от контуров своих стран. Места, слишком маленькие для контура, например Гибралтар, Токелау и Тувалу, показаны точками.',
+  mhTier: 'Как определяются этапы развития',
+  mhDraw: 'Как проходит розыгрыш',
+  mpDraw: 'Случайные числа — это 53 бита из криптографического генератора случайных чисел браузера (crypto.getRandomValues). Сначала страна выбирается пропорционально числу рождений в 2026 году, затем пол — по соотношению полов при рождении в этой стране. При соотношении 1,06 вероятность мальчика равна 1,06 ÷ 2,06, то есть около 51,5 %.',
+  mhRank: 'Как читать места',
+  mpRank: 'Места считаются по числу детей, а не стран. «Верхние 3 %» в записи означают, что из детей того же пола, родившихся в 2026 году, около 3 % рождаются в странах с лучшим значением этого показателя. Дети, родившиеся в той же стране, учитываются наполовину. Если выбрать страну на карте или в таблице, она сравнивается со всеми детьми 2026 года рождения, мальчиками и девочками вместе.',
+  mhLimits: 'Чего не говорят числа',
+  mpLimits: 'Среднее по стране скрывает разрывы внутри неё. Даже в одной стране стартовые условия сильно различаются в зависимости от региона, дохода, города или села. Все значения на 2026 год — прогнозы, поэтому войны и бедствия, случившиеся после их составления, могут быть не учтены. ВВП на душу населения — по курсу или по ППС — лишь грубо показывает средний объём производства и ничего не говорит о том, как он распределяется. Этап развития — административная классификация международных организаций; он ничего не говорит о жизни конкретного человека, родившегося в этой стране.',
+  mhFlags: 'Флаги',
+  mpFlagsHtml: 'Флаги — SVG-файлы 4:3 из <a href="https://github.com/lipis/flag-icons">flag-icons</a> (лицензия MIT), без изменений цветов и пропорций.',
+  colophon: 'Данные: средний вариант WPP 2024 ООН (2026), «Перспективы развития мировой экономики» МВФ, апрель 2026 г., список наименее развитых стран ООН (19 декабря 2024 г.). Названия стран на японском, испанском и русском: Unicode CLDR.',
+
+  tier: { ADV: 'Развитые', DEV: 'Развивающиеся', LDC: 'Наименее развитые' },
+  sex: { M: 'Мальчик', F: 'Девочка' }, both: 'Оба пола',
+  note: (src, yr) => 'данные ' + ({ WB: 'Всемирного банка', UN: 'ООН', IMF: 'МВФ' }[src] || src) + (yr ? ' за ' + yr + ' г.' : ''),
+  flagOf: n => 'Флаг: ' + n,
+  tdMonaco: 'Не член МВФ; в одной группе с Францией',
+  tdAssoc: (n, c) => 'В свободной ассоциации с ' + (c === 554 ? 'Новой Зеландией' : n) + '; следует её этапу',
+  tdTerr: (n, c) => 'Территория ' + (ruOf[c] || n) + '; следует этапу страны-владельца',
+  tdAdv: n => 'Одна из ' + n + ' развитых экономик по классификации МВФ',
+  tdLdc: n => 'Одна из ' + n + ' наименее развитых стран по списку ООН',
+  tdDev: n => 'Одно из ' + n + ' мест, не относящихся ни к развитым, ни к наименее развитым',
+  tdSoon: d => ' (выход из списка НРС — ' + d + ')',
+  tdDone: d => ' (вышла из списка НРС ' + d + ')',
+
+  kindDraw: 'Запись о рождении 2026', kindLookup: 'Справка о стране',
+  serial: n => '№ ' + n, serialEmpty: '№ —',
+  emptyName: 'Нажмите «Родиться заново», чтобы узнать, в какой стране вы родитесь.',
+  fSex: 'Пол', fPop: 'Население', fMed: 'Медианный возраст', fTfr: 'Рождаемость',
+  srb: n => n + ' ' + ruPl(n, 'мальчик', 'мальчика', 'мальчиков') + ' на 100 девочек',
+  ofWorld: p => p + ' населения мира',
+  world: x => 'Мир: ' + x,
+  years: x => x + ' ' + ruPl(x, 'год', 'года', 'лет'),
+  kids: x => x + ' ' + ruPl(x, 'ребёнок', 'ребёнка', 'детей'),
+  lifeUnit: 'года',
+  noData: 'Нет данных',
+  gdpNa: (n, ppp) => 'Одно из ' + n + ' мест без данных по рыночному курсу в «Перспективах развития мировой экономики» МВФ.' + (ppp ? ' По ППС: ' + ppp + '.' : ''),
+  gdpLabel: note => (note || '2025 г.') + ', по рыночному курсу',
+  noPpp: 'Нет данных по ППС',
+  ppp: ['ППС: ', ' межд. долл.'], pppShort: 'ППС',
+  intl: n => n + ' межд. долл.',
+  tierSayHtml: p => 'Из 100 детей, родившихся в 2026 году, <b>' + p + '</b> рождаются в странах этой группы.',
+  rankScope: s => 'Место среди ' + (s === 'M' ? 'всех мальчиков' : s === 'F' ? 'всех девочек' : 'всех детей обоих полов') + ', родившихся в мире в 2026 году',
+  top: p => 'Верхние ' + p, bottom: p => 'Нижние ' + p,
+  oneIn: c => 'примерно 1 из ' + c,
+  people: s => /(млн|млрд)$/.test(s) ? s + ' человек' : s + ' ' + ruPl(s, 'человек', 'человека', 'человек'),
+  lessThanOne: 'меньше одного человека',
+
+  births2026: 'Рождений в 2026 году',
+  tipBatch: n => 'В этой серии: ' + n + ' ' + ruPl(n, 'раз', 'раза', 'раз'),
+  mapFail: 'Не удалось загрузить карту. Проверьте подключение к интернету и обновите страницу. Розыгрыш и таблица работают и без карты.',
+  ledeHtml: s => 'Вы — один из <b>' + s + '</b> детей 2026 года',
+  atlasLede: 'Страна выбирается пропорционально числу рождений в 2026 году, пол — по соотношению полов при рождении в этой стране. Чем больше круг, тем выше вероятность родиться там.',
+  legend: 'Размер круга — число рождений в 2026 году, цвет — этап развития. Мигающие точки — дети, которые рождаются прямо сейчас, в реальном темпе. Нажмите на страну, чтобы показать её на экране выше.',
+  mapAria: 'Карта мира. Размер круга — число рождений в каждой стране в 2026 году, цвет — этап развития.',
+  liveB: 'Рождений/с', liveD: 'Смертей/с', liveSince: 'Родилось с открытия: ', liveAfter: ' чел.',
+
+  tierRules: d => 'Этапы развития следуют официальным классификациям двух международных организаций и рассчитываются на сегодняшнюю дату (' + d + ').',
+  gradItem: (n, d) => n + ' (' + d + ')',
+  gradSoon: l => 'Выход из списка запланирован: ' + l + '.',
+  gradDone: l => 'Уже вышли из списка: ' + l + '.',
+  tierListHtml: o =>
+    '<li class="t-ADV"><b>Развитые</b>: развитые экономики из Статистического приложения (таблица B) «Перспектив развития мировой экономики» МВФ за апрель 2026 года (всего ' + o.advN + ') и их территории. Сейчас это ' + o.count.ADV + ' ' + ruPl(o.count.ADV, 'место', 'места', 'мест') + ', ' + o.pct.ADV + ' рождений 2026 года.</li>' +
+    '<li class="t-LDC"><b>Наименее развитые</b>: страны из списка наименее развитых стран ООН на 19 декабря 2024 года (всего ' + o.ldcN + '). После даты выхода из списка страна считается развивающейся. ' + (o.grad ? o.grad + ' ' : '') + 'Сейчас это ' + o.count.LDC + ' ' + ruPl(o.count.LDC, 'место', 'места', 'мест') + ', ' + o.pct.LDC + '.</li>' +
+    '<li class="t-DEV"><b>Развивающиеся</b>: все остальные. Сейчас это ' + o.count.DEV + ' ' + ruPl(o.count.DEV, 'место', 'места', 'мест') + ', ' + o.pct.DEV + '.</li>' +
+    '<li>Зависимые территории и государства в свободной ассоциации (Острова Кука, Ниуэ) следуют этапу своего суверенного государства. Монако — суверенное государство вне МВФ — не подпадает ни под одно правило и отнесено к той же группе, что и Франция. Западная Сахара, Палестина и Косово не являются территориями развитых экономик, поэтому считаются развивающимися.</li>' +
+    '<li>Три доли округлены так, чтобы в сумме давать 100 %.</li>',
+
+  /* the third item of first, second and rest is the continent's index, for the "в Азии" forms */
+  hundredLede: o => 'Из 100 детей, родившихся в 2026 году, ' + o.first[1] + ' появляются на свет ' + ruIn[o.first[2]] + ' и ' + o.second[1] + ' — ' + ruIn[o.second[2]] + '. ' +
+    (o.rest.length ? 'Далее: ' + o.rest.map(([n, c]) => n + ' — ' + c).join(', ') + '.' : '') +
+    o.zero.map(n => ' ' + n + ' — меньше одного.').join('') +
+    ' По этапам развития: ' + o.tiers.ADV + ' — в развитых странах, ' + o.tiers.DEV + ' — в развивающихся и ' + o.tiers.LDC + ' — в наименее развитых.',
+  hTierAria: l => 'Дети по этапам развития: ' + l,
+  nb: x => x,
+  cells: n => n + ' ' + ruPl(n, 'клетка', 'клетки', 'клеток'),
+
+  mineEmpty: 'Записей пока нет. Нажмите «Родиться заново» выше, чтобы получить первую.',
+  mineCount: (s, n) => 'Вы уже родились заново ' + s + ' ' + ruPl(n, 'раз', 'раза', 'раз') + ' как ребёнок 2026 года.',
+  exp: x => 'ожид. ' + x,
+  topItem: (n, c, x) => n + ' ' + c + ' (ожид. ' + x + ')',
+  mostFrequent: 'Чаще всего: ',
+  emptyHint: 'Здесь будут появляться ваши записи.',
+  lastOf: n => 'последняя из ' + n,
+
+  cols: { name: 'Страна', births: 'Рождений 2026', pop: 'Население', prob: 'Вероятность', tier: 'Этап', e0B: 'Прод. жизни', gdpN: 'ВВП на душу ($)', gdp: 'ППС' },
+  tblEmpty: 'Подходящих стран нет. Попробуйте другое название или английское.',
+  count: (all, n) => n === all ? all + ' ' + ruPl(all, 'место', 'места', 'мест') : n + ' из ' + all,
+  tTitle: n => 'Все ' + n + ' стран и территорий',
+  allCont: 'Все континенты', allTier: 'Все этапы развития',
+
+  batchTitle: n => 'Серия из ' + n,
+  batchNote: s => 'Точки на карте — места, выпавшие в этой серии (цвет — этап развития). На экране выше показана последняя запись, ' + s + '.',
+  batchAria: l => 'Выпадения по континентам в этой серии и ожидаемые значения. ' + l,
+  batchItem: (n, c, x) => n + ' ' + c + ', ожидалось ' + x,
+  rowNow: 'Серия', rowExp: 'Ожид.',
+  batchLineHtml: (n, items, x) => 'Серия из ' + n + ': ' + items + ' (ожид. ' + x + ')',
+  toMap: 'Показать на карте',
+
+  drawnOne: (s, n, sex, p, t) => s + '. ' + n + ', ' + sex.toLowerCase() + '. Вероятность родиться в этой стране: ' + p + '. Этап развития: ' + t.toLowerCase() + '.',
+  drawnMany: (k, a, b, c, n) => 'Серия из ' + k + ': развитые — ' + a + ', развивающиеся — ' + b + ', наименее развитые — ' + c + '. Последняя запись: ' + n + '.',
+  reopened: (s, n, t) => 'Снова открыта запись ' + s + ': ' + n + ', этап развития — ' + t.toLowerCase() + '.',
+  looked: (n, t) => 'Показаны данные: ' + n + '. Этап развития — ' + t.toLowerCase() + '.',
+  clearArm: 'Нажмите ещё раз, чтобы удалить', clearArmSay: 'Чтобы удалить записи, нажмите ещё раз.', cleared: 'Записи удалены.'
+};
+
+return { LANGS: ['en', 'ja', 'es', 'ko', 'ru'], en, ja, es, ko, ru };
 })();
