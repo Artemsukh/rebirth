@@ -26,7 +26,7 @@
 </header>
 
 <main>
-  <section class="stage" id="stage" data-tier="NONE" aria-labelledby="idName">
+  <section class="stage" id="stage" data-band="0" aria-labelledby="idName">
     <div class="center-col">
       <div class="planet-wrap">
         <div id="planet" aria-hidden="true"></div>
@@ -60,6 +60,10 @@
       <section class="panel p-gdp" aria-labelledby="lbGdp">
         <h3 class="p-label" id="lbGdp"><span data-t="lbGdp"></span> <small id="nGdp"></small></h3>
         <p class="p-val big" id="vGdp"></p>
+        <div class="ladder">
+          <span class="rungs" id="rungs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="ladder-l" id="ladderL"></span>
+        </div>
         <p class="p-sub" id="sGdp"></p>
         <div class="rank" id="rGdp">
           <span class="bar" aria-hidden="true"><b></b><i></i></span>
@@ -118,6 +122,9 @@
       <h3 class="minor" data-t="hByTier"></h3>
       <div class="tier-strip" id="hTier" role="img"></div>
       <ul class="tier-keys" id="hTierKeys"></ul>
+      <h3 class="minor gap" data-t="hByBand"></h3>
+      <div class="tier-strip band-strip" id="hBand" role="img"></div>
+      <ul class="tier-keys band-keys" id="hBandKeys"></ul>
     </div>
     <div class="h-grid">
       <div>

@@ -31,7 +31,7 @@ const ko = {
   copy: '결과 복사', copied: '복사했습니다', copyFail: '복사하지 못했습니다',
   lbProb: '이 나라에 태어날 확률', lbGdp: '1인당 GDP', lbTier: '발전 단계', lbLife: '기대수명',
   atlasTitle: '세계 지도', resetMap: '세계 전체 보기',
-  hTitle: '세계 출생아를 100명으로 줄이면', hByTier: '발전 단계로 나누면', hByCont: '대륙으로 나누면', hByCountry: '나라별로 보면',
+  hTitle: '세계 출생아를 100명으로 줄이면', hByTier: '발전 단계로 나누면', hByBand: '1인당 GDP 구간으로 나누면', hByCont: '대륙으로 나누면', hByCountry: '나라별로 보면',
   mTitle: '나의 기록', mByCont: '대륙별로 나온 비율', mByTier: '발전 단계별로 나온 비율',
   mNote: '막대는 실제로 나온 비율, 세로선은 출생아 자료로 기대하는 비율입니다. 많이 뽑을수록 둘이 가까워집니다.',
   mRecent: '최근 기록', clear: '기록 지우기',
@@ -78,6 +78,8 @@ const ko = {
   kids: x => x + '명',
   lifeUnit: '세',
   noData: '자료 없음',
+  bandUnder: a => a + ' 미만', bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' 이상',
+  bandNo: (i, n) => '구간 ' + i + '/' + n,
   gdpNa: (n, ppp) => 'IMF 세계경제전망에 환율 기준 값이 없는 ' + n + '곳 가운데 한 곳입니다.' + (ppp ? ' 구매력 기준 ' + ppp + '.' : ''),
   gdpLabel: note => (note || '2025년') + ', 환율 기준',
   noPpp: '구매력 기준 값 없음',
@@ -95,8 +97,9 @@ const ko = {
   mapFail: '지도를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침하세요. 추첨과 표는 지도 없이도 쓸 수 있습니다.',
   ledeHtml: s => '2026년에 태어날 아기 <b>' + s + '</b> 명 가운데 한 명이 됩니다',
   atlasLede: '나라는 2026년 출생아 수에 비례해, 성별은 그 나라의 출생 성비에 따라 정해집니다. 원이 클수록 그 나라에 태어날 확률이 큽니다.',
-  legend: '원의 크기는 2026년 출생아 수, 색은 발전 단계입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.',
-  mapAria: '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 발전 단계를 나타냅니다.',
+  legend: '원의 크기는 2026년 출생아 수, 색은 1인당 GDP(환율 기준) 구간입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.',
+  mapAria: '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 1인당 GDP(환율 기준) 구간을 나타냅니다.',
+  keysAria: '지도의 색: 1인당 GDP(환율 기준) 구간',
   liveB: '초당 탄생', liveD: '초당 사망', liveSince: '화면을 연 뒤 ', liveAfter: '명 탄생',
 
   tierRules: d => '발전 단계는 두 국제기구의 공식 분류를 그대로 따르고, 오늘 날짜(' + d + ')를 기준으로 계산합니다.',
@@ -104,9 +107,9 @@ const ko = {
   gradSoon: l => '졸업 예정: ' + l + '.',
   gradDone: l => '졸업함: ' + l + '.',
   tierListHtml: o =>
-    '<li class="t-ADV"><b>선진국</b>: IMF WEO 2026년 4월 통계 부록 Table B의 선진경제 ' + o.advN + '곳과 그 속령. 지금 ' + o.count.ADV + '곳, 2026년 출생아의 ' + o.pct.ADV + '입니다.</li>' +
-    '<li class="t-LDC"><b>최저개발국</b>: UN 최저개발국 목록, 2024년 12월 19일 기준의 ' + o.ldcN + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + (o.grad ? o.grad + ' ' : '') + '지금 ' + o.count.LDC + '곳, ' + o.pct.LDC + '입니다.</li>' +
-    '<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + o.count.DEV + '곳, ' + o.pct.DEV + '입니다.</li>' +
+    '<li><b>선진국</b>: IMF WEO 2026년 4월 통계 부록 Table B의 선진경제 ' + o.advN + '곳과 그 속령. 지금 ' + o.count.ADV + '곳, 2026년 출생아의 ' + o.pct.ADV + '입니다.</li>' +
+    '<li><b>최저개발국</b>: UN 최저개발국 목록, 2024년 12월 19일 기준의 ' + o.ldcN + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + (o.grad ? o.grad + ' ' : '') + '지금 ' + o.count.LDC + '곳, ' + o.pct.LDC + '입니다.</li>' +
+    '<li><b>개발도상국</b>: 나머지 전부. 지금 ' + o.count.DEV + '곳, ' + o.pct.DEV + '입니다.</li>' +
     '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
     '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>',
 
@@ -116,6 +119,7 @@ const ko = {
     o.zero.map(n => ' ' + topic(n) + ' 1명이 채 안 됩니다.').join('') +
     ' 발전 단계로 나누면 선진국에서 ' + o.tiers.ADV + '명, 개발도상국에서 ' + o.tiers.DEV + '명, 최저개발국에서 ' + o.tiers.LDC + '명이 태어납니다.',
   hTierAria: l => '발전 단계별 아기 수: ' + l,
+  hBandAria: l => '1인당 GDP(환율 기준) 구간별 아기 수: ' + l,
   nb: x => x + '명',
   cells: n => n + '칸',
 
@@ -134,7 +138,7 @@ const ko = {
   allCont: '모든 대륙', allTier: '모든 발전 단계',
 
   batchTitle: n => '이번 ' + n + '번',
-  batchNote: s => '지도의 점이 이번에 나온 곳입니다(색은 발전 단계). 위 화면에는 마지막 ' + s + '를 띄웠습니다.',
+  batchNote: s => '지도의 점이 이번에 나온 곳입니다(색은 1인당 GDP 구간). 위 화면에는 마지막 ' + s + '를 띄웠습니다.',
   batchAria: l => '대륙별로 이번에 나온 횟수와 기대 횟수. ' + l,
   batchItem: (n, c, x) => n + ' ' + c + '번, 기대 ' + x + '번',
   rowNow: '이번', rowExp: '기대',
@@ -145,6 +149,7 @@ const ko = {
   drawnMany: (k, a, b, c, n) => k + '번을 뽑았습니다. 선진국 ' + a + '번, 개발도상국 ' + b + '번, 최저개발국 ' + c + '번입니다. 마지막은 ' + n + '입니다.',
   reopened: (s, n, t) => s + ' 기록을 다시 펼쳤습니다. ' + n + ', 발전 단계는 ' + t + '입니다.',
   looked: (n, t) => n + ' 정보를 띄웠습니다. 발전 단계는 ' + t + '입니다.',
+  bandSay: r => r ? '1인당 GDP는 ' + r + ' 구간입니다.' : '환율 기준 1인당 GDP 자료는 없습니다.',
   clearArm: '한 번 더 누르면 지웁니다', clearArmSay: '기록을 지우려면 한 번 더 누르세요.', cleared: '기록을 지웠습니다.'
 };
 
@@ -166,7 +171,7 @@ const en = {
   copy: 'Copy result', copied: 'Copied', copyFail: 'Could not copy',
   lbProb: 'Chance of being born here', lbGdp: 'GDP per head', lbTier: 'Development tier', lbLife: 'Life expectancy',
   atlasTitle: 'World map', resetMap: 'Show the whole world',
-  hTitle: 'If the world’s newborns were 100 babies', hByTier: 'By development tier', hByCont: 'By continent', hByCountry: 'By country',
+  hTitle: 'If the world’s newborns were 100 babies', hByTier: 'By development tier', hByBand: 'By GDP per head', hByCont: 'By continent', hByCountry: 'By country',
   mTitle: 'My records', mByCont: 'Share by continent', mByTier: 'Share by development tier',
   mNote: 'Bars show what you actually drew; the vertical line is what the birth data leads you to expect. The more you draw, the closer they get.',
   mRecent: 'Recent records', clear: 'Clear records',
@@ -213,6 +218,8 @@ const en = {
   kids: x => x + ' per woman',
   lifeUnit: 'years',
   noData: 'No data',
+  bandUnder: a => 'Under ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' and over',
+  bandNo: (i, n) => 'Band ' + i + '/' + n,
   gdpNa: (n, ppp) => 'One of ' + n + ' places with no market-rate figure in the IMF World Economic Outlook.' + (ppp ? ' At PPP: ' + ppp + '.' : ''),
   gdpLabel: note => (note || '2025') + ', market rates',
   noPpp: 'No PPP figure',
@@ -230,8 +237,9 @@ const en = {
   mapFail: 'The map could not be loaded. Check your internet connection and reload. The draw and the table work without the map.',
   ledeHtml: s => 'You become one of the <b>' + s + '</b> babies born in 2026',
   atlasLede: 'The country is chosen in proportion to its 2026 births, and the sex by that country’s sex ratio at birth. The bigger the circle, the bigger the chance of being born there.',
-  legend: 'Circle size is 2026 births; color is the development tier. The flashing dots are babies being born right now, at the real rate. Click a country to show it on the screen above.',
-  mapAria: 'World map. Circle size shows each country’s 2026 births; color shows the development tier.',
+  legend: 'Circle size is 2026 births; color is the band of GDP per head at market rates. The flashing dots are babies being born right now, at the real rate. Click a country to show it on the screen above.',
+  mapAria: 'World map. Circle size shows each country’s 2026 births; color shows its band of GDP per head at market rates.',
+  keysAria: 'Map colors: bands of GDP per head at market rates',
   liveB: 'Births/sec', liveD: 'Deaths/sec', liveSince: 'Since you arrived: ', liveAfter: ' born',
 
   tierRules: d => 'Development tiers follow the official classifications of two international organizations, as they stand on today’s date (' + d + ').',
@@ -239,9 +247,9 @@ const en = {
   gradSoon: l => 'Due to graduate: ' + l + '.',
   gradDone: l => 'Graduated: ' + l + '.',
   tierListHtml: o =>
-    '<li class="t-ADV"><b>Advanced</b>: the ' + o.advN + ' advanced economies in the IMF World Economic Outlook, April 2026, Statistical Appendix Table B, and their territories. Currently ' + o.count.ADV + ' places, ' + o.pct.ADV + ' of 2026 births.</li>' +
-    '<li class="t-LDC"><b>Least developed</b>: the ' + o.ldcN + ' countries on the UN list of least developed countries as of December 19, 2024. A country counts as developing once its graduation date has passed. ' + (o.grad ? o.grad + ' ' : '') + 'Currently ' + o.count.LDC + ' places, ' + o.pct.LDC + '.</li>' +
-    '<li class="t-DEV"><b>Developing</b>: everything else. Currently ' + o.count.DEV + ' places, ' + o.pct.DEV + '.</li>' +
+    '<li><b>Advanced</b>: the ' + o.advN + ' advanced economies in the IMF World Economic Outlook, April 2026, Statistical Appendix Table B, and their territories. Currently ' + o.count.ADV + ' places, ' + o.pct.ADV + ' of 2026 births.</li>' +
+    '<li><b>Least developed</b>: the ' + o.ldcN + ' countries on the UN list of least developed countries as of December 19, 2024. A country counts as developing once its graduation date has passed. ' + (o.grad ? o.grad + ' ' : '') + 'Currently ' + o.count.LDC + ' places, ' + o.pct.LDC + '.</li>' +
+    '<li><b>Developing</b>: everything else. Currently ' + o.count.DEV + ' places, ' + o.pct.DEV + '.</li>' +
     '<li>Territories and freely associated states (Cook Islands, Niue) follow the tier of their sovereign state. Monaco, a sovereign state outside the IMF, fits neither rule and is grouped with France. Western Sahara, Palestine and Kosovo are not territories of an advanced economy, so they are developing.</li>' +
     '<li>The three shares are rounded so that they add up to 100%.</li>',
 
@@ -250,6 +258,7 @@ const en = {
     (o.zero.length ? ' ' + joinAnd(o.zero, ' and ') + (o.zero.length > 1 ? ' each get' : ' gets') + ' fewer than one.' : '') +
     ' By development tier, ' + o.tiers.ADV + ' are born in advanced economies, ' + o.tiers.DEV + ' in developing countries and ' + o.tiers.LDC + ' in least developed countries.',
   hTierAria: l => 'Babies by development tier: ' + l,
+  hBandAria: l => 'Babies by band of GDP per head at market rates: ' + l,
   nb: x => x,
   cells: n => n + (n === 1 ? ' square' : ' squares'),
 
@@ -268,7 +277,7 @@ const en = {
   allCont: 'All continents', allTier: 'All development tiers',
 
   batchTitle: n => 'This run of ' + n,
-  batchNote: s => 'Dots on the map mark where this run landed (color = development tier). The screen above shows the last one, ' + s + '.',
+  batchNote: s => 'Dots on the map mark where this run landed (color = band of GDP per head). The screen above shows the last one, ' + s + '.',
   batchAria: l => 'Draws per continent in this run, with the expected number. ' + l,
   batchItem: (n, c, x) => n + ' ' + c + ', expected ' + x,
   rowNow: 'Now', rowExp: 'Exp.',
@@ -279,6 +288,7 @@ const en = {
   drawnMany: (k, a, b, c, n) => 'Drew ' + k + ' times: advanced ' + a + ', developing ' + b + ', least developed ' + c + '. The last one is ' + n + '.',
   reopened: (s, n, t) => 'Reopened record ' + s + '. ' + n + ', development tier: ' + t + '.',
   looked: (n, t) => 'Showing ' + n + '. Development tier: ' + t + '.',
+  bandSay: r => r ? 'GDP per head band: ' + r + '.' : 'No market-rate GDP per head figure.',
   clearArm: 'Press again to clear', clearArmSay: 'Press again to clear your records.', cleared: 'Records cleared.'
 };
 
@@ -298,7 +308,7 @@ const ja = {
   copy: '結果をコピー', copied: 'コピーしました', copyFail: 'コピーできませんでした',
   lbProb: 'この国に生まれる確率', lbGdp: '1人当たりGDP', lbTier: '発展段階', lbLife: '平均寿命',
   atlasTitle: '世界地図', resetMap: '世界全体を表示',
-  hTitle: '世界の出生児を100人に縮めると', hByTier: '発展段階別に見ると', hByCont: '大陸別に見ると', hByCountry: '国別に見ると',
+  hTitle: '世界の出生児を100人に縮めると', hByTier: '発展段階別に見ると', hByBand: '1人当たりGDPの区分別に見ると', hByCont: '大陸別に見ると', hByCountry: '国別に見ると',
   mTitle: 'わたしの記録', mByCont: '大陸別の出現率', mByTier: '発展段階別の出現率',
   mNote: '棒は実際に出た割合、縦線は出生データから期待される割合です。回数を重ねるほど、両者は近づきます。',
   mRecent: '最近の記録', clear: '記録を消去',
@@ -345,6 +355,9 @@ const ja = {
   kids: x => x + '人',
   lifeUnit: '歳',
   noData: 'データなし',
+  /* a word joiner (U+2060) keeps 未満 and 以上 whole when the narrow map keys wrap */
+  bandUnder: a => a + '未\u2060満', bandRange: (a, b) => a + '–' + b, bandOver: a => a + '以\u2060上',
+  bandNo: (i, n) => '区分 ' + i + '/' + n,
   gdpNa: (n, ppp) => 'IMFの世界経済見通しに為替レート基準の値がない' + n + 'か所のひとつです。' + (ppp ? '購買力平価では' + ppp + 'です。' : ''),
   gdpLabel: note => (note || '2025年') + '・為替レート基準',
   noPpp: '購買力平価の値なし',
@@ -362,8 +375,9 @@ const ja = {
   mapFail: '地図を読み込めませんでした。インターネット接続を確認してから再読み込みしてください。抽選と表は地図なしでも使えます。',
   ledeHtml: s => '2026年に生まれる赤ちゃん<b>' + s + '</b>人のうちの1人になります',
   atlasLede: '国は2026年の出生数に比例して、性別はその国の出生性比に従って決まります。円が大きいほど、その国に生まれる確率が高くなります。',
-  legend: '円の大きさは2026年の出生数、色は発展段階を表します。点滅する点は、いまこの瞬間に生まれている赤ちゃんを実際の速さで示しています。国を押すと、その国の情報を上の画面に表示します。',
-  mapAria: '世界地図。円の大きさは国別の2026年出生数、色は発展段階を表します。',
+  legend: '円の大きさは2026年の出生数、色は1人当たりGDP（為替レート基準）の区分を表します。点滅する点は、いまこの瞬間に生まれている赤ちゃんを実際の速さで示しています。国を押すと、その国の情報を上の画面に表示します。',
+  mapAria: '世界地図。円の大きさは国別の2026年出生数、色は1人当たりGDP（為替レート基準）の区分を表します。',
+  keysAria: '地図の色：1人当たりGDP（為替レート基準）の区分',
   liveB: '出生/秒', liveD: '死亡/秒', liveSince: 'ページを開いてから', liveAfter: '人誕生',
 
   tierRules: d => '発展段階は2つの国際機関の公式分類にそのまま従い、今日の日付（' + d + '）を基準に計算します。',
@@ -371,9 +385,9 @@ const ja = {
   gradSoon: l => '卒業予定：' + l + '。',
   gradDone: l => '卒業済み：' + l + '。',
   tierListHtml: o =>
-    '<li class="t-ADV"><b>先進国</b>：IMF世界経済見通し2026年4月版 統計付録 Table Bの先進経済' + o.advN + 'か国・地域と、その属領。現在' + o.count.ADV + 'か所で、2026年の出生数の' + o.pct.ADV + 'です。</li>' +
-    '<li class="t-LDC"><b>後発開発途上国</b>：国連の後発開発途上国リスト（2024年12月19日時点）の' + o.ldcN + 'か国。卒業日を過ぎると開発途上国に変わります。' + o.grad + '現在' + o.count.LDC + 'か所、' + o.pct.LDC + 'です。</li>' +
-    '<li class="t-DEV"><b>開発途上国</b>：残りのすべて。現在' + o.count.DEV + 'か所、' + o.pct.DEV + 'です。</li>' +
+    '<li><b>先進国</b>：IMF世界経済見通し2026年4月版 統計付録 Table Bの先進経済' + o.advN + 'か国・地域と、その属領。現在' + o.count.ADV + 'か所で、2026年の出生数の' + o.pct.ADV + 'です。</li>' +
+    '<li><b>後発開発途上国</b>：国連の後発開発途上国リスト（2024年12月19日時点）の' + o.ldcN + 'か国。卒業日を過ぎると開発途上国に変わります。' + o.grad + '現在' + o.count.LDC + 'か所、' + o.pct.LDC + 'です。</li>' +
+    '<li><b>開発途上国</b>：残りのすべて。現在' + o.count.DEV + 'か所、' + o.pct.DEV + 'です。</li>' +
     '<li>属領と自由連合国（クック諸島、ニウエ）は、本国の段階に従います。モナコはIMFに加盟していない主権国家で、どの規則にも当てはまらないため、フランスと同じ段階とします。西サハラ、パレスチナ、コソボは先進国の属領ではないため、開発途上国です。</li>' +
     '<li>3つの割合は、合計が100%になるように丸めています。</li>',
 
@@ -382,6 +396,7 @@ const ja = {
     o.zero.map(n => n + 'は1人未満です。').join('') +
     '発展段階で分けると、先進国で' + o.tiers.ADV + '人、開発途上国で' + o.tiers.DEV + '人、後発開発途上国で' + o.tiers.LDC + '人が生まれます。',
   hTierAria: l => '発展段階別の赤ちゃんの数：' + l,
+  hBandAria: l => '1人当たりGDP（為替レート基準）の区分別の赤ちゃんの数：' + l,
   nb: x => x + '人',
   cells: n => n + 'マス',
 
@@ -400,7 +415,7 @@ const ja = {
   allCont: 'すべての大陸', allTier: 'すべての発展段階',
 
   batchTitle: n => '今回の' + n + '回',
-  batchNote: s => '地図上の点が今回出た場所です（色は発展段階）。上の画面には最後の' + s + 'を表示しています。',
+  batchNote: s => '地図上の点が今回出た場所です（色は1人当たりGDPの区分）。上の画面には最後の' + s + 'を表示しています。',
   batchAria: l => '大陸別の今回の回数と期待回数。' + l,
   batchItem: (n, c, x) => n + ' ' + c + '回、期待 ' + x + '回',
   rowNow: '今回', rowExp: '期待',
@@ -411,6 +426,7 @@ const ja = {
   drawnMany: (k, a, b, c, n) => k + '回抽選しました。先進国' + a + '回、開発途上国' + b + '回、後発開発途上国' + c + '回です。最後は' + n + 'です。',
   reopened: (s, n, t) => s + 'の記録をもう一度開きました。' + n + '、発展段階は' + t + 'です。',
   looked: (n, t) => n + 'の情報を表示しました。発展段階は' + t + 'です。',
+  bandSay: r => r ? '1人当たりGDPは' + r + 'の区分です。' : '為替レート基準の1人当たりGDPのデータはありません。',
   clearArm: 'もう一度押すと消去します', clearArmSay: '記録を消去するには、もう一度押してください。', cleared: '記録を消去しました。'
 };
 
@@ -432,7 +448,7 @@ const es = {
   copy: 'Copiar resultado', copied: 'Copiado', copyFail: 'No se pudo copiar',
   lbProb: 'Probabilidad de nacer aquí', lbGdp: 'PIB per cápita', lbTier: 'Etapa de desarrollo', lbLife: 'Esperanza de vida',
   atlasTitle: 'Mapa del mundo', resetMap: 'Ver el mundo entero',
-  hTitle: 'Si los recién nacidos del mundo fueran 100', hByTier: 'Por etapa de desarrollo', hByCont: 'Por continente', hByCountry: 'Por país',
+  hTitle: 'Si los recién nacidos del mundo fueran 100', hByTier: 'Por etapa de desarrollo', hByBand: 'Por tramo de PIB per cápita', hByCont: 'Por continente', hByCountry: 'Por país',
   mTitle: 'Mis registros', mByCont: 'Proporción por continente', mByTier: 'Proporción por etapa de desarrollo',
   mNote: 'La barra es la proporción que te ha salido; la línea vertical, la que cabe esperar según los datos de nacimientos. Cuantas más veces juegues, más se acercan.',
   mRecent: 'Registros recientes', clear: 'Borrar registros',
@@ -479,6 +495,8 @@ const es = {
   kids: x => x + ' hijos',
   lifeUnit: 'años',
   noData: 'Sin datos',
+  bandUnder: a => 'Menos de ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' o más',
+  bandNo: (i, n) => 'Tramo ' + i + '/' + n,
   gdpNa: (n, ppp) => 'Es uno de los ' + n + ' lugares sin dato a tipo de cambio en las Perspectivas de la Economía Mundial del FMI.' + (ppp ? ' Por PPA: ' + ppp + '.' : ''),
   gdpLabel: note => (note || '2025') + ', a tipo de cambio',
   noPpp: 'Sin dato por PPA',
@@ -496,8 +514,9 @@ const es = {
   mapFail: 'No se pudo cargar el mapa. Comprueba la conexión a internet y recarga la página. El sorteo y la tabla funcionan sin el mapa.',
   ledeHtml: s => 'Serás uno de los <b>' + s + '</b> de bebés que nacerán en 2026',
   atlasLede: 'El país se elige en proporción a sus nacimientos de 2026 y el sexo, según la proporción de sexos al nacer de ese país. Cuanto mayor es el círculo, mayor es la probabilidad de nacer allí.',
-  legend: 'El tamaño del círculo indica los nacimientos de 2026 y el color, la etapa de desarrollo. Los puntos que parpadean son bebés que nacen ahora mismo, al ritmo real. Pulsa un país para ver sus datos en la pantalla de arriba.',
-  mapAria: 'Mapa del mundo. El tamaño del círculo indica los nacimientos de 2026 de cada país y el color, la etapa de desarrollo.',
+  legend: 'El tamaño del círculo indica los nacimientos de 2026 y el color, el tramo de PIB per cápita a tipo de cambio. Los puntos que parpadean son bebés que nacen ahora mismo, al ritmo real. Pulsa un país para ver sus datos en la pantalla de arriba.',
+  mapAria: 'Mapa del mundo. El tamaño del círculo indica los nacimientos de 2026 de cada país y el color, su tramo de PIB per cápita a tipo de cambio.',
+  keysAria: 'Colores del mapa: tramos de PIB per cápita a tipo de cambio',
   liveB: 'Nacimientos/s', liveD: 'Muertes/s', liveSince: 'Desde que llegaste: ', liveAfter: ' nacidos',
 
   tierRules: d => 'Las etapas de desarrollo siguen tal cual las clasificaciones oficiales de dos organismos internacionales y se calculan con la fecha de hoy (' + d + ').',
@@ -505,9 +524,9 @@ const es = {
   gradSoon: l => 'Graduación prevista: ' + l + '.',
   gradDone: l => 'Ya graduados: ' + l + '.',
   tierListHtml: o =>
-    '<li class="t-ADV"><b>Avanzado</b>: las ' + o.advN + ' economías avanzadas del apéndice estadístico (cuadro B) de las Perspectivas de la Economía Mundial del FMI de abril de 2026, y sus territorios. Ahora son ' + o.count.ADV + ' lugares, el ' + o.pct.ADV + ' de los nacimientos de 2026.</li>' +
-    '<li class="t-LDC"><b>Menos adelantado</b>: los ' + o.ldcN + ' países de la lista de países menos adelantados de la ONU a 19 de diciembre de 2024. Pasan a estar en desarrollo cuando llega su fecha de graduación. ' + (o.grad ? o.grad + ' ' : '') + 'Ahora son ' + o.count.LDC + ' lugares, el ' + o.pct.LDC + '.</li>' +
-    '<li class="t-DEV"><b>En desarrollo</b>: todos los demás. Ahora son ' + o.count.DEV + ' lugares, el ' + o.pct.DEV + '.</li>' +
+    '<li><b>Avanzado</b>: las ' + o.advN + ' economías avanzadas del apéndice estadístico (cuadro B) de las Perspectivas de la Economía Mundial del FMI de abril de 2026, y sus territorios. Ahora son ' + o.count.ADV + ' lugares, el ' + o.pct.ADV + ' de los nacimientos de 2026.</li>' +
+    '<li><b>Menos adelantado</b>: los ' + o.ldcN + ' países de la lista de países menos adelantados de la ONU a 19 de diciembre de 2024. Pasan a estar en desarrollo cuando llega su fecha de graduación. ' + (o.grad ? o.grad + ' ' : '') + 'Ahora son ' + o.count.LDC + ' lugares, el ' + o.pct.LDC + '.</li>' +
+    '<li><b>En desarrollo</b>: todos los demás. Ahora son ' + o.count.DEV + ' lugares, el ' + o.pct.DEV + '.</li>' +
     '<li>Los territorios dependientes y los Estados en libre asociación (Islas Cook, Niue) siguen la etapa de su Estado soberano. Mónaco, Estado soberano que no es miembro del FMI, no encaja en ninguna regla y se agrupa con Francia. Sáhara Occidental, Palestina y Kosovo no son territorios de una economía avanzada, así que están en desarrollo.</li>' +
     '<li>Las tres proporciones se redondean para que sumen 100 %.</li>',
 
@@ -516,6 +535,7 @@ const es = {
     (o.zero.length ? ' ' + joinAnd(o.zero, ' y ') + ', menos de uno.' : '') +
     ' Por etapa de desarrollo, ' + o.tiers.ADV + ' nacen en países avanzados, ' + o.tiers.DEV + ' en países en desarrollo y ' + o.tiers.LDC + ' en países menos adelantados.',
   hTierAria: l => 'Bebés por etapa de desarrollo: ' + l,
+  hBandAria: l => 'Bebés por tramo de PIB per cápita a tipo de cambio: ' + l,
   nb: x => x,
   cells: n => n + (n === 1 ? ' casilla' : ' casillas'),
 
@@ -534,7 +554,7 @@ const es = {
   allCont: 'Todos los continentes', allTier: 'Todas las etapas',
 
   batchTitle: n => 'Esta tanda de ' + n,
-  batchNote: s => 'Los puntos del mapa son los lugares que han salido en esta tanda (el color indica la etapa de desarrollo). La pantalla de arriba muestra el último, ' + s + '.',
+  batchNote: s => 'Los puntos del mapa son los lugares que han salido en esta tanda (el color indica el tramo de PIB per cápita). La pantalla de arriba muestra el último, ' + s + '.',
   batchAria: l => 'Veces por continente en esta tanda y veces esperadas. ' + l,
   batchItem: (n, c, x) => n + ' ' + c + ', esperado ' + x,
   rowNow: 'Ahora', rowExp: 'Esp.',
@@ -545,6 +565,7 @@ const es = {
   drawnMany: (k, a, b, c, n) => 'Has sacado ' + k + ' veces: avanzado ' + a + ', en desarrollo ' + b + ', menos adelantado ' + c + '. La última es ' + n + '.',
   reopened: (s, n, t) => 'Se ha vuelto a abrir el registro ' + s + '. ' + n + ', etapa de desarrollo: ' + t + '.',
   looked: (n, t) => 'Mostrando ' + n + '. Etapa de desarrollo: ' + t + '.',
+  bandSay: r => r ? 'Tramo de PIB per cápita: ' + r + '.' : 'Sin dato de PIB per cápita a tipo de cambio.',
   clearArm: 'Pulsa otra vez para borrar', clearArmSay: 'Para borrar los registros, pulsa otra vez.', cleared: 'Registros borrados.'
 };
 
@@ -577,7 +598,7 @@ const ru = {
   copy: 'Копировать', copied: 'Скопировано', copyFail: 'Не удалось скопировать',
   lbProb: 'Вероятность родиться здесь', lbGdp: 'ВВП на душу населения', lbTier: 'Этап развития', lbLife: 'Продолжительность жизни',
   atlasTitle: 'Карта мира', resetMap: 'Показать весь мир',
-  hTitle: 'Если бы новорождённых в мире было 100', hByTier: 'По этапам развития', hByCont: 'По континентам', hByCountry: 'По странам',
+  hTitle: 'Если бы новорождённых в мире было 100', hByTier: 'По этапам развития', hByBand: 'По ВВП на душу населения', hByCont: 'По континентам', hByCountry: 'По странам',
   mTitle: 'Мои записи', mByCont: 'Доля по континентам', mByTier: 'Доля по этапам развития',
   mNote: 'Полоса — доля, которая выпала у вас; вертикальная линия — доля, которой можно ожидать по данным о рождениях. Чем больше розыгрышей, тем ближе они друг к другу.',
   mRecent: 'Последние записи', clear: 'Удалить записи',
@@ -624,6 +645,8 @@ const ru = {
   kids: x => x + ' ' + ruPl(x, 'ребёнок', 'ребёнка', 'детей'),
   lifeUnit: 'года',
   noData: 'Нет данных',
+  bandUnder: a => 'Менее ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' и выше',
+  bandNo: (i, n) => 'Диапазон ' + i + '/' + n,
   gdpNa: (n, ppp) => 'Одно из ' + n + ' мест без данных по рыночному курсу в «Перспективах развития мировой экономики» МВФ.' + (ppp ? ' По ППС: ' + ppp + '.' : ''),
   gdpLabel: note => (note || '2025 г.') + ', по рыночному курсу',
   noPpp: 'Нет данных по ППС',
@@ -641,8 +664,9 @@ const ru = {
   mapFail: 'Не удалось загрузить карту. Проверьте подключение к интернету и обновите страницу. Розыгрыш и таблица работают и без карты.',
   ledeHtml: s => 'Вы — один из <b>' + s + '</b> детей 2026 года',
   atlasLede: 'Страна выбирается пропорционально числу рождений в 2026 году, пол — по соотношению полов при рождении в этой стране. Чем больше круг, тем выше вероятность родиться там.',
-  legend: 'Размер круга — число рождений в 2026 году, цвет — этап развития. Мигающие точки — дети, которые рождаются прямо сейчас, в реальном темпе. Нажмите на страну, чтобы показать её на экране выше.',
-  mapAria: 'Карта мира. Размер круга — число рождений в каждой стране в 2026 году, цвет — этап развития.',
+  legend: 'Размер круга — число рождений в 2026 году, цвет — диапазон ВВП на душу населения по рыночному курсу. Мигающие точки — дети, которые рождаются прямо сейчас, в реальном темпе. Нажмите на страну, чтобы показать её на экране выше.',
+  mapAria: 'Карта мира. Размер круга — число рождений в каждой стране в 2026 году, цвет — диапазон ВВП на душу населения по рыночному курсу.',
+  keysAria: 'Цвета карты: диапазоны ВВП на душу населения по рыночному курсу',
   liveB: 'Рождений/с', liveD: 'Смертей/с', liveSince: 'Родилось с открытия: ', liveAfter: ' чел.',
 
   tierRules: d => 'Этапы развития следуют официальным классификациям двух международных организаций и рассчитываются на сегодняшнюю дату (' + d + ').',
@@ -650,9 +674,9 @@ const ru = {
   gradSoon: l => 'Выход из списка запланирован: ' + l + '.',
   gradDone: l => 'Уже вышли из списка: ' + l + '.',
   tierListHtml: o =>
-    '<li class="t-ADV"><b>Развитые</b>: развитые экономики из Статистического приложения (таблица B) «Перспектив развития мировой экономики» МВФ за апрель 2026 года (всего ' + o.advN + ') и их территории. Сейчас это ' + o.count.ADV + ' ' + ruPl(o.count.ADV, 'место', 'места', 'мест') + ', ' + o.pct.ADV + ' рождений 2026 года.</li>' +
-    '<li class="t-LDC"><b>Наименее развитые</b>: страны из списка наименее развитых стран ООН на 19 декабря 2024 года (всего ' + o.ldcN + '). После даты выхода из списка страна считается развивающейся. ' + (o.grad ? o.grad + ' ' : '') + 'Сейчас это ' + o.count.LDC + ' ' + ruPl(o.count.LDC, 'место', 'места', 'мест') + ', ' + o.pct.LDC + '.</li>' +
-    '<li class="t-DEV"><b>Развивающиеся</b>: все остальные. Сейчас это ' + o.count.DEV + ' ' + ruPl(o.count.DEV, 'место', 'места', 'мест') + ', ' + o.pct.DEV + '.</li>' +
+    '<li><b>Развитые</b>: развитые экономики из Статистического приложения (таблица B) «Перспектив развития мировой экономики» МВФ за апрель 2026 года (всего ' + o.advN + ') и их территории. Сейчас это ' + o.count.ADV + ' ' + ruPl(o.count.ADV, 'место', 'места', 'мест') + ', ' + o.pct.ADV + ' рождений 2026 года.</li>' +
+    '<li><b>Наименее развитые</b>: страны из списка наименее развитых стран ООН на 19 декабря 2024 года (всего ' + o.ldcN + '). После даты выхода из списка страна считается развивающейся. ' + (o.grad ? o.grad + ' ' : '') + 'Сейчас это ' + o.count.LDC + ' ' + ruPl(o.count.LDC, 'место', 'места', 'мест') + ', ' + o.pct.LDC + '.</li>' +
+    '<li><b>Развивающиеся</b>: все остальные. Сейчас это ' + o.count.DEV + ' ' + ruPl(o.count.DEV, 'место', 'места', 'мест') + ', ' + o.pct.DEV + '.</li>' +
     '<li>Зависимые территории и государства в свободной ассоциации (Острова Кука, Ниуэ) следуют этапу своего суверенного государства. Монако — суверенное государство вне МВФ — не подпадает ни под одно правило и отнесено к той же группе, что и Франция. Западная Сахара, Палестина и Косово не являются территориями развитых экономик, поэтому считаются развивающимися.</li>' +
     '<li>Три доли округлены так, чтобы в сумме давать 100 %.</li>',
 
@@ -662,6 +686,7 @@ const ru = {
     o.zero.map(n => ' ' + n + ' — меньше одного.').join('') +
     ' По этапам развития: ' + o.tiers.ADV + ' — в развитых странах, ' + o.tiers.DEV + ' — в развивающихся и ' + o.tiers.LDC + ' — в наименее развитых.',
   hTierAria: l => 'Дети по этапам развития: ' + l,
+  hBandAria: l => 'Дети по диапазонам ВВП на душу населения по рыночному курсу: ' + l,
   nb: x => x,
   cells: n => n + ' ' + ruPl(n, 'клетка', 'клетки', 'клеток'),
 
@@ -680,7 +705,7 @@ const ru = {
   allCont: 'Все континенты', allTier: 'Все этапы развития',
 
   batchTitle: n => 'Серия из ' + n,
-  batchNote: s => 'Точки на карте — места, выпавшие в этой серии (цвет — этап развития). На экране выше показана последняя запись, ' + s + '.',
+  batchNote: s => 'Точки на карте — места, выпавшие в этой серии (цвет — диапазон ВВП на душу населения). На экране выше показана последняя запись, ' + s + '.',
   batchAria: l => 'Выпадения по континентам в этой серии и ожидаемые значения. ' + l,
   batchItem: (n, c, x) => n + ' ' + c + ', ожидалось ' + x,
   rowNow: 'Серия', rowExp: 'Ожид.',
@@ -691,6 +716,7 @@ const ru = {
   drawnMany: (k, a, b, c, n) => 'Серия из ' + k + ': развитые — ' + a + ', развивающиеся — ' + b + ', наименее развитые — ' + c + '. Последняя запись: ' + n + '.',
   reopened: (s, n, t) => 'Снова открыта запись ' + s + ': ' + n + ', этап развития — ' + t.toLowerCase() + '.',
   looked: (n, t) => 'Показаны данные: ' + n + '. Этап развития — ' + t.toLowerCase() + '.',
+  bandSay: r => r ? 'ВВП на душу населения: ' + r + '.' : 'Данных о ВВП на душу населения по рыночному курсу нет.',
   clearArm: 'Нажмите ещё раз, чтобы удалить', clearArmSay: 'Чтобы удалить записи, нажмите ещё раз.', cleared: 'Записи удалены.'
 };
 
