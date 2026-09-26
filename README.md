@@ -1,31 +1,31 @@
 # Birth Lottery
 
-2026년에 태어날 아기 1억 3,250만 명 가운데 한 명으로 무작위로 다시 태어나 보는 페이지입니다. 나라와 성별이 실제 출생아 구성에 비례해 정해지고, 그 아이가 받게 될 출발선(이 나라에 태어날 확률, 1인당 GDP, 발전 단계, 기대수명)을 세계 전체와 나란히 보여 줍니다.
+Be born again, at random, as one of the 132.5 million babies of 2026. The country and sex are drawn in proportion to the real makeup of births, and the page shows that child's starting line (the chance of being born in that country, GDP per head, development tier and life expectancy) side by side with the world as a whole.
 
-**바로 실행하기: https://artemsukh.github.io/rebirth/**
+**Try it now: https://artemsukh.github.io/rebirth/**
 
-## 특징
+## Features
 
-- **범위:** UN 세계인구전망 2024의 국가·지역 236곳을 모두 담았습니다. 인구 1,000명이 안 되는 교황청만 뺐습니다. 코소보는 UN 코드 412를 씁니다.
-- **추첨:** 2026년 출생아 기준 하나입니다. 나라를 출생아 수에 비례해 고른 뒤 성별을 그 나라의 출생 성비로 정합니다. 난수는 `crypto.getRandomValues`에서 53비트를 가져옵니다.
-- **지표:** 이 나라에 태어날 확률, 1인당 GDP(환율 기준과 구매력 기준), 발전 단계, 기대수명입니다.
-- **순위:** 나라 수가 아니라 사람 수로 셉니다. "상위 7%"는 같은 해에 태어나는 같은 성별 아기 가운데 이 나라보다 지표가 좋은 나라에서 태어나는 아기가 약 7%라는 뜻입니다.
-- **결과 화면:** 우주 탐사선 스캐너처럼 꾸몄습니다. 화면의 강조색은 뽑힌 나라의 1인당 GDP 구간 색입니다(아래 "색" 절). 가운데 행성은 그 색 한 가지로 칠한 점묘(dot-matrix) 지구입니다. 밝기는 점의 투명도로만 나타내고, 뽑힌 나라가 가장 밝으며 그 테두리는 흰빛을 띱니다. 추첨하면 카메라가 지구본 전체로 물러났다가 그 나라 쪽으로 돌아 들어가며 확대합니다. 작은 나라도 보이도록 중심에서 멀어지는 각도를 최대 22배까지 늘린 뒤 구에 감쌉니다. 1인당 GDP 판독 패널에는 큰 숫자 아래에 9칸짜리 구간 사다리가 있어 그 나라의 구간 칸만 켜지고, 옆에 "구간 3/9 · $3,000–7,000"처럼 적습니다. 발전 단계 패널은 핍(막대 3/2/1개)과 단계 이름으로 단계를 보여 줍니다. 숫자는 슬롯머신처럼 한 바퀴 굴러가다 멈추고, 멈추면 보통 글자로 바뀝니다. 동작 줄이기 설정에서는 모든 움직임을 끕니다.
-- **프레임 규칙:** 휴대전화에서 열어 두어도 뜨거워지지 않도록 움직이는 동안에만 그립니다. 빈 화면의 지구는 초당 8번 0.75°씩 돌고, 행성이 화면 밖에 있거나 탭이 숨겨지면 멈춥니다. 추첨 비행은 초당 30프레임 이하로 그리고, 결과가 고정되면 더 그리지 않습니다. 계속 도는 것은 HUD 고리 두 개뿐인데, 각각 따로 합성되는 층이라 행성을 다시 칠하지 않습니다. 지도의 출생 펄스는 지도 위에 겹친 캔버스에, 지도가 보일 때만 그립니다. 반투명 흐림(`backdrop-filter`)과 필터 애니메이션은 쓰지 않습니다.
-- **지도:** Natural Earth 1:5천만 경계를 씁니다. UN 통계 단위에 맞추려고 프랑스 해외 레지옹과 카리브 네덜란드를 본국에서 떼어 냈습니다. 원 크기는 출생아 수, 색은 1인당 GDP 구간입니다. 범례는 9구간과 자료 없음을 막대와 범위로 보여 주며, 폭 1000px 이상에서는 한 줄, 그보다 좁으면 다섯 칸씩 두 줄입니다.
-- **언어:** English, 日本語, Español, 한국어, Русский. 기본은 영어입니다. 페이지 맨 위 막대에서 고르면 강조 표시가 그 언어로 미끄러져 가고, 새로 고침 없이 모든 글과 숫자 표기(1억 3,250만 / 132.5 million / 1億3,250万 / 132,5 millones / 132,5 млн), 날짜, 나라 이름이 바뀝니다. 휴대폰(폭 480px 미만)에서는 막대가 화면 폭을 다섯 칸으로 나눕니다.
+- **Coverage:** All 236 countries and areas in the UN World Population Prospects 2024. Only the Holy See, with fewer than 1,000 people, is left out. Kosovo uses UN code 412.
+- **Draw:** There is one basis, 2026 births. A country is picked in proportion to its number of births, then the sex is set by that country's sex ratio at birth. Random numbers take 53 bits from `crypto.getRandomValues`.
+- **Measures:** Chance of being born in this country, GDP per head (at market exchange rates and at purchasing power parity), development tier and life expectancy.
+- **Ranks:** Ranks count people, not countries. "Top 7%" means that among the babies of the same sex born in the same year, about 7% are born in a country that does better on that measure than this one.
+- **Result screen:** Styled like a space-probe scanner. The screen's accent color is the GDP-per-head band color of the drawn country (see "Color" below). The planet in the middle is a dot-matrix globe painted in that one color. Brightness is shown only through dot opacity: the drawn country is the brightest, and its border glows white. On a draw, the camera pulls back to the whole globe, then turns toward the country and zooms in. So that small countries stay visible, the angle away from the center is stretched up to 22× before being wrapped back onto the sphere. The GDP-per-head readout panel has a nine-step band ladder under the large number; only the country's band lights up, with a label beside it such as "Band 3/9 · $3,000–7,000". The development tier panel shows the tier with pips (3, 2 or 1 bars) and the tier name. Numbers spin once like a slot machine before stopping, and turn into plain text when they stop. With the reduced-motion setting, all motion is turned off.
+- **Frame rules:** So that a phone left open on the page does not heat up, it draws only while something is moving. On the idle screen the globe turns 0.75° eight times a second, and stops when the planet is off screen or the tab is hidden. The draw flight renders at no more than 30 frames per second, and drawing stops once the result settles. The only things that keep turning are the two HUD rings, each on its own composited layer, so they never repaint the planet. The map's birth pulses are drawn on a canvas laid over the map, and only while the map is visible. No translucent blur (`backdrop-filter`) or filter animations are used.
+- **Map:** Uses Natural Earth 1:50m boundaries. To match UN statistical units, the French overseas regions and the Caribbean Netherlands are split off from their parent countries. Circle size is the number of births; color is the GDP-per-head band. The legend shows the nine bands and "no data" as bars with ranges, in one row at 1000px wide or more and in two rows of five below that.
+- **Languages:** English, 日本語, Español, 한국어, Русский. English is the default. Picking a language in the bar at the very top slides the highlight to it, and without a reload all text, number formatting (1억 3,250만 / 132.5 million / 1億3,250万 / 132,5 millones / 132,5 млн), dates and country names change. On phones (under 480px wide) the bar divides the screen width into five cells.
 
-## 색
+## Color
 
-화면의 색은 한 가지만 뜻합니다. **1인당 GDP(시장 환율 미국 달러, `gdpN`)의 9구간**입니다. 판독 패널의 큰 숫자와 순위가 이 값을 쓰므로 색도 화면에 보이는 숫자와 같은 기준입니다. `gdpNNote`가 붙은 대체값(UN 2023, 세계은행 연도)도 그대로 씁니다.
+Color on screen means one thing only: **the nine bands of GDP per head (US dollars at market exchange rates, `gdpN`)**. The large number in the readout panel and the ranks use this value, so the color follows the same basis as the number on screen. Fallback values marked with `gdpNNote` (UN 2023, World Bank years) are used as they are.
 
-- **구간 경계:** `src/app.js`의 `BAND_EDGES = [1000, 3000, 7000, 15000, 30000, 50000, 75000, 100000]` 하나뿐입니다. 경계값은 위 구간에 넣습니다(하한 포함, 상한 미포함). 999달러는 1구간, 1,000달러는 2구간입니다. 각 나라의 구간은 시작할 때 `LOCS`를 만들며 한 번 계산하고(`l.band`, 0~9), 저장하지 않습니다.
-- **자료 없음:** `gdpN`이 없는 18곳(코소보, 레위니옹, 서사하라, 마요트, 저지섬 등)은 0구간(`--band-0`)입니다. 구매력 기준 값으로 대신 채우지 않습니다. 빈 화면도 이 색을 씁니다.
-- **팔레트:** 어두운 배경(`#050716`) 위 네온 색입니다. 가장 가난한 구간의 장밋빛에서 주황, 호박, 노랑, 연두, 청록, 하늘색, 남보라로 이어지고, 10만 달러 이상은 거의 흰 백금색입니다.
+- **Band edges:** Defined in one place only, `BAND_EDGES = [1000, 3000, 7000, 15000, 30000, 50000, 75000, 100000]` in `src/app.js`. An edge value belongs to the upper band (lower bound inclusive, upper bound exclusive): $999 is band 1, $1,000 is band 2. Each country's band is computed once, when `LOCS` is built at startup (`l.band`, 0–9), and is not stored.
+- **No data:** The 18 places without `gdpN` (Kosovo, Réunion, Western Sahara, Mayotte, Jersey and others) are band 0 (`--band-0`). They are not filled in with PPP values. The idle screen uses this color too.
+- **Palette:** Neon colors on a dark background (`#050716`). It runs from rose for the poorest band through orange, amber, yellow, yellow-green, teal, sky blue and indigo, and $100,000 and over is a near-white platinum.
 
-| 구간 | 범위 | 색 | 곳 수 | 2026 출생아 |
+| Band | Range | Color | Places | 2026 births |
 |---|---|---|---|---|
-| 1 | $1,000 미만 | `#FB0374` | 19 | 15.99% |
+| 1 | Under $1,000 | `#FB0374` | 19 | 15.99% |
 | 2 | $1,000–3,000 | `#D27430` | 33 | 42.93% |
 | 3 | $3,000–7,000 | `#EEAB4E` | 39 | 17.19% |
 | 4 | $7,000–15,000 | `#FFEB1C` | 36 | 13.32% |
@@ -33,104 +33,104 @@
 | 6 | $30,000–50,000 | `#5FDAC9` | 25 | 2.57% |
 | 7 | $50,000–75,000 | `#72A4F9` | 18 | 2.18% |
 | 8 | $75,000–100,000 | `#796EF5` | 6 | 2.90% |
-| 9 | $100,000 이상 | `#EEEAFD` | 7 | 0.11% |
-| 0 | 자료 없음 | `#76829C` | 18 | 0.05% |
+| 9 | $100,000 and over | `#EEEAFD` | 7 | 0.11% |
+| 0 | No data | `#76829C` | 18 | 0.05% |
 
-- **강조색:** 언어 막대, 머리글, 결과 화면, 지도, 100명의 아기 다섯 부분에 `data-band`(0~9)를 달고, 그 안에서 CSS 변수 `--acc`가 구간 색이 됩니다. 색은 바로 바뀌며 transition, filter, blur를 쓰지 않습니다. 행성은 `--band-0`~`--band-9`를 읽어 칠합니다. 9구간의 백금색은 이미 흰색에 가까워 뽑힌 나라의 흰빛 테두리가 드러나지 않으므로, 이 구간에서만 나머지 육지의 투명도를 0.55배로 낮춥니다(`LAND_DIM`).
-- **발전 단계에는 색이 없습니다.** 단계는 핍(선진국 3개, 개발도상국 2개, 최저개발국 1개)과 이름으로 나타냅니다. 여러 단계를 나란히 보여 주는 막대, 띠, 범례는 `--band-0`과 같은 색조의 회색 세 단계(`--lvl-3` `#D3D8E3`, `--lvl-2` `#A2A9BA`, `--lvl-1` `#707A8E`)로 칠해 핍 개수와 같은 순서로 선진국이 가장 밝습니다. 지금 뽑힌 나라를 강조하는 곳(켜진 핍, 단계 이름, 단계 막대의 현재 칸)만 그 나라의 구간 색입니다.
-- **팔레트를 바꿀 때:** 구간 색과 자료 없음은 `#050716` 위 명암비 4.5:1 이상, 정상 시각과 색각이상 시뮬레이션(Machado 2009, 적색약·녹색약·청색약 강도 100%)에서 어느 두 색 사이든 색차(CAM02-UCS ΔE) 10 이상이어야 합니다. 단계 회색은 밝은 순서를 지키고 가장 어두운 것도 3:1 이상이어야 합니다. `python3 pipeline/check_palette.py`(`pip install colorspacious`)가 이 조건을 검사합니다. 지금 팔레트는 명암비 5.1~17.0:1(자료 없음 5.2:1), 최소 색차가 정상 시각 17.7, 녹색약 14.2, 적색약 13.2, 청색약 11.1입니다. 참고로 CIEDE2000으로 재면 14.4, 10.4, 11.7, 8.6이고, 청색약에서 1구간과 2구간이 가장 가깝습니다.
-- **구간을 바꿀 때:** `BAND_EDGES`와 `pipeline/check_bands.js`의 검증값을 함께 고치고, 구간 수가 달라지면 `style.css`의 `--band-*`와 `[data-band]`, `.b-*` 규칙도 맞춥니다.
+- **Accent color:** `data-band` (0–9) is set on five parts (the language bar, the header, the result screen, the map and the 100 babies section), and inside them the CSS variable `--acc` becomes the band color. The color changes instantly, with no transition, filter or blur. The planet is painted from `--band-0` to `--band-9`. Band 9's platinum is already close to white, so the drawn country's white glowing border would not stand out; for this band only, the opacity of the rest of the land is lowered to 0.55× (`LAND_DIM`).
+- **Development tiers have no color.** A tier is shown by pips (3 for advanced, 2 for developing, 1 for least developed) and its name. Bars, strips and legends that show several tiers side by side are painted in three grays of the same hue as `--band-0` (`--lvl-3` `#D3D8E3`, `--lvl-2` `#A2A9BA`, `--lvl-1` `#707A8E`), with advanced the brightest, in the same order as the pip count. Only the elements that highlight the currently drawn country (the lit pips, the tier name, the current cell of the tier bar) use that country's band color.
+- **Changing the palette:** The band colors and "no data" must have a contrast ratio of at least 4.5:1 against `#050716`, and a color difference (CAM02-UCS ΔE) of at least 10 between any two colors, under normal vision and under color vision deficiency simulations (Machado 2009, protanomaly, deuteranomaly and tritanomaly at 100% severity). The tier grays must keep their brightness order, and even the darkest must reach at least 3:1. `python3 pipeline/check_palette.py` (`pip install colorspacious`) checks these conditions. The current palette has contrast ratios of 5.1–17.0:1 (no data 5.2:1), and minimum color differences of 17.7 for normal vision, 14.2 for deuteranomaly, 13.2 for protanomaly and 11.1 for tritanomaly. For reference, measured with CIEDE2000 they are 14.4, 10.4, 11.7 and 8.6; under tritanomaly, bands 1 and 2 are the closest pair.
+- **Changing the bands:** Update `BAND_EDGES` together with the expected values in `pipeline/check_bands.js`. If the number of bands changes, also adjust the `--band-*`, `[data-band]` and `.b-*` rules in `style.css`.
 
-## 행성 그리는 법
+## How the planet is drawn
 
-행성은 캔버스 한 장입니다. 지구를 반지름 R칸의 격자로 나누고, 프레임마다 칸마다 경위도를 거꾸로 구해 육지 래스터에서 바다(0), 육지(1), 뽑힌 나라(2)를 읽습니다. 래스터는 두 가지입니다. 전 세계 마스크(1024×512)는 시작할 때 한 번 만들고, 뽑힌 나라 주변의 더 촘촘한 창은 추첨마다 하나 만듭니다. 칸 그림은 한 칸에 한 픽셀인 작은 캔버스에 그린 뒤 확대하고, 점 무늬로 오려 냅니다.
+The planet is a single canvas. The globe is divided into a grid of radius R cells, and on every frame each cell's latitude and longitude are found by inverse projection and looked up in a land raster as sea (0), land (1) or the drawn country (2). There are two rasters: a world mask (1024×512), built once at startup, and a finer window around the drawn country, built once per draw. The cell image is drawn on a small canvas at one pixel per cell, then scaled up and clipped with a dot pattern.
 
-- 점 간격은 `DOT_PITCH`(3.6 CSS px)입니다. 점 하나가 차지하는 칸은 장치 픽셀 k×k개(k는 정수)이고, 캔버스는 장치 픽셀 격자에 맞춰 놓습니다.
-- 경계선 자료는 d3 없이 `src/topo.js`로 바로 풉니다. 날짜변경선을 넘는 러시아와 피지의 고리는 경도를 이어 붙여 둡니다.
-- 빈 화면에서 지구가 돌 때는 칸마다의 위도와 중심 기준 경도가 변하지 않으므로, 한 번 계산해 두고 프레임마다 중심 경도만 더합니다.
-- 구체 몸통, 궤도 고리, 조준 브래킷, HUD 글자는 모두 정적인 HTML과 SVG입니다.
+- The dot pitch is `DOT_PITCH` (3.6 CSS px). Each dot occupies k×k device pixels (k an integer), and the canvas is aligned to the device pixel grid.
+- Boundary data is decoded directly by `src/topo.js`, without d3. The rings of Russia and Fiji, which cross the date line, have their longitudes unwrapped so they stay continuous.
+- While the globe turns on the idle screen, each cell's latitude and its longitude relative to the center do not change, so they are computed once and only the center longitude is added each frame.
+- The sphere body, orbit rings, targeting brackets and HUD text are all static HTML and SVG.
 
-## 발전 단계
+## Development tiers
 
-| 단계 | 기준 |
+| Tier | Basis |
 |---|---|
-| 선진국 | IMF 세계경제전망(2026년 4월) 통계 부록 Table B의 선진경제 43곳과 그 속령 |
-| 최저개발국 | UN 최저개발국(LDC) 목록 44곳(2024년 12월 19일 기준). 졸업일이 지나면 개발도상국 |
-| 개발도상국 | 나머지 전부 |
+| Advanced | The 43 advanced economies in Table B of the Statistical Appendix to the IMF World Economic Outlook (April 2026), and their territories |
+| Least developed | The 44 countries on the UN list of least developed countries (LDCs) as of December 19, 2024. A country becomes developing once its graduation date has passed |
+| Developing | Everything else |
 
-- 속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 본국은 `appdata.json`의 `sov` 칸에 M49 코드로 적었습니다.
-- 모나코는 속령이 아니라 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않습니다. 프랑스와 같은 단계(선진국)로 둡니다.
-- 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.
-- 단계는 **보는 날짜 기준으로 실행 중에 계산합니다.** 졸업 예정국(방글라데시, 라오스, 네팔 2026년 11월 24일, 솔로몬제도 2027년 12월 13일, 캄보디아와 세네갈 2029년 12월 19일)은 졸업일 전까지 최저개발국이고 그날부터 개발도상국입니다. 일정이 바뀌면 `pipeline/classify.py`의 날짜와 그 아래 검증값(`EXPECT`)을 함께 고치고 다시 돌리면 됩니다.
-- 2026년 9월 24일 기준으로 선진국 80곳(출생아의 7.37%), 개발도상국 112곳(64.29%), 최저개발국 44곳(28.34%)입니다. 세 비중은 합이 100%가 되도록 최대잉여 방식으로 반올림합니다.
+- Territories and freely associated states (Cook Islands, Niue) follow the tier of their sovereign state. The sovereign state is recorded as an M49 code in the `sov` field of `appdata.json`.
+- Monaco is not a territory but a sovereign state outside the IMF, so neither rule covers it. It is given the same tier as France (advanced).
+- Western Sahara, Palestine and Kosovo are not territories of an advanced economy, so they are developing.
+- Tiers are **computed at run time from the viewing date.** Countries scheduled to graduate (Bangladesh, Laos and Nepal on November 24, 2026; Solomon Islands on December 13, 2027; Cambodia and Senegal on December 19, 2029) are least developed until their graduation date and developing from that day on. If the schedule changes, update the dates in `pipeline/classify.py` together with the expected values below them (`EXPECT`), then run it again.
+- As of September 24, 2026, there are 80 advanced places (7.37% of births), 112 developing (64.29%) and 44 least developed (28.34%). The three shares are rounded with the largest remainder method so that they add up to 100%.
 
-## 언어
+## Languages
 
-- **처음 고르는 언어:** 주소의 `?lang=en|ja|es|ko|ru`, 지난번에 고른 언어(localStorage `rebirth-simulator-lang`) 순서로 찾고, 둘 다 없으면 영어로 엽니다. 브라우저 언어는 보지 않으므로 처음 온 사람은 누구나 영어 화면을 봅니다. 막대에서 바꾸면 그 선택을 저장하고, 주소에 `?lang=`이 있으면 그 값도 바꿉니다. 한국어 화면으로 바로 보내려면 `?lang=ko`를 붙인 주소를 쓰면 됩니다.
-- **순서:** 막대의 순서는 `src/i18n.js`의 `LANGS`(`en ja es ko ru`)와 `body.html`의 버튼 순서가 같아야 합니다. 강조 칸의 폭은 1/`LANGS` 개수이고, 순번만큼 움직이기 때문입니다.
-- **글:** 화면의 모든 문장은 `src/i18n.js`에 언어별로 같은 열쇠(key)로 들어 있습니다. `body.html`의 고정 문구는 `data-t`(글), `data-th`(마크업), `data-tp`(입력 안내)로 열쇠를 가리키고, 숫자와 날짜는 `app.js`가 그 언어의 `Intl` 형식(ko-KR, en-US, ja-JP, es-ES, ru-RU)으로 만든 뒤 넘깁니다. 러시아어는 숫자 뒤 명사가 세 가지 꼴(1 раз, 2 раза, 5 раз)로 바뀌어서 `i18n.js`의 `ruPl`이 고르고, 속령의 본국("Территория Франции")과 대륙("в Азии")은 격에 맞춘 꼴을 표로 둡니다. 문장을 고치거나 언어를 더하려면 이 파일만 고치고 다시 빌드하면 됩니다.
-- **이름:** 한국어와 영어 나라 이름은 원래의 `ko`, `en` 칸을 씁니다. 일본어·스페인어·러시아어 이름(`ja`, `es`, `ru` 칸)과 대륙·하위 지역 이름(`NAMES`)은 `pipeline/names.py`가 Unicode CLDR(Node에 들어 있는 ICU)에서 가져오고, 홍콩·마카오·두 콩고·미얀마·팔레스타인 등의 긴 공식 명칭과 러시아어 CLDR의 약어("о-ва" → "острова"), 러시아에서 흔히 쓰는 이름(США, ЮАР, Южная Корея)은 스크립트 안의 값으로 바꿉니다.
-- **검색:** 표의 나라 검색은 화면 언어와 관계없이 다섯 언어 이름과 별칭을 모두 찾고, 악센트와 ё/е 차이는 무시합니다(`japon` → Japón, `сша` → США).
-- **글꼴:** 일본어 글꼴(IBM Plex Sans JP)은 스타일시트만 90KB가 넘어서, 일본어를 고를 때에만 불러옵니다. Orbit과 Chakra Petch에는 키릴 문자가 없어서, 러시아어를 고르면 본문은 IBM Plex Sans, 제목과 이름은 Orbit과 비슷한 가는 기하학 서체인 Jura로 바꿔 불러옵니다. 불러오기 전에는 시스템 글꼴로 보입니다.
+- **Initial language:** Chosen in this order: `?lang=en|ja|es|ko|ru` in the URL, then the language picked last time (localStorage `rebirth-simulator-lang`). If neither exists, the page opens in English. The browser language is not consulted, so every first-time visitor sees English. Changing the language in the bar saves the choice, and if the URL has `?lang=`, updates that value too. To send someone straight to the Korean page, use a URL with `?lang=ko`.
+- **Order:** The order of the bar must match between `LANGS` (`en ja es ko ru`) in `src/i18n.js` and the order of the buttons in `body.html`, because the highlight cell is 1/(number of `LANGS`) wide and moves by the language's index.
+- **Text:** Every sentence on screen lives in `src/i18n.js`, under the same keys for each language. Fixed text in `body.html` points to keys with `data-t` (text), `data-th` (markup) and `data-tp` (input placeholder). Numbers and dates are formatted by `app.js` in that language's `Intl` format (ko-KR, en-US, ja-JP, es-ES, ru-RU) before being passed in. In Russian, a noun after a number takes one of three forms (1 раз, 2 раза, 5 раз), so `ruPl` in `i18n.js` picks the right one, and the sovereign state of a territory ("Территория Франции") and continents ("в Азии") are kept in tables in the correct grammatical case. To change a sentence or add a language, edit only this file and rebuild.
+- **Names:** Korean and English country names use the original `ko` and `en` fields. Japanese, Spanish and Russian names (the `ja`, `es` and `ru` fields) and continent and subregion names (`NAMES`) are taken by `pipeline/names.py` from Unicode CLDR (the ICU bundled with Node). Long official names such as those of Hong Kong, Macao, the two Congos, Myanmar and Palestine, abbreviations in the Russian CLDR ("о-ва" → "острова") and names commonly used in Russia (США, ЮАР, Южная Корея) are replaced with values set in the script.
+- **Search:** Country search in the table matches names and aliases in all five languages, whatever the screen language, and ignores accents and the ё/е difference (`japon` → Japón, `сша` → США).
+- **Fonts:** The stylesheet for the Japanese font (IBM Plex Sans JP) alone is over 90 KB, so it is loaded only when Japanese is chosen. Orbit and Chakra Petch have no Cyrillic, so when Russian is chosen, the page loads IBM Plex Sans for body text and Jura, a thin geometric typeface similar to Orbit, for titles and names. Until they load, system fonts are shown.
 
-## 자료
+## Data
 
-| 항목 | 출처 |
+| Item | Source |
 |---|---|
-| 출생아, 인구, 성비, 기대수명, 합계출산율 | UN World Population Prospects 2024, 중위 추계 2026년 (CC BY 3.0 IGO) |
-| 1인당 GDP | IMF World Economic Outlook, 2026년 4월판의 2025년 추정치 (Worldometers 정리표 경유). IMF 값이 없는 곳은 세계은행이나 UN 값을 쓰고 표시함 |
-| 발전 단계 | IMF WEO 2026년 4월 통계 부록 Table B, UN 최저개발국 목록 |
-| 국기 | [flag-icons](https://github.com/lipis/flag-icons) 7.5.0의 4:3 SVG (MIT 라이선스, `vendor/flag-icons.LICENSE`) |
-| 일본어·스페인어·러시아어 나라 이름 | Unicode CLDR 48 (Node 22의 ICU), 일부는 `pipeline/names.py`에서 바꿈 |
-| 지도 | Natural Earth (퍼블릭 도메인), world-atlas 경유 |
+| Births, population, sex ratio, life expectancy, total fertility rate | UN World Population Prospects 2024, medium scenario, 2026 (CC BY 3.0 IGO) |
+| GDP per head | IMF World Economic Outlook, April 2026 edition, 2025 estimates (via a Worldometers table). Where there is no IMF value, a World Bank or UN value is used and marked as such |
+| Development tier | IMF WEO April 2026 Statistical Appendix Table B, UN list of least developed countries |
+| Flags | 4:3 SVGs from [flag-icons](https://github.com/lipis/flag-icons) 7.5.0 (MIT license, `vendor/flag-icons.LICENSE`) |
+| Japanese, Spanish and Russian country names | Unicode CLDR 48 (the ICU in Node 22), with some replaced in `pipeline/names.py` |
+| Map | Natural Earth (public domain), via world-atlas |
 
-1인당 GDP는 두 값을 함께 적습니다. 큰 숫자는 시장 환율로 바꾼 미국 달러이고, 순위도 이 값으로 매깁니다. 작은 숫자는 물가 차이를 걷어 낸 구매력평가(PPP) 기준 국제달러입니다. 예를 들어 한국은 36,227달러와 65,405국제달러, 인도는 2,675달러와 11,789국제달러입니다.
+GDP per head is shown as two values. The large number is in US dollars converted at market exchange rates, and ranks are based on it. The small number is in international dollars at purchasing power parity (PPP), which removes price differences. For example, South Korea has $36,227 and Int$65,405, and India $2,675 and Int$11,789.
 
-## 폴더 구조
+## Folder structure
 
 ```
-index.html        빌드 결과물. 국기를 뺀 모든 것이 이 파일 하나에 들어 있습니다.
-build.py          src/와 data/를 index.html 하나로 합칩니다.
-src/              body.html(구조), style.css(모양), i18n.js(다섯 언어의 글), app.js(동작), topo.js(TopoJSON 해독)
-data/             appdata.json(가공된 인구·경제·분류 자료), world.topo.json(지도)
-assets/flags/     236곳의 국기 SVG (index.html과 같은 곳에서 필요할 때만 불러옴)
-vendor/           flag-icons 라이선스, topojson-client 3.1.0 (src/topo.js 대조 검사용, ISC)
-pipeline/         자료를 만든 스크립트
+index.html        Build output. Everything except the flags is in this one file.
+build.py          Combines src/ and data/ into a single index.html.
+src/              body.html (structure), style.css (appearance), i18n.js (text in five languages), app.js (behavior), topo.js (TopoJSON decoding)
+data/             appdata.json (processed population, economic and classification data), world.topo.json (map)
+assets/flags/     Flag SVGs for the 236 places (loaded on demand from the same origin as index.html)
+vendor/           flag-icons license, topojson-client 3.1.0 (for cross-checking src/topo.js, ISC)
+pipeline/         Scripts that produced the data
 ```
 
-`data/appdata.json`의 `LOC`는 236행이고, 각 행의 칸 이름은 `LOC_FIELDS`에 있습니다(`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov ja es ru`). 그 밖에 `CONT`, `SUB`(한국어 대륙·하위 지역 이름), `NAMES`(같은 순서의 영어·일본어·스페인어·러시아어 이름), `WORLD`, `CLASS`(발전 단계) 키가 있습니다.
+`LOC` in `data/appdata.json` has 236 rows, and the field names of each row are listed in `LOC_FIELDS` (`code ko en cont sub lat lng births pop srb e0M e0F tfr med gdp gdpNote e0B gdpN gdpNNote iso2 sov ja es ru`). The other keys are `CONT` and `SUB` (Korean continent and subregion names), `NAMES` (English, Japanese, Spanish and Russian names in the same order), `WORLD` and `CLASS` (development tiers).
 
 ### pipeline/
 
-| 스크립트 | 하는 일 |
+| Script | What it does |
 |---|---|
-| `build_final.py`, `add_nominal.py` | 처음 자료를 만든 스크립트. UN 원자료(wpp2024 R 패키지)가 있어야 돌릴 수 있습니다. v2 형식을 내도록 고쳐 두었습니다. |
-| `migrate_v2.py` | v1 `appdata.json`에서 인구 기준 모드 자료와 사망·생존 지표를 지우고 `LOC_FIELDS` 형식으로 바꿉니다. 이미 v2면 검사만 합니다. |
-| `classify.py` | 발전 단계 목록(`CLASS`)과 본국(`sov`)을 넣고 단계별 곳 수와 비중을 검증합니다. |
-| `build_iso.py` | ISO 두 글자 코드(`iso2`)를 채우고 flag-icons에서 국기를 복사해 svgo로 줄입니다. `pip install pycountry`와 npm이 필요합니다. |
-| `names.py` | 일본어·스페인어·러시아어 나라 이름(`ja`, `es`, `ru`)과 대륙·하위 지역 이름(`NAMES`)을 넣습니다. Node가 필요하고, 여러 번 돌려도 결과가 같습니다. |
-| `check_topo.js` | `src/topo.js`가 topojson-client와 똑같이 지도를 풀어내는지 확인합니다. |
-| `check_bands.js` | `src/app.js`의 `BAND_EDGES`와 구간 판정을 자료에 적용해 구간별 곳 수와 출생아 비중, 표본 나라, 경계값을 검증합니다. |
-| `check_palette.py` | `src/style.css`의 구간 색과 단계 회색이 명암비와 색각이상 색차 조건을 지키는지 검사합니다. `pip install colorspacious`가 필요합니다. |
+| `build_final.py`, `add_nominal.py` | The scripts that first built the data. They need the raw UN data (the wpp2024 R package) to run. They have been updated to output the v2 format. |
+| `migrate_v2.py` | Removes the population-based mode data and the mortality and survival measures from a v1 `appdata.json`, and converts it to the `LOC_FIELDS` format. If the file is already v2, it only runs the checks. |
+| `classify.py` | Adds the development tier lists (`CLASS`) and sovereign states (`sov`), and checks the number of places and share of births in each tier. |
+| `build_iso.py` | Fills in the two-letter ISO codes (`iso2`), copies the flags from flag-icons and shrinks them with svgo. Needs `pip install pycountry` and npm. |
+| `names.py` | Adds the Japanese, Spanish and Russian country names (`ja`, `es`, `ru`) and the continent and subregion names (`NAMES`). Needs Node. Running it again gives the same result. |
+| `check_topo.js` | Checks that `src/topo.js` decodes the map exactly as topojson-client does. |
+| `check_bands.js` | Applies `BAND_EDGES` and the band logic from `src/app.js` to the data, and checks the number of places and share of births per band, sample countries and edge values. |
+| `check_palette.py` | Checks that the band colors and tier grays in `src/style.css` meet the contrast and color vision deficiency color-difference conditions. Needs `pip install colorspacious`. |
 
-## 고친 뒤 다시 빌드하기
+## Rebuilding after changes
 
 ```bash
 python3 build.py
 ```
 
-빌드는 CSS와 JS의 주석과 들여쓰기만 걷어 냅니다. 외부에서 불러오는 것은 d3 7.9.0(cdnjs, 실패 시 jsDelivr)과 Google Fonts(Orbit, Chakra Petch, IBM Plex Sans KR, 일본어를 고르면 IBM Plex Sans JP, 러시아어를 고르면 IBM Plex Sans와 Jura)뿐입니다. d3는 아래 지도만 씁니다. d3를 불러오지 못해도 추첨, 판독값, 표, 행성은 그대로 작동하고, 지도 자리에 안내 문구가 나옵니다. 국기 파일이 없으면 두 글자 코드 칩을 보여 줍니다.
+The build strips only comments and indentation from the CSS and JS. The only things loaded from outside are d3 7.9.0 (from cdnjs, falling back to jsDelivr) and Google Fonts (Orbit, Chakra Petch and IBM Plex Sans KR, plus IBM Plex Sans JP when Japanese is chosen, and IBM Plex Sans and Jura when Russian is chosen). d3 is used only for the map at the bottom. If d3 fails to load, the draw, readouts, table and planet keep working, and a notice appears in place of the map. If a flag file is missing, a chip with the two-letter code is shown instead.
 
-기록은 브라우저의 localStorage(`rebirth-simulator-v2`)에만 저장됩니다. 예전 형식(`dasi-taeeonandamyeon-v1`)이 있으면 처음 열 때 한 번 옮깁니다. 출생아 기준 통계와 기록은 그대로 가져오고, 인구 기준 기록은 버리며, 일련번호는 이어서 씁니다.
+Records are stored only in the browser's localStorage (`rebirth-simulator-v2`). If data in the old format (`dasi-taeeonandamyeon-v1`) exists, it is migrated once on first open: birth-based statistics and records are carried over, population-based records are dropped, and serial numbers continue where they left off.
 
-## GitHub Pages로 공개하기
+## Publishing with GitHub Pages
 
-저장소의 Settings → Pages에서 Source를 "Deploy from a branch", Branch를 `main`, 폴더를 `/ (root)`로 고르면 https://artemsukh.github.io/rebirth/ 에서 열립니다. 국기는 `assets/flags/`에서 같은 출처로 제공되므로 `index.html`과 함께 올라가야 합니다. 무료 계정에서는 저장소가 공개(Public)여야 Pages를 켤 수 있습니다.
+In the repository's Settings → Pages, set Source to "Deploy from a branch", Branch to `main` and the folder to `/ (root)`, and the site will open at https://artemsukh.github.io/rebirth/. The flags are served from `assets/flags/` on the same origin, so they must be published along with `index.html`. On a free account, the repository must be public for Pages to be turned on.
 
-## 한계
+## Limitations
 
-- 2026년 값은 모두 추계입니다. 추계 뒤에 벌어진 전쟁이나 재난은 반영되지 않았을 수 있습니다.
-- 나라 평균은 나라 안의 격차를 가립니다. 같은 나라라도 지역, 소득, 도시와 농촌에 따라 출발선은 크게 다릅니다.
-- 1인당 GDP는 평균 생산량일 뿐 분배를 말해 주지 않습니다. 환율 기준으로 코소보, 레위니옹, 저지섬 등 18곳은 IMF 값이 없어 비워 두었습니다.
-- 발전 단계는 국제기구의 행정 분류입니다. 최저개발국 졸업 일정은 유엔 총회 결정에 따라 미뤄질 수 있습니다(방글라데시와 네팔은 2029년까지 연기를 요청해 두었습니다).
-- 행성의 확대 배율은 모양을 보이게 하려는 과장이라 면적 비교에는 쓸 수 없습니다. 윤곽이 너무 거칠거나 점 몇 개로밖에 보이지 않는 작은 나라는 그 자리에 조준 표시(십자와 점 네 개)를 찍습니다.
+- All 2026 values are projections. Wars or disasters that happened after the projections were made may not be reflected.
+- National averages hide the gaps within a country. Even in the same country, the starting line varies widely by region and income, and between city and countryside.
+- GDP per head is only average output and says nothing about how it is distributed. At market exchange rates, 18 places such as Kosovo, Réunion and Jersey have no IMF value and are left blank.
+- Development tiers are administrative classifications from international organizations. LDC graduation dates can be postponed by decisions of the UN General Assembly (Bangladesh and Nepal have asked for a delay until 2029).
+- The planet's zoom is an exaggeration meant to make shapes visible, and cannot be used to compare areas. For small countries whose outline is too coarse or that show up as only a few dots, a targeting marker (a crosshair and four dots) is placed at their location.
