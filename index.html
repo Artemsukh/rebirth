@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Orbit&display=swap">
 <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" crossorigin="anonymous">
 <style>
-:root{--space:#050716;--ink:#EAF2FF;--ink-hi:#F4F9FF;--ink-2:#AFC0DA;--ink-3:#8497B8;--line:rgba(150,185,225,.2);--line-2:rgba(150,185,225,.11);--panel:rgba(12,22,46,.62);--tier-adv:#5BE4F0;--tier-dev:#FFB547;--tier-ldc:#FF5C8A;--tier-none:#8497B8;--pip-off:rgba(234,242,255,.16);--btn:#E6F0FF;--btn-ink:#06102A;--live:#7CF0B0;--focus:#BFF6FB;--c0:#D98A4E;--c1:#5E9DC0;--c2:#9A87C4;--c3:#6DB585;--c4:#C0728F;--c5:#D1B04F;--land:#16223A;--land-hover:#22324F;--land-edge:#050716;--grat:rgba(234,242,255,.06);--display:'Orbit','IBM Plex Sans KR',sans-serif;--num:'Chakra Petch','IBM Plex Sans KR',sans-serif;--sans:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--clip-panel:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);--clip-btn:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);--spd:1;--tier:var(--tier-none);--rail:34px;color-scheme:dark;box-sizing:border-box}:root:lang(ja){--jp:'IBM Plex Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,'Noto Sans JP',sans-serif;--display:var(--jp);--num:'Chakra Petch',var(--jp);--sans:var(--jp)}:root:lang(ja) body{word-break:normal;line-break:strict}:root:lang(ru){--ru:'IBM Plex Sans','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--display:'Jura',var(--ru);--num:'Chakra Petch',var(--ru);--sans:var(--ru)}*,*::before,*::after{box-sizing:inherit}html{background:var(--space);-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0;min-height:100%;background:transparent;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;overflow-x:hidden}button,input,select{font:inherit;color:inherit}img,svg{max-width:100%}a{color:var(--ink);text-decoration-color:rgba(234,242,255,.35);text-underline-offset:3px}a:hover{text-decoration-color:currentColor}:focus-visible{outline:2px solid var(--focus);outline-offset:2px}[hidden]{display:none !important}.sr-only{position:absolute !important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}.skip{position:absolute;left:12px;top:-60px;z-index:50;padding:8px 12px;background:var(--btn);color:var(--btn-ink)}.skip:focus{top:12px}.k0{--k:var(--c0)}.k1{--k:var(--c1)}.k2{--k:var(--c2)}.k3{--k:var(--c3)}.k4{--k:var(--c4)}.k5{--k:var(--c5)}.t-ADV{--k:var(--tier-adv)}.t-DEV{--k:var(--tier-dev)}.t-LDC{--k:var(--tier-ldc)}.space{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--space);overflow:hidden}.space::before{content:"";position:absolute;left:50%;top:50%;width:max(100vw,160vh);height:max(62.5vw,100vh);margin:calc(-1 * max(31.25vw,50vh)) 0 0 calc(-1 * max(50vw,80vh));background:var(--stars,none) 0 0 / 100% 100% no-repeat,radial-gradient(ellipse 43.056% 68.889% at 50% 47.778%,rgba(27,42,94,.55),rgba(27,42,94,0)),radial-gradient(ellipse 36.111% 57.778% at 81.944% 13.333%,rgba(59,31,94,.45),rgba(59,31,94,0)),radial-gradient(ellipse 33.333% 53.333% at 12.5% 91.111%,rgba(15,59,74,.4),rgba(15,59,74,0))}.lang-bar{position:relative;z-index:4;height:var(--rail);padding:0 40px;display:flex;justify-content:flex-end;align-items:center;background:rgba(5,7,22,.9);border-bottom:1px solid var(--line-2)}.lang-sw{display:flex;align-items:center;gap:10px}.globe{width:16px;height:16px;flex:none;fill:none;stroke:var(--ink-3);stroke-width:1.1}.lang-track{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;box-shadow:inset 0 0 0 1px var(--line)}.lang-thumb{position:absolute;top:0;bottom:0;left:0;width:calc(100% / var(--n,5));pointer-events:none;transform:translateX(calc(var(--i,0) * 100%));background:rgba(230,240,255,.1);box-shadow:inset 0 0 0 1px rgba(230,240,255,.38),inset 0 -2px 0 var(--tier);transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .6s}.lang-track label{position:relative;display:block;cursor:pointer}.lang-track input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}.lang-track label span{display:block;padding:3px 13px;text-align:center;font-size:.8125rem;line-height:1.5;color:var(--ink-3);white-space:nowrap;transition:color .2s}.lang-track label:hover span{color:var(--ink)}.lang-track input:checked + span{color:var(--ink-hi)}.lang-track input:focus-visible + span{outline:2px solid var(--focus);outline-offset:-2px}.lang-track [lang="ko"]{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif}.lang-track [lang="ja"]{font-family:'IBM Plex Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,'Noto Sans JP',sans-serif}.lang-track [lang="en"],.lang-track [lang="es"]{font-family:'IBM Plex Sans KR',sans-serif}.lang-track [lang="ru"]{font-family:'IBM Plex Sans','Segoe UI',Roboto,Arial,sans-serif}@media (forced-colors: active){.lang-thumb{border:2px solid Highlight}}.hud-head{position:relative;z-index:3;height:72px;padding:0 40px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(5,7,22,.85),rgba(5,7,22,.35))}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:34px;height:34px;flex:none;fill:none;stroke:var(--ink);stroke-width:1.4}.logo ellipse{stroke:var(--tier);transition:stroke .6s}.logo .logo-dot{fill:var(--tier);stroke:none}.brand-name{margin:0;font-family:'Orbit','IBM Plex Sans KR',sans-serif;font-weight:400;font-size:1.25rem;letter-spacing:.04em;white-space:nowrap}.head-mid{margin:0;font-size:.9375rem;color:var(--ink-2);text-align:center;white-space:nowrap}.head-mid b{color:var(--ink);font-family:var(--num);font-weight:600}.head-live{margin:0;justify-self:end;display:flex;gap:18px;align-items:center;font-size:.8125rem;color:var(--ink-3);white-space:nowrap;font-family:var(--num);font-variant-numeric:tabular-nums}.head-live b{color:var(--ink);font-weight:600;margin-left:5px}.head-live .dot{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live);vertical-align:1px}[data-tier="ADV"]{--tier:var(--tier-adv)}[data-tier="DEV"]{--tier:var(--tier-dev)}[data-tier="LDC"]{--tier:var(--tier-ldc)}.stage{position:relative;z-index:1;display:grid;grid-template-columns:340px minmax(0,1fr) 390px;column-gap:24px;grid-template-areas:"id center read";min-height:calc(100vh - 72px - var(--rail));min-height:calc(100svh - 72px - var(--rail));padding:20px 40px 32px}.center-col{grid-area:center;position:relative;z-index:0;display:flex;flex-direction:column;align-items:center}.id-col{grid-area:id;position:relative;z-index:2;min-width:0}.read-col{grid-area:read;position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;min-width:0}.read-col:focus{outline:none}.p-prob:focus{outline:none}.planet-wrap{position:relative;width:100%;height:600px;flex:none;pointer-events:none}#planet{position:absolute;left:50%;top:0;width:720px;height:600px;max-width:none;margin-left:-360px;--u:1px}.actions{display:flex;gap:12px;justify-content:center;margin-top:8px;position:relative;z-index:3}.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:10px 18px;cursor:pointer;border:0;font-size:.9375rem;font-weight:500;line-height:1.2;white-space:nowrap;transition:background-color .15s,color .15s,filter .15s}.btn:active{transform:translateY(1px)}.btn-primary,.btn-ghost{position:relative;isolation:isolate;height:56px;background:none}.btn-primary::before,.btn-ghost::before{content:"";position:absolute;inset:0;z-index:-1;clip-path:var(--clip-btn);transition:background-color .15s,filter .15s}.btn-primary{padding:0 34px;color:var(--btn-ink);font-family:var(--display);font-size:1.0625rem;letter-spacing:.02em}.btn-primary::before{background:var(--btn)}.btn-primary:hover::before{background:#FFFFFF;filter:drop-shadow(0 0 10px rgba(191,246,251,.55))}.btn-ghost{padding:0 22px;color:var(--ink)}.btn-ghost::before{background-color:rgba(230,240,255,.06);background-repeat:no-repeat;background-image:linear-gradient(rgba(230,240,255,.4),rgba(230,240,255,.4)),linear-gradient(rgba(230,240,255,.4),rgba(230,240,255,.4)),linear-gradient(to right bottom,transparent calc(50% - .7px),rgba(230,240,255,.4) calc(50% - .7px),rgba(230,240,255,.4) calc(50% + .7px),transparent calc(50% + .7px)),linear-gradient(to left top,transparent calc(50% - .7px),rgba(230,240,255,.4) calc(50% - .7px),rgba(230,240,255,.4) calc(50% + .7px),transparent calc(50% + .7px));background-size:100% 1px,100% 1px,12px 100%,12px 100%;background-position:left top,left bottom,left top,right top}.btn-ghost:hover::before{background-color:rgba(230,240,255,.14)}.btn-ghost .sm{display:none}.btn-mini{min-height:32px;padding:5px 12px;font-size:.8125rem;color:var(--ink-2);background:rgba(230,240,255,.05);box-shadow:inset 0 0 0 1px rgba(230,240,255,.28)}.btn-mini:hover{color:var(--ink);background:rgba(230,240,255,.12)}.btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}.btn-primary:focus-visible,.btn-ghost:focus-visible{outline:2px solid var(--focus);outline-offset:4px}@media (forced-colors: active){.btn,.btn-primary::before,.btn-ghost::before{border:1px solid ButtonText}}.batch-line{margin:12px 0 0;max-width:36em;text-align:center;font-size:.875rem;color:var(--ink-2);font-variant-numeric:tabular-nums;position:relative;z-index:3}.batch-line b{color:var(--ink);font-weight:600}.batch-line .t-ADV b,.batch-line .t-DEV b,.batch-line .t-LDC b{color:var(--k)}.batch-line a{margin-left:8px;white-space:nowrap}.id-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:14px;grid-template-areas:"chip kind copy" "name name name" "sub sub sub";align-items:center}.id-head > .chip{grid-area:chip}.id-kind{grid-area:kind;display:flex;flex-direction:column;min-width:0}#copyBtn{grid-area:copy;align-self:start}.id-name{grid-area:name}.id-sex{grid-area:sex;display:none}.id-sub{grid-area:sub}.kind-l{font-size:.8125rem;color:var(--ink-3);line-height:1.4}.kind-no{font-family:var(--num);font-size:1.25rem;font-weight:600;line-height:1.3;min-height:1.3em;font-variant-numeric:tabular-nums}.id-name{margin:18px 0 0;font-family:var(--display);font-weight:400;color:var(--ink-hi);font-size:64px;line-height:1.12;letter-spacing:-.01em;white-space:nowrap;text-shadow:0 0 24px rgba(5,7,22,.9)}.id-name.n2{font-size:46px}.id-name.n3{font-size:34px;white-space:normal}.id-name.empty{font-family:var(--sans);font-size:1.125rem;line-height:1.6;white-space:normal;color:var(--ink-2)}.id-en{margin:6px 0 0;font-family:var(--num);font-size:20px;line-height:1.3;color:var(--ink-2)}.id-geo{margin:4px 0 0;font-size:14px;color:var(--ink-3);font-variant-numeric:tabular-nums}.id-geo .coord{font-family:var(--num);margin-left:8px}.chip{position:relative;display:inline-block;flex:none;width:75px;height:56px;padding:3px;border:1px solid rgba(234,242,255,.3);background:rgba(5,7,22,.6)}.chip img,.chip .chip-code{display:block;width:100%;height:100%;object-fit:cover}.chip .chip-code{display:grid;place-items:center;font-family:var(--num);font-size:.875rem;font-weight:600;letter-spacing:.08em;color:var(--ink-2);background:rgba(234,242,255,.06)}.chip::before{content:"";position:absolute;inset:3px;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(5,7,22,.14) 0 1px,transparent 1px 3px)}.chip::after{content:"";position:absolute;pointer-events:none}.chip::after{inset:-1px;background:linear-gradient(var(--tier),var(--tier)) left top / 10px 2px,linear-gradient(var(--tier),var(--tier)) left top / 2px 10px,linear-gradient(var(--tier),var(--tier)) right bottom / 10px 2px,linear-gradient(var(--tier),var(--tier)) right bottom / 2px 10px;background-repeat:no-repeat}.chip.xs{width:24px;height:18px;padding:1px;vertical-align:-3px}.chip.xs::before{display:none}.chip.xs .chip-code{font-size:8px;letter-spacing:0}.chip.xs::after{display:none}.chip.empty{border-style:dashed}.facts{display:grid;grid-template-columns:1fr 1fr;margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);row-gap:12px;column-gap:16px}.fact{min-width:0}.fact dt{font-size:13px;color:var(--ink-3);line-height:1.4}.fact dd{margin:1px 0 0;font-size:16px;line-height:1.4;color:var(--ink);font-variant-numeric:tabular-nums}.fact dd small{display:block;font-size:13px;color:var(--ink-3)}.panel{position:relative;padding:14px 18px 15px;background:rgba(12,22,46,.92);clip-path:var(--clip-panel)}.panel::before{content:"";position:absolute;inset:0;pointer-events:none;clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line)}.panel::after{content:"";position:absolute;top:0;right:0;width:23px;height:1px;background:var(--tier);transform-origin:right top;transform:rotate(45deg) translateX(1px);opacity:.9}.p-label{margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:.01em}.p-label small{font-weight:400;font-size:12px;color:var(--ink-3);text-align:right}.p-val{margin:4px 0 0;font-family:var(--num);font-weight:600;color:var(--ink-hi);font-variant-numeric:tabular-nums;line-height:1.1;display:flex;align-items:flex-end;min-height:1.1em}.p-val.big{font-size:48px}.p-val.mid{font-size:40px}.p-val .unit{font-family:var(--sans);font-size:20px;font-weight:500;line-height:1;padding:0 0 6px 4px;color:var(--ink-2)}.p-val.na{font-family:var(--sans);font-size:26px;font-weight:500;color:var(--ink-2)}.p-sub{margin:6px 0 0;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}.p-sub .roller,.p-sub .num{font-family:var(--num);font-weight:500}.p-sub.memo{font-size:13px;color:var(--ink-3)}.p-foot{margin:10px 0 0;font-size:12px;color:var(--ink-3)}.rank{display:grid;grid-template-columns:minmax(0,1fr) auto;row-gap:6px;margin-top:12px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}.rank .bar{grid-column:1 / -1;position:relative;height:6px;background:rgba(234,242,255,.08);overflow-x:clip}.rank.thin .bar{height:3px}.rank .bar b{position:absolute;inset:0;background:var(--tier);opacity:.38;transform-origin:left;transform:scaleX(var(--p,0));transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}.rank .bar i{position:absolute;top:-4px;bottom:-4px;left:0;width:100%;transform:translateX(calc(var(--p,0) * 100%));transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}.rank .bar i::before{content:"";position:absolute;top:0;bottom:0;left:-1px;width:2px;background:var(--tier);box-shadow:0 0 6px var(--tier)}@supports not (overflow-x: clip){.rank .bar{overflow:hidden}.rank .bar i{top:0;bottom:0}}.rank-r{color:var(--tier);font-weight:600;text-align:right}.rank.off .bar{visibility:hidden}.tier-row{display:flex;align-items:center;gap:14px;margin-top:6px}.pips{display:inline-flex;gap:5px;flex:none}.pips i{display:block;width:21px;height:8px;transform:skewX(-24deg);background:var(--pip-off);transition:background-color .6s}.pips i.on{background:var(--tier);box-shadow:0 0 8px color-mix(in srgb,var(--tier) 60%,transparent)}.tier-name{margin:0;min-width:0;white-space:nowrap;font-family:var(--display);font-size:40px;line-height:1.15;color:var(--tier);min-height:1.15em}.tier-desc{margin:4px 0 0;font-size:14px;color:var(--ink-2)}.tier-bar{display:flex;margin-top:12px;height:8px;gap:2px}.tier-bar span{position:relative;height:100%;background:var(--k);opacity:.26;transition:opacity .6s}.tier-bar span.on{opacity:1}.tier-bar-l{display:flex;flex-wrap:wrap;margin:6px 0 0;gap:2px 10px;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}.tier-bar-l span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.tier-bar-l span::before{content:"";width:7px;height:7px;background:var(--k);opacity:.5;transform:skewX(-24deg)}.tier-bar-l span.on{color:var(--ink);font-weight:600}.tier-bar-l span.on::before{opacity:1}.tier-say{margin:10px 0 0;font-size:14px;color:var(--ink-2)}.tier-say b{color:var(--ink);font-family:var(--num);font-weight:600}.roller{display:inline-flex;align-items:flex-start;line-height:1.1em;height:1.1em}.rwin{display:inline-flex;justify-content:center;align-items:flex-start;height:1.1em;overflow:hidden}.rstrip{display:block;flex:none;width:1ch;line-height:1.1em;text-align:center;white-space:normal;word-break:break-all}.rch{display:inline-block;line-height:1.1em;white-space:pre}.stage.fx .id-name:not(.empty),.stage.fx .tier-name{animation:nameIn 520ms cubic-bezier(.2,.8,.2,1) both}.stage.fx .fx-sm{animation:smIn 500ms ease-out 250ms both}@keyframes nameIn{from{opacity:0;transform:translateY(10px)}}@keyframes smIn{from{transform:translateY(6px);opacity:0}}#planet > *{position:absolute}#planet > svg{left:0;top:0;width:100%;height:100%;max-width:none;overflow:visible}#planet .stop-t{stop-color:var(--tier)}#planet .p-ring path{fill:none;stroke:url(#pRingGrad)}#planet .p-ring .solid{stroke-width:1.2}#planet .p-ring .dash{stroke-width:.6;stroke-dasharray:2 5}#planet .p-ring.front .solid{stroke-width:1.6}#planet .sphere{border-radius:50%;background:radial-gradient(circle at 36% 32%,#0B1A36 0%,#07132B 46%,#030816 100%);background:radial-gradient(circle at 36% 32%,color-mix(in srgb,var(--tier) 13%,#0B1A36) 0%,#07132B 46%,#030816 100%);box-shadow:0 0 0 1px color-mix(in srgb,var(--tier) 38%,transparent),0 0 44px color-mix(in srgb,var(--tier) 24%,transparent),inset -18px -22px 40px rgba(1,3,10,.55)}#planet .globe-dots{display:block}#planet .p-spin{max-width:none;overflow:visible;fill:none;stroke:var(--tier);will-change:transform;animation:spin 60s linear infinite}#planet .p-hud-ring{left:18.889%;top:12.667%;width:62.222%;height:74.667%;stroke-opacity:.35;stroke-width:1;stroke-dasharray:1 7}#planet .p-hud-arcs{left:16.944%;top:10.333%;width:66.111%;height:79.333%;stroke-opacity:.6;stroke-width:1.4;animation-duration:24s;animation-direction:reverse}#planet.still .p-spin{animation-play-state:paused}#planet .brk{left:50%;top:50%;width:calc(26 * var(--u));height:calc(26 * var(--u));border:0 solid var(--tier);border-width:2px 0 0 2px;opacity:.9;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .4s}#planet .brk.tr{border-width:2px 2px 0 0}#planet .brk.br{border-width:0 2px 2px 0}#planet .brk.bl{border-width:0 0 2px 2px}#planet.wide .brk{opacity:.5}#planet .p-cross{fill:none;stroke:#E9FBFF;stroke-opacity:.85;stroke-width:1.2}#planet .p-hud{inset:0;font-family:var(--num);font-size:calc(13 * var(--u));line-height:1;letter-spacing:.12em;color:var(--ink-2);white-space:nowrap}#planet .p-hud span{position:absolute;left:calc(var(--x) * var(--u));top:calc((var(--y) - 10.5) * var(--u))}#planet .p-hud .end{left:auto;right:calc((720 - var(--x)) * var(--u))}#planet .p-hud .hl{color:var(--tier)}#planet .p-status{transition:color .3s}@keyframes spin{to{transform:rotate(360deg)}}main > .block{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:72px 40px 0}.block-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}.block-h .idx{font-family:var(--num);font-size:.8125rem;font-weight:600;letter-spacing:.2em;color:var(--ink-3);padding:2px 8px;box-shadow:inset 0 0 0 1px var(--line)}.block h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.875rem;line-height:1.25}.block .sub{margin:0 0 22px;max-width:46em;color:var(--ink-2)}.minor{margin:0 0 10px;font-size:1rem;font-weight:600;color:var(--ink)}.minor.gap{margin-top:26px}.note{margin:10px 0 0;font-size:.8125rem;color:var(--ink-3)}.atlas-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 16px;margin-bottom:10px;min-height:32px}.keys{display:flex;flex-wrap:wrap;gap:4px 18px;list-style:none;margin:0;padding:0;font-size:.875rem;color:var(--ink-2)}.keys li{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.keys .pips i{width:13px;height:6px}.keys .pips i.on{background:var(--k);box-shadow:none}.map-wrap{position:relative;padding:10px;background:rgba(8,14,32,.55);clip-path:var(--clip-panel)}.map-wrap::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line);background:repeating-linear-gradient(0deg,rgba(184,230,255,.025) 0 1px,transparent 1px 4px)}#map{display:block;width:100%;height:auto;aspect-ratio:1000 / 486;overflow:hidden;touch-action:manipulation}.grat{fill:none;stroke:var(--grat);stroke-width:.7;vector-effect:non-scaling-stroke}.land{fill:var(--land);stroke:var(--land-edge);stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .15s}.land:hover{fill:var(--land-hover)}.land.nodata{opacity:.55;pointer-events:none}.land.picked,.land.picked:hover{fill:color-mix(in srgb,var(--tier) 55%,var(--land))}.bubble{fill:var(--k);fill-opacity:.3;stroke:var(--k);stroke-opacity:.85;stroke-width:.9;vector-effect:non-scaling-stroke;cursor:pointer}.bubble:hover{fill-opacity:.6}.map-wrap .pulses{position:absolute;z-index:1;display:block;pointer-events:none}.bdot{fill:var(--k);fill-opacity:.85;stroke:var(--space);stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}.pin-ring{fill:none;stroke:var(--tier);stroke-width:1.8;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;pointer-events:none}.pin-ring.ping{animation:ping .45s cubic-bezier(.2,.8,.3,1) both}.pin-cross{stroke:#E9FBFF;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none;opacity:.8}@keyframes ping{0%{opacity:0;transform:scale(3)}100%{opacity:1;transform:scale(1)}}.pin-dot{fill:var(--tier);stroke:var(--space);stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}.tip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,calc(-100% - 14px));background:rgba(10,18,40,.94);color:var(--ink);padding:7px 11px;box-shadow:inset 0 0 0 1px var(--line);font-size:.8125rem;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}.tip.below{transform:translate(-50%,18px)}.tip b{font-family:var(--display);font-weight:400;font-size:.9375rem}.tip .t{color:var(--k)}.map-msg{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:24px;text-align:center;color:var(--ink-2);font-size:.9375rem}.batch{margin-top:16px;padding:14px 18px 13px;background:var(--panel);clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line)}.batch-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin-bottom:10px}.batch-h h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.0625rem}.batch-h p{margin:0;font-size:.8125rem;color:var(--ink-2)}.stack{display:grid;gap:5px}.stack-row{display:grid;grid-template-columns:2.4em minmax(0,1fr);align-items:center;gap:8px;font-size:.75rem;color:var(--ink-3)}.stack-bar{display:flex;height:14px;overflow:hidden;background:rgba(234,242,255,.06)}.stack-bar b{flex:none;width:var(--w);background:var(--k)}.stack-bar b + b{box-shadow:inset 1px 0 0 var(--space)}.stack-bar.exp{height:8px;opacity:.6}.stack-keys{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;margin:10px 0 0;padding:0;font-size:.8125rem;color:var(--ink-2);font-variant-numeric:tabular-nums}.stack-keys li{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.stack-keys i{width:9px;height:9px;background:var(--k)}.stack-keys b{color:var(--ink);font-weight:600}.stack-keys small{color:var(--ink-3);font-size:.75rem}.batch-top{margin:8px 0 0;font-size:.8125rem;color:var(--ink-2)}.h-tier{margin-bottom:30px;max-width:760px}.tier-strip{display:flex;height:34px;gap:3px}.tier-strip span{display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;background:var(--k);color:var(--space);font-family:var(--num);font-weight:600;font-size:.9375rem;white-space:nowrap}.tier-keys{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;margin:8px 0 0;padding:0;font-size:.875rem;color:var(--ink-2);font-variant-numeric:tabular-nums}.tier-keys li{display:inline-flex;align-items:center;gap:7px}.tier-keys i{width:10px;height:10px;background:var(--k);transform:skewX(-24deg)}.tier-keys b{color:var(--ink);font-weight:600}.h-grid{display:grid;grid-template-columns:minmax(200px,290px) minmax(0,1fr);gap:20px 44px;align-items:start}.waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:290px}.waffle span{aspect-ratio:1;background:var(--k)}.legend{list-style:none;margin:16px 0 0;padding:0;max-width:290px;font-size:.875rem}.legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line-2)}.legend li:last-child{border-bottom:0}.legend i{width:12px;height:12px;background:var(--k)}.legend b{font-weight:600;font-variant-numeric:tabular-nums}.bars{list-style:none;margin:0;padding:0;font-size:.875rem}.bars li{display:grid;grid-template-columns:8.4em minmax(0,1fr) 4.6em;gap:12px;align-items:center;padding:3px 0}.bars .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bars .bar{height:11px;background:rgba(234,242,255,.06);position:relative}.bars .bar b{position:absolute;left:0;top:0;bottom:0;width:var(--w);min-width:2px;background:var(--k)}.bars .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}.bars li.ref.extra{margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}.bars li.ref .nm{font-weight:600}.bars li.ref .bar b{background:var(--tier);box-shadow:0 0 8px var(--tier)}.m-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px 44px;align-items:start}.cmp{list-style:none;margin:0;padding:0;font-size:.875rem}.cmp li{display:grid;grid-template-columns:6.2em minmax(0,1fr) 8.6em;gap:12px;align-items:center;padding:5px 0}.cmp.tiers li{grid-template-columns:6.2em minmax(0,1fr) 8.6em}:root:lang(en) .cmp li,:root:lang(es) .cmp li,:root:lang(ru) .cmp li{grid-template-columns:8.8em minmax(0,1fr) 9.4em}:root:lang(en) .stack-row,:root:lang(es) .stack-row,:root:lang(ru) .stack-row{grid-template-columns:3.2em minmax(0,1fr)}.cmp .bar{position:relative;height:12px;background:rgba(234,242,255,.06)}.cmp .bar b{position:absolute;left:0;top:0;bottom:0;width:var(--w);background:var(--k)}.cmp .bar i{position:absolute;left:var(--x);top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}.cmp .v{text-align:right;font-variant-numeric:tabular-nums}.cmp .v small{color:var(--ink-3)}.mtop{margin:14px 0 0;font-size:.875rem;color:var(--ink-2)}.recent{list-style:none;margin:0 0 14px;padding:0;font-size:.875rem}.recent li{border-bottom:1px dashed var(--line-2)}.recent button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;background:none;border:0;text-align:left;cursor:pointer;color:var(--ink)}.recent .r-name{display:inline-flex;align-items:center;gap:8px;min-width:0}.recent .r-name::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--k);box-shadow:0 0 6px var(--k)}.recent button:hover .r-txt{text-decoration:underline;text-underline-offset:3px}.recent .r-no{color:var(--ink-3);font-variant-numeric:tabular-nums;flex:none;font-family:var(--num)}.recent .r-no small{margin-right:8px;font-size:.75rem;font-family:var(--sans)}.recent button[aria-current] .r-txt{font-weight:600}.empty-hint{color:var(--ink-2);margin:0}.tbl-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}.tbl-tools input,.tbl-tools select{min-height:42px;padding:7px 12px;border:0;background:rgba(12,22,46,.8);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font-size:.9375rem}.tbl-tools select option{background:#0C162E}.tbl-tools input{flex:1 1 16em;max-width:24em;min-width:0}.tbl-tools input::placeholder{color:var(--ink-3);opacity:1}.tbl-tools .count{font-size:.8125rem;color:var(--ink-3);font-variant-numeric:tabular-nums}.tbl-wrap{max-height:620px;overflow:auto;background:rgba(8,14,32,.7);box-shadow:inset 0 0 0 1px var(--line);overscroll-behavior:contain}table{width:100%;border-collapse:separate;border-spacing:0;font-size:.875rem;font-variant-numeric:tabular-nums}thead th{position:sticky;top:0;z-index:2;background:#0E1A36;border-bottom:1px solid var(--line);padding:0;font-weight:500;text-align:right;white-space:nowrap}thead th:first-child{left:0;z-index:3;text-align:left}thead th.tl{text-align:left}thead button{display:block;width:100%;padding:10px 12px;background:none;border:0;cursor:pointer;text-align:inherit;font-size:.8125rem;color:var(--ink-2)}thead button:hover{color:var(--ink)}th[aria-sort] button{color:var(--ink);font-weight:600}th[aria-sort="descending"] button::after{content:" ▾" / ""}th[aria-sort="ascending"] button::after{content:" ▴" / ""}tbody td,tbody th{padding:7px 12px;border-bottom:1px solid var(--line-2);text-align:right;white-space:nowrap}tbody th{position:sticky;left:0;z-index:1;background:#09112A;text-align:left;font-weight:400}tbody tr:hover td,tbody tr:hover th{background:#111E3C}tbody tr.cur td,tbody tr.cur th{background:#13234A}.nm-cell{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:9px;align-items:center}.nm-btn{padding:0;background:none;border:0;cursor:pointer;font-weight:600;color:var(--ink);text-align:left}.nm-btn:hover{text-decoration:underline;text-underline-offset:3px}.en{grid-column:2;display:block;font-size:.75rem;color:var(--ink-3)}td.tier-c{text-align:left}td.tier-c .pips{vertical-align:1px;margin-right:8px;gap:3px}td.tier-c .pips i{width:10px;height:5px}td.tier-c .pips i.on{background:var(--k);box-shadow:none}td.na{color:var(--ink-3)}.tbl-empty{padding:28px 16px;text-align:center !important;color:var(--ink-2);white-space:normal !important}.method{padding-bottom:96px !important}.method > p,.method > ul,.method > h3{max-width:780px}.method h3{margin:28px 0 6px;font-size:1.0625rem;font-weight:600}.method p{margin:0 0 10px;color:var(--ink-2);line-height:1.75}.method p b{color:var(--ink);font-weight:600}.rules{margin:6px 0 12px;padding-left:1.2em;color:var(--ink-2);line-height:1.7}.rules li{margin-bottom:6px}.rules b{color:var(--k);font-weight:600}.method p.colophon{margin-top:30px;font-size:.8125rem;color:var(--ink-3) !important}@media (min-width: 1180px){.center-col{margin-right:-50px}}@media (min-width: 1180px) and (max-width: 1439px){:root:not(:lang(ko)) .head-live .since{display:none}}@media (min-width: 1180px) and (max-width: 1379px){.stage{grid-template-columns:300px minmax(0,1fr) 350px}.planet-wrap{height:480px}#planet{width:576px;height:480px;margin-left:-288px}.btn-primary{padding:0 22px}.btn-ghost{padding:0 14px}.p-val.big{font-size:42px}}@media (max-width: 1179px){.lang-bar{padding:0 24px}.hud-head{padding:0 24px;grid-template-columns:auto minmax(0,1fr) auto}.head-mid{font-size:.875rem;overflow:hidden;text-overflow:ellipsis}.head-live .rate{display:none}.stage{grid-template-columns:minmax(0,340px) minmax(0,1fr);grid-template-areas:"center center" "id read";column-gap:28px;row-gap:28px;padding:12px 24px 40px;min-height:0}.planet-wrap{height:auto;max-width:560px;aspect-ratio:720 / 600}#planet{position:absolute;inset:0;left:0;width:100%;height:100%;margin:0}.read-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}.p-val.big{font-size:40px}.p-val.mid{font-size:36px}.tier-name{font-size:34px}.id-name{font-size:54px}.id-name.n2{font-size:40px}.id-name.n3{font-size:30px}main > .block{padding:64px 24px 0}}@media (max-width: 1179px) and (min-width: 1000px){.stage{grid-template-columns:340px minmax(0,1fr)}}@media (max-width: 999px) and (min-width: 760px){.stage{grid-template-columns:minmax(0,270px) minmax(0,1fr);column-gap:20px}.head-mid{display:none}.hud-head{grid-template-columns:minmax(0,1fr) auto}.read-col{gap:10px}.panel{padding:12px 14px 13px}.p-label{flex-direction:column;gap:0}.p-label small{text-align:left}.p-val.big{font-size:30px}.p-val.mid{font-size:30px}.p-val .unit{font-size:16px;padding-bottom:4px}.p-sub{font-size:14px}.p-gdp .rank{grid-template-columns:minmax(0,1fr)}.p-gdp .rank-r{text-align:left}.tier-name{font-size:26px}.tier-row{gap:10px}}@media (max-width: 759px){:root{--rail:40px}.lang-bar{padding:0 16px}.lang-track label span{padding:6px 9px}.hud-head{height:56px;padding:0 16px;grid-template-columns:minmax(0,1fr) auto;gap:12px}.logo{width:28px;height:28px}.brand-name{font-size:1.0625rem}.head-mid{display:none}.head-live .rate,.head-live .since{display:none}.brand{overflow:hidden}.brand-name{overflow:hidden;text-overflow:ellipsis}.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:none;padding:0 16px;row-gap:18px;column-gap:10px}.center-col,.id-col,.read-col{display:contents}.center-col > *,.id-col > *,.read-col > *{grid-area:auto;grid-column:1 / -1;min-width:0}.planet-wrap{order:1;height:383px;max-width:none;aspect-ratio:auto;margin:0 -16px;width:calc(100% + 32px);overflow:hidden}#planet{position:absolute;inset:0 auto auto 50%;width:460px;height:383px;margin-left:-230px}.id-head{order:2;grid-template-columns:38px fit-content(calc(100% - 120px)) minmax(0,1fr);column-gap:10px;grid-template-areas:"kind kind copy" "chip name sex" "sub sub sub";margin-top:-8px}.id-kind{flex-direction:row;align-items:baseline;gap:10px}.kind-no{font-size:1rem}.chip{width:38px;height:28px;padding:2px;align-self:center;margin-top:8px}.chip::before{inset:2px}.chip::after{background-size:6px 2px,2px 6px,6px 2px,2px 6px}.chip .chip-code{font-size:.625rem}.id-name{margin-top:8px;font-size:34px}.id-name.n2{font-size:26px}.id-name.n3{font-size:26px}.id-name.empty{grid-column:1 / -1;font-size:1rem}.chip.empty{display:none}#copyBtn{justify-self:end}.id-sex{display:block;justify-self:start;align-self:center;margin-top:8px;font-size:.875rem;color:var(--ink-2);padding:2px 8px;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}.id-sex:empty{display:none}.id-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:4px}.id-en{font-size:14px;margin:0}.id-geo{font-size:13px;margin:0}.read-col > .p-prob{order:3;grid-column:1}.read-col > .p-gdp{order:3;grid-column:2}.read-col > .p-tier{order:5}.read-col > .p-life{order:6}.panel{padding:12px 14px 13px}.p-label{flex-direction:column;gap:0}.p-label small{text-align:left}.p-val.big{font-size:28px}.p-val.mid{font-size:34px}.p-val .unit{font-size:17px;padding-bottom:5px}.p-val.na{font-size:20px}.p-sub{font-size:14px}.p-gdp .rank{grid-template-columns:minmax(0,1fr)}.p-gdp .rank-r{text-align:left}.tier-name{font-size:30px}.facts{order:4;margin:0;padding:2px 0;border-top:0;column-gap:10px;row-gap:12px}.fact{padding-left:14px}.actions{order:7;position:sticky;bottom:0;z-index:20;margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr) 64px 64px;gap:8px;background:rgba(5,7,22,.97);border-top:1px solid var(--line)}.actions .btn{height:52px;padding:0 8px}.btn-ghost .lg{display:none}.btn-ghost .sm{display:inline;font-family:var(--num);font-weight:600}.batch-line{order:1;margin:0;text-align:left}#planet .p-hud{display:none}main > .block{padding:56px 16px 0}.block h2{font-size:1.5rem}.h-grid,.m-grid{grid-template-columns:minmax(0,1fr)}.waffle,.legend{max-width:360px}.bars li{grid-template-columns:7em minmax(0,1fr) 4.4em;gap:8px}.cmp li,.cmp.tiers li{grid-template-columns:5.4em minmax(0,1fr) 7.8em;gap:8px}:root:lang(en) .cmp li,:root:lang(es) .cmp li,:root:lang(ru) .cmp li{grid-template-columns:7.2em minmax(0,1fr) 8.6em}.tbl-wrap{max-height:70vh}tbody th{white-space:normal;min-width:9em;max-width:11em}tbody td,tbody th{padding-left:10px;padding-right:10px}.tier-strip span{font-size:.8125rem}}@media (max-width: 479px){.globe{display:none}.lang-sw,.lang-track{flex:1}.lang-track{grid-auto-columns:minmax(0,1fr)}.lang-track label span{padding:6px 2px;font-size:.75rem}}@media (max-width: 379px){.actions{grid-template-columns:minmax(0,1fr) 56px 56px}.actions .btn-primary{font-size:.9375rem;letter-spacing:0}}#idName{transition:none !important}@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:1ms !important;animation-delay:0ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important;transition-delay:0ms !important}.rstrip{animation-duration:1ms !important;animation-delay:0ms !important}html{scroll-behavior:auto}}
+:root{--space:#050716;--ink:#EAF2FF;--ink-hi:#F4F9FF;--ink-2:#AFC0DA;--ink-3:#8497B8;--line:rgba(150,185,225,.2);--line-2:rgba(150,185,225,.11);--panel:rgba(12,22,46,.62);--band-1:#FB0374;--band-2:#D27430;--band-3:#EEAB4E;--band-4:#FFEB1C;--band-5:#B3FF9F;--band-6:#5FDAC9;--band-7:#72A4F9;--band-8:#796EF5;--band-9:#EEEAFD;--band-0:#76829C;--lvl-3:#D3D8E3;--lvl-2:#A2A9BA;--lvl-1:#707A8E;--pip-off:rgba(234,242,255,.16);--btn:#E6F0FF;--btn-ink:#06102A;--live:#7CF0B0;--focus:#BFF6FB;--c0:#D98A4E;--c1:#5E9DC0;--c2:#9A87C4;--c3:#6DB585;--c4:#C0728F;--c5:#D1B04F;--land:#16223A;--land-hover:#22324F;--land-edge:#050716;--grat:rgba(234,242,255,.06);--display:'Orbit','IBM Plex Sans KR',sans-serif;--num:'Chakra Petch','IBM Plex Sans KR',sans-serif;--sans:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;--clip-panel:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);--clip-btn:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);--spd:1;--acc:var(--band-0);--rail:34px;color-scheme:dark;box-sizing:border-box}:root:lang(ja){--jp:'IBM Plex Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,'Noto Sans JP',sans-serif;--display:var(--jp);--num:'Chakra Petch',var(--jp);--sans:var(--jp)}:root:lang(ja) body{word-break:normal;line-break:strict}:root:lang(ru){--ru:'IBM Plex Sans','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--display:'Jura',var(--ru);--num:'Chakra Petch',var(--ru);--sans:var(--ru)}*,*::before,*::after{box-sizing:inherit}html{background:var(--space);-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0;min-height:100%;background:transparent;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.62;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;overflow-x:hidden}button,input,select{font:inherit;color:inherit}img,svg{max-width:100%}a{color:var(--ink);text-decoration-color:rgba(234,242,255,.35);text-underline-offset:3px}a:hover{text-decoration-color:currentColor}:focus-visible{outline:2px solid var(--focus);outline-offset:2px}[hidden]{display:none !important}.sr-only{position:absolute !important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}.skip{position:absolute;left:12px;top:-60px;z-index:50;padding:8px 12px;background:var(--btn);color:var(--btn-ink)}.skip:focus{top:12px}.k0{--k:var(--c0)}.k1{--k:var(--c1)}.k2{--k:var(--c2)}.k3{--k:var(--c3)}.k4{--k:var(--c4)}.k5{--k:var(--c5)}.b-0{--k:var(--band-0)}.b-1{--k:var(--band-1)}.b-2{--k:var(--band-2)}.b-3{--k:var(--band-3)}.b-4{--k:var(--band-4)}.b-5{--k:var(--band-5)}.b-6{--k:var(--band-6)}.b-7{--k:var(--band-7)}.b-8{--k:var(--band-8)}.b-9{--k:var(--band-9)}.lv3{--k:var(--lvl-3)}.lv2{--k:var(--lvl-2)}.lv1{--k:var(--lvl-1)}.space{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--space);overflow:hidden}.space::before{content:"";position:absolute;left:50%;top:50%;width:max(100vw,160vh);height:max(62.5vw,100vh);margin:calc(-1 * max(31.25vw,50vh)) 0 0 calc(-1 * max(50vw,80vh));background:var(--stars,none) 0 0 / 100% 100% no-repeat,radial-gradient(ellipse 43.056% 68.889% at 50% 47.778%,rgba(27,42,94,.55),rgba(27,42,94,0)),radial-gradient(ellipse 36.111% 57.778% at 81.944% 13.333%,rgba(59,31,94,.45),rgba(59,31,94,0)),radial-gradient(ellipse 33.333% 53.333% at 12.5% 91.111%,rgba(15,59,74,.4),rgba(15,59,74,0))}.lang-bar{position:relative;z-index:4;height:var(--rail);padding:0 40px;display:flex;justify-content:flex-end;align-items:center;background:rgba(5,7,22,.9);border-bottom:1px solid var(--line-2)}.lang-sw{display:flex;align-items:center;gap:10px}.globe{width:16px;height:16px;flex:none;fill:none;stroke:var(--ink-3);stroke-width:1.1}.lang-track{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;box-shadow:inset 0 0 0 1px var(--line)}.lang-thumb{position:absolute;top:0;bottom:0;left:0;width:calc(100% / var(--n,5));pointer-events:none;transform:translateX(calc(var(--i,0) * 100%));background:rgba(230,240,255,.1);box-shadow:inset 0 0 0 1px rgba(230,240,255,.38),inset 0 -2px 0 var(--acc);transition:transform .45s cubic-bezier(.2,.8,.2,1)}.lang-track label{position:relative;display:block;cursor:pointer}.lang-track input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}.lang-track label span{display:block;padding:3px 13px;text-align:center;font-size:.8125rem;line-height:1.5;color:var(--ink-3);white-space:nowrap;transition:color .2s}.lang-track label:hover span{color:var(--ink)}.lang-track input:checked + span{color:var(--ink-hi)}.lang-track input:focus-visible + span{outline:2px solid var(--focus);outline-offset:-2px}.lang-track [lang="ko"]{font-family:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif}.lang-track [lang="ja"]{font-family:'IBM Plex Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,'Noto Sans JP',sans-serif}.lang-track [lang="en"],.lang-track [lang="es"]{font-family:'IBM Plex Sans KR',sans-serif}.lang-track [lang="ru"]{font-family:'IBM Plex Sans','Segoe UI',Roboto,Arial,sans-serif}@media (forced-colors: active){.lang-thumb{border:2px solid Highlight}}.hud-head{position:relative;z-index:3;height:72px;padding:0 40px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(5,7,22,.85),rgba(5,7,22,.35))}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:34px;height:34px;flex:none;fill:none;stroke:var(--ink);stroke-width:1.4}.logo ellipse{stroke:var(--acc)}.logo .logo-dot{fill:var(--acc);stroke:none}.brand-name{margin:0;font-family:'Orbit','IBM Plex Sans KR',sans-serif;font-weight:400;font-size:1.25rem;letter-spacing:.04em;white-space:nowrap}.head-mid{margin:0;font-size:.9375rem;color:var(--ink-2);text-align:center;white-space:nowrap}.head-mid b{color:var(--ink);font-family:var(--num);font-weight:600}.head-live{margin:0;justify-self:end;display:flex;gap:18px;align-items:center;font-size:.8125rem;color:var(--ink-3);white-space:nowrap;font-family:var(--num);font-variant-numeric:tabular-nums}.head-live b{color:var(--ink);font-weight:600;margin-left:5px}.head-live .dot{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live);vertical-align:1px}[data-band="0"]{--acc:var(--band-0)}[data-band="1"]{--acc:var(--band-1)}[data-band="2"]{--acc:var(--band-2)}[data-band="3"]{--acc:var(--band-3)}[data-band="4"]{--acc:var(--band-4)}[data-band="5"]{--acc:var(--band-5)}[data-band="6"]{--acc:var(--band-6)}[data-band="7"]{--acc:var(--band-7)}[data-band="8"]{--acc:var(--band-8)}[data-band="9"]{--acc:var(--band-9)}.stage{position:relative;z-index:1;display:grid;grid-template-columns:340px minmax(0,1fr) 390px;column-gap:24px;grid-template-areas:"id center read";min-height:calc(100vh - 72px - var(--rail));min-height:calc(100svh - 72px - var(--rail));padding:20px 40px 32px}.center-col{grid-area:center;position:relative;z-index:0;display:flex;flex-direction:column;align-items:center}.id-col{grid-area:id;position:relative;z-index:2;min-width:0}.read-col{grid-area:read;position:relative;z-index:2;display:flex;flex-direction:column;gap:12px;min-width:0}.read-col:focus{outline:none}.p-prob:focus{outline:none}.planet-wrap{position:relative;width:100%;height:600px;flex:none;pointer-events:none}#planet{position:absolute;left:50%;top:0;width:720px;height:600px;max-width:none;margin-left:-360px;--u:1px}.actions{display:flex;gap:12px;justify-content:center;margin-top:8px;position:relative;z-index:3}.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:10px 18px;cursor:pointer;border:0;font-size:.9375rem;font-weight:500;line-height:1.2;white-space:nowrap;transition:background-color .15s,color .15s,filter .15s}.btn:active{transform:translateY(1px)}.btn-primary,.btn-ghost{position:relative;isolation:isolate;height:56px;background:none}.btn-primary::before,.btn-ghost::before{content:"";position:absolute;inset:0;z-index:-1;clip-path:var(--clip-btn);transition:background-color .15s,filter .15s}.btn-primary{padding:0 34px;color:var(--btn-ink);font-family:var(--display);font-size:1.0625rem;letter-spacing:.02em}.btn-primary::before{background:var(--btn)}.btn-primary:hover::before{background:#FFFFFF;filter:drop-shadow(0 0 10px rgba(191,246,251,.55))}.btn-ghost{padding:0 22px;color:var(--ink)}.btn-ghost::before{background-color:rgba(230,240,255,.06);background-repeat:no-repeat;background-image:linear-gradient(rgba(230,240,255,.4),rgba(230,240,255,.4)),linear-gradient(rgba(230,240,255,.4),rgba(230,240,255,.4)),linear-gradient(to right bottom,transparent calc(50% - .7px),rgba(230,240,255,.4) calc(50% - .7px),rgba(230,240,255,.4) calc(50% + .7px),transparent calc(50% + .7px)),linear-gradient(to left top,transparent calc(50% - .7px),rgba(230,240,255,.4) calc(50% - .7px),rgba(230,240,255,.4) calc(50% + .7px),transparent calc(50% + .7px));background-size:100% 1px,100% 1px,12px 100%,12px 100%;background-position:left top,left bottom,left top,right top}.btn-ghost:hover::before{background-color:rgba(230,240,255,.14)}.btn-ghost .sm{display:none}.btn-mini{min-height:32px;padding:5px 12px;font-size:.8125rem;color:var(--ink-2);background:rgba(230,240,255,.05);box-shadow:inset 0 0 0 1px rgba(230,240,255,.28)}.btn-mini:hover{color:var(--ink);background:rgba(230,240,255,.12)}.btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}.btn-primary:focus-visible,.btn-ghost:focus-visible{outline:2px solid var(--focus);outline-offset:4px}@media (forced-colors: active){.btn,.btn-primary::before,.btn-ghost::before{border:1px solid ButtonText}}.batch-line{margin:12px 0 0;max-width:36em;text-align:center;font-size:.875rem;color:var(--ink-2);font-variant-numeric:tabular-nums;position:relative;z-index:3}.batch-line b{color:var(--ink);font-weight:600}.batch-line a{margin-left:8px;white-space:nowrap}.id-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:14px;grid-template-areas:"chip kind copy" "name name name" "sub sub sub";align-items:center}.id-head > .chip{grid-area:chip}.id-kind{grid-area:kind;display:flex;flex-direction:column;min-width:0}#copyBtn{grid-area:copy;align-self:start}.id-name{grid-area:name}.id-sex{grid-area:sex;display:none}.id-sub{grid-area:sub}.kind-l{font-size:.8125rem;color:var(--ink-3);line-height:1.4}.kind-no{font-family:var(--num);font-size:1.25rem;font-weight:600;line-height:1.3;min-height:1.3em;font-variant-numeric:tabular-nums}.id-name{margin:18px 0 0;font-family:var(--display);font-weight:400;color:var(--ink-hi);font-size:64px;line-height:1.12;letter-spacing:-.01em;white-space:nowrap;text-shadow:0 0 24px rgba(5,7,22,.9)}.id-name.n2{font-size:46px}.id-name.n3{font-size:34px;white-space:normal}.id-name.empty{font-family:var(--sans);font-size:1.125rem;line-height:1.6;white-space:normal;color:var(--ink-2)}.id-en{margin:6px 0 0;font-family:var(--num);font-size:20px;line-height:1.3;color:var(--ink-2)}.id-geo{margin:4px 0 0;font-size:14px;color:var(--ink-3);font-variant-numeric:tabular-nums}.id-geo .coord{font-family:var(--num);margin-left:8px}.chip{position:relative;display:inline-block;flex:none;width:75px;height:56px;padding:3px;border:1px solid rgba(234,242,255,.3);background:rgba(5,7,22,.6)}.chip img,.chip .chip-code{display:block;width:100%;height:100%;object-fit:cover}.chip .chip-code{display:grid;place-items:center;font-family:var(--num);font-size:.875rem;font-weight:600;letter-spacing:.08em;color:var(--ink-2);background:rgba(234,242,255,.06)}.chip::before{content:"";position:absolute;inset:3px;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(5,7,22,.14) 0 1px,transparent 1px 3px)}.chip::after{content:"";position:absolute;pointer-events:none}.chip::after{inset:-1px;background:linear-gradient(var(--acc),var(--acc)) left top / 10px 2px,linear-gradient(var(--acc),var(--acc)) left top / 2px 10px,linear-gradient(var(--acc),var(--acc)) right bottom / 10px 2px,linear-gradient(var(--acc),var(--acc)) right bottom / 2px 10px;background-repeat:no-repeat}.chip.xs{width:24px;height:18px;padding:1px;vertical-align:-3px}.chip.xs::before{display:none}.chip.xs .chip-code{font-size:8px;letter-spacing:0}.chip.xs::after{display:none}.chip.empty{border-style:dashed}.facts{display:grid;grid-template-columns:1fr 1fr;margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);row-gap:12px;column-gap:16px}.fact{min-width:0}.fact dt{font-size:13px;color:var(--ink-3);line-height:1.4}.fact dd{margin:1px 0 0;font-size:16px;line-height:1.4;color:var(--ink);font-variant-numeric:tabular-nums}.fact dd small{display:block;font-size:13px;color:var(--ink-3)}.panel{position:relative;padding:14px 18px 15px;background:rgba(12,22,46,.92);clip-path:var(--clip-panel)}.panel::before{content:"";position:absolute;inset:0;pointer-events:none;clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line)}.panel::after{content:"";position:absolute;top:0;right:0;width:23px;height:1px;background:var(--acc);transform-origin:right top;transform:rotate(45deg) translateX(1px);opacity:.9}.p-label{margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:.01em}.p-label small{font-weight:400;font-size:12px;color:var(--ink-3);text-align:right}.p-val{margin:4px 0 0;font-family:var(--num);font-weight:600;color:var(--ink-hi);font-variant-numeric:tabular-nums;line-height:1.1;display:flex;align-items:flex-end;min-height:1.1em}.p-val.big{font-size:48px}.p-val.mid{font-size:40px}.p-val .unit{font-family:var(--sans);font-size:20px;font-weight:500;line-height:1;padding:0 0 6px 4px;color:var(--ink-2)}.p-val.na{font-family:var(--sans);font-size:26px;font-weight:500;color:var(--ink-2)}.p-sub{margin:6px 0 0;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}.p-sub .roller,.p-sub .num{font-family:var(--num);font-weight:500}.p-sub.memo{font-size:13px;color:var(--ink-3)}.p-foot{margin:10px 0 0;font-size:12px;color:var(--ink-3)}.rank{display:grid;grid-template-columns:minmax(0,1fr) auto;row-gap:6px;margin-top:12px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}.rank .bar{grid-column:1 / -1;position:relative;height:6px;background:rgba(234,242,255,.08);overflow-x:clip}.rank.thin .bar{height:3px}.rank .bar b{position:absolute;inset:0;background:var(--acc);opacity:.38;transform-origin:left;transform:scaleX(var(--p,0));transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}.rank .bar i{position:absolute;top:-4px;bottom:-4px;left:0;width:100%;transform:translateX(calc(var(--p,0) * 100%));transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}.rank .bar i::before{content:"";position:absolute;top:0;bottom:0;left:-1px;width:2px;background:var(--acc);box-shadow:0 0 6px var(--acc)}@supports not (overflow-x: clip){.rank .bar{overflow:hidden}.rank .bar i{top:0;bottom:0}}.rank-r{color:var(--acc);font-weight:600;text-align:right}.rank.off .bar{visibility:hidden}.ladder{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:10px}.rungs{display:flex;flex:0 1 auto;gap:3px;width:158px;min-width:0;max-width:100%;padding:0 2px}.rungs i{display:block;flex:1 1 0;min-width:0;height:8px;transform:skewX(-24deg);background:var(--pip-off)}.rungs i.on{background:var(--acc);box-shadow:0 0 8px color-mix(in srgb,var(--acc) 60%,transparent)}.ladder-l{min-width:0;font-size:12px;line-height:1.4;color:var(--ink-3);font-variant-numeric:tabular-nums}.ladder-l b{color:var(--ink-2);font-weight:600}.tier-row{display:flex;align-items:center;gap:14px;margin-top:6px}.pips{display:inline-flex;gap:5px;flex:none}.pips i{display:block;width:21px;height:8px;transform:skewX(-24deg);background:var(--pip-off)}.pips i.on{background:var(--acc);box-shadow:0 0 8px color-mix(in srgb,var(--acc) 60%,transparent)}.tier-name{margin:0;min-width:0;white-space:nowrap;font-family:var(--display);font-size:40px;line-height:1.15;color:var(--acc);min-height:1.15em}.tier-desc{margin:4px 0 0;font-size:14px;color:var(--ink-2)}.tier-bar{display:flex;align-items:center;margin-top:10px;height:12px;gap:2px}.tier-bar span{position:relative;height:6px;background:var(--k)}.tier-bar span.on{height:12px;background:var(--acc)}.tier-bar-l{display:flex;flex-wrap:wrap;margin:6px 0 0;gap:2px 10px;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}.tier-bar-l span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.tier-bar-l span::before{content:"";width:7px;height:7px;background:var(--k);transform:skewX(-24deg)}.tier-bar-l span.on{color:var(--ink);font-weight:600}.tier-bar-l span.on::before{background:var(--acc)}.tier-say{margin:10px 0 0;font-size:14px;color:var(--ink-2)}.tier-say b{color:var(--ink);font-family:var(--num);font-weight:600}.roller{display:inline-flex;align-items:flex-start;line-height:1.1em;height:1.1em}.rwin{display:inline-flex;justify-content:center;align-items:flex-start;height:1.1em;overflow:hidden}.rstrip{display:block;flex:none;width:1ch;line-height:1.1em;text-align:center;white-space:normal;word-break:break-all}.rch{display:inline-block;line-height:1.1em;white-space:pre}.stage.fx .id-name:not(.empty),.stage.fx .tier-name{animation:nameIn 520ms cubic-bezier(.2,.8,.2,1) both}.stage.fx .fx-sm{animation:smIn 500ms ease-out 250ms both}@keyframes nameIn{from{opacity:0;transform:translateY(10px)}}@keyframes smIn{from{transform:translateY(6px);opacity:0}}#planet > *{position:absolute}#planet > svg{left:0;top:0;width:100%;height:100%;max-width:none;overflow:visible}#planet .stop-t{stop-color:var(--acc)}#planet .p-ring path{fill:none;stroke:url(#pRingGrad)}#planet .p-ring .solid{stroke-width:1.2}#planet .p-ring .dash{stroke-width:.6;stroke-dasharray:2 5}#planet .p-ring.front .solid{stroke-width:1.6}#planet .sphere{border-radius:50%;background:radial-gradient(circle at 36% 32%,#0B1A36 0%,#07132B 46%,#030816 100%);background:radial-gradient(circle at 36% 32%,color-mix(in srgb,var(--acc) 13%,#0B1A36) 0%,#07132B 46%,#030816 100%);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 38%,transparent),0 0 44px color-mix(in srgb,var(--acc) 24%,transparent),inset -18px -22px 40px rgba(1,3,10,.55)}#planet .globe-dots{display:block}#planet .p-spin{max-width:none;overflow:visible;fill:none;stroke:var(--acc);will-change:transform;animation:spin 60s linear infinite}#planet .p-hud-ring{left:18.889%;top:12.667%;width:62.222%;height:74.667%;stroke-opacity:.35;stroke-width:1;stroke-dasharray:1 7}#planet .p-hud-arcs{left:16.944%;top:10.333%;width:66.111%;height:79.333%;stroke-opacity:.6;stroke-width:1.4;animation-duration:24s;animation-direction:reverse}#planet.still .p-spin{animation-play-state:paused}#planet .brk{left:50%;top:50%;width:calc(26 * var(--u));height:calc(26 * var(--u));border:0 solid var(--acc);border-width:2px 0 0 2px;opacity:.9;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .4s}#planet .brk.tr{border-width:2px 2px 0 0}#planet .brk.br{border-width:0 2px 2px 0}#planet .brk.bl{border-width:0 0 2px 2px}#planet.wide .brk{opacity:.5}#planet .p-cross{fill:none;stroke:#E9FBFF;stroke-opacity:.85;stroke-width:1.2}#planet .p-hud{inset:0;font-family:var(--num);font-size:calc(13 * var(--u));line-height:1;letter-spacing:.12em;color:var(--ink-2);white-space:nowrap}#planet .p-hud span{position:absolute;left:calc(var(--x) * var(--u));top:calc((var(--y) - 10.5) * var(--u))}#planet .p-hud .end{left:auto;right:calc((720 - var(--x)) * var(--u))}#planet .p-hud .hl{color:var(--acc)}@keyframes spin{to{transform:rotate(360deg)}}main > .block{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:72px 40px 0}.block-h{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}.block-h .idx{font-family:var(--num);font-size:.8125rem;font-weight:600;letter-spacing:.2em;color:var(--ink-3);padding:2px 8px;box-shadow:inset 0 0 0 1px var(--line)}.block h2{margin:0;font-family:var(--display);font-weight:400;font-size:1.875rem;line-height:1.25}.block .sub{margin:0 0 22px;max-width:46em;color:var(--ink-2)}.minor{margin:0 0 10px;font-size:1rem;font-weight:600;color:var(--ink)}.minor.gap{margin-top:26px}.note{margin:10px 0 0;font-size:.8125rem;color:var(--ink-3)}.atlas-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 16px;margin-bottom:10px;min-height:32px}.keys{flex:1 1 560px;max-width:1040px;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px 6px;list-style:none;margin:0;padding:0;font-size:.75rem;line-height:1.3;color:var(--ink-2);font-variant-numeric:tabular-nums}.keys li{display:flex;flex-direction:column;gap:4px;min-width:0;overflow-wrap:anywhere}.keys i{display:block;height:6px;margin:0 2px;transform:skewX(-24deg);background:var(--k)}.keys li.b-0{color:var(--ink-3)}.map-wrap{position:relative;padding:10px;background:rgba(8,14,32,.55);clip-path:var(--clip-panel)}.map-wrap::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line);background:repeating-linear-gradient(0deg,rgba(184,230,255,.025) 0 1px,transparent 1px 4px)}#map{display:block;width:100%;height:auto;aspect-ratio:1000 / 486;overflow:hidden;touch-action:manipulation}.grat{fill:none;stroke:var(--grat);stroke-width:.7;vector-effect:non-scaling-stroke}.land{fill:var(--land);stroke:var(--land-edge);stroke-width:.7;vector-effect:non-scaling-stroke;cursor:pointer;transition:fill .15s}.land:hover{fill:var(--land-hover)}.land.nodata{opacity:.55;pointer-events:none}.land.picked,.land.picked:hover{fill:color-mix(in srgb,var(--acc) 55%,var(--land))}.bubble{fill:var(--k);fill-opacity:.3;stroke:var(--k);stroke-opacity:.85;stroke-width:.9;vector-effect:non-scaling-stroke;cursor:pointer}.bubble:hover{fill-opacity:.6}.map-wrap .pulses{position:absolute;z-index:1;display:block;pointer-events:none}.bdot{fill:var(--k);fill-opacity:.85;stroke:var(--space);stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer}.pin-ring{fill:none;stroke:var(--acc);stroke-width:1.8;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;pointer-events:none}.pin-ring.ping{animation:ping .45s cubic-bezier(.2,.8,.3,1) both}.pin-cross{stroke:#E9FBFF;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none;opacity:.8}@keyframes ping{0%{opacity:0;transform:scale(3)}100%{opacity:1;transform:scale(1)}}.pin-dot{fill:var(--acc);stroke:var(--space);stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}.tip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,calc(-100% - 14px));background:rgba(10,18,40,.94);color:var(--ink);padding:7px 11px;box-shadow:inset 0 0 0 1px var(--line);font-size:.8125rem;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}.tip.below{transform:translate(-50%,18px)}.tip b{font-family:var(--display);font-weight:400;font-size:.9375rem}.tip .t{color:var(--k)}.tip .tt{color:var(--ink-3)}.map-msg{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:24px;text-align:center;color:var(--ink-2);font-size:.9375rem}.batch{margin-top:16px;padding:14px 18px 13px;background:var(--panel);clip-path:var(--clip-panel);box-shadow:inset 0 0 0 1px var(--line)}.batch-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin-bottom:10px}.batch-h h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.0625rem}.batch-h p{margin:0;font-size:.8125rem;color:var(--ink-2)}.stack{display:grid;gap:5px}.stack-row{display:grid;grid-template-columns:2.4em minmax(0,1fr);align-items:center;gap:8px;font-size:.75rem;color:var(--ink-3)}.stack-bar{display:flex;height:14px;overflow:hidden;background:rgba(234,242,255,.06)}.stack-bar b{flex:none;width:var(--w);background:var(--k)}.stack-bar b + b{box-shadow:inset 1px 0 0 var(--space)}.stack-bar.exp{height:8px;opacity:.6}.stack-keys{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;margin:10px 0 0;padding:0;font-size:.8125rem;color:var(--ink-2);font-variant-numeric:tabular-nums}.stack-keys li{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.stack-keys i{width:9px;height:9px;background:var(--k)}.stack-keys b{color:var(--ink);font-weight:600}.stack-keys small{color:var(--ink-3);font-size:.75rem}.batch-top{margin:8px 0 0;font-size:.8125rem;color:var(--ink-2)}.h-tier{margin-bottom:30px;max-width:760px}.tier-strip{display:flex;height:34px;gap:3px}.tier-strip span{display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;background:var(--k);color:var(--space);font-family:var(--num);font-weight:600;font-size:.9375rem;white-space:nowrap}.band-strip span{min-width:2px}.tier-keys{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;margin:8px 0 0;padding:0;font-size:.875rem;color:var(--ink-2);font-variant-numeric:tabular-nums}.tier-keys li{display:inline-flex;align-items:center;gap:7px}.tier-keys i{width:10px;height:10px;background:var(--k);transform:skewX(-24deg)}.band-keys{gap:4px 16px}.tier-keys b{color:var(--ink);font-weight:600}.h-grid{display:grid;grid-template-columns:minmax(200px,290px) minmax(0,1fr);gap:20px 44px;align-items:start}.waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:290px}.waffle span{aspect-ratio:1;background:var(--k)}.legend{list-style:none;margin:16px 0 0;padding:0;max-width:290px;font-size:.875rem}.legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line-2)}.legend li:last-child{border-bottom:0}.legend i{width:12px;height:12px;background:var(--k)}.legend b{font-weight:600;font-variant-numeric:tabular-nums}.bars{list-style:none;margin:0;padding:0;font-size:.875rem}.bars li{display:grid;grid-template-columns:8.4em minmax(0,1fr) 4.6em;gap:12px;align-items:center;padding:3px 0}.bars .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bars .bar{height:11px;background:rgba(234,242,255,.06);position:relative}.bars .bar b{position:absolute;left:0;top:0;bottom:0;width:var(--w);min-width:2px;background:var(--k)}.bars .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}.bars li.ref.extra{margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}.bars li.ref .nm{font-weight:600}.bars li.ref .bar b{background:var(--acc);box-shadow:0 0 8px var(--acc)}.m-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px 44px;align-items:start}.cmp{list-style:none;margin:0;padding:0;font-size:.875rem}.cmp li{display:grid;grid-template-columns:6.2em minmax(0,1fr) 8.6em;gap:12px;align-items:center;padding:5px 0}.cmp.tiers li{grid-template-columns:6.2em minmax(0,1fr) 8.6em}:root:lang(en) .cmp li,:root:lang(es) .cmp li,:root:lang(ru) .cmp li{grid-template-columns:8.8em minmax(0,1fr) 9.4em}:root:lang(en) .stack-row,:root:lang(es) .stack-row,:root:lang(ru) .stack-row{grid-template-columns:3.2em minmax(0,1fr)}.cmp .bar{position:relative;height:12px;background:rgba(234,242,255,.06)}.cmp .bar b{position:absolute;left:0;top:0;bottom:0;width:var(--w);background:var(--k)}.cmp .bar i{position:absolute;left:var(--x);top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink)}.cmp .v{text-align:right;font-variant-numeric:tabular-nums}.cmp .v small{color:var(--ink-3)}.mtop{margin:14px 0 0;font-size:.875rem;color:var(--ink-2)}.recent{list-style:none;margin:0 0 14px;padding:0;font-size:.875rem}.recent li{border-bottom:1px dashed var(--line-2)}.recent button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;background:none;border:0;text-align:left;cursor:pointer;color:var(--ink)}.recent .r-name{display:inline-flex;align-items:center;gap:8px;min-width:0}.recent .r-name::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--k);box-shadow:0 0 6px var(--k)}.recent button:hover .r-txt{text-decoration:underline;text-underline-offset:3px}.recent .r-no{color:var(--ink-3);font-variant-numeric:tabular-nums;flex:none;font-family:var(--num)}.recent .r-no small{margin-right:8px;font-size:.75rem;font-family:var(--sans)}.recent button[aria-current] .r-txt{font-weight:600}.empty-hint{color:var(--ink-2);margin:0}.tbl-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}.tbl-tools input,.tbl-tools select{min-height:42px;padding:7px 12px;border:0;background:rgba(12,22,46,.8);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font-size:.9375rem}.tbl-tools select option{background:#0C162E}.tbl-tools input{flex:1 1 16em;max-width:24em;min-width:0}.tbl-tools input::placeholder{color:var(--ink-3);opacity:1}.tbl-tools .count{font-size:.8125rem;color:var(--ink-3);font-variant-numeric:tabular-nums}.tbl-wrap{max-height:620px;overflow:auto;background:rgba(8,14,32,.7);box-shadow:inset 0 0 0 1px var(--line);overscroll-behavior:contain}table{width:100%;border-collapse:separate;border-spacing:0;font-size:.875rem;font-variant-numeric:tabular-nums}thead th{position:sticky;top:0;z-index:2;background:#0E1A36;border-bottom:1px solid var(--line);padding:0;font-weight:500;text-align:right;white-space:nowrap}thead th:first-child{left:0;z-index:3;text-align:left}thead th.tl{text-align:left}thead button{display:block;width:100%;padding:10px 12px;background:none;border:0;cursor:pointer;text-align:inherit;font-size:.8125rem;color:var(--ink-2)}thead button:hover{color:var(--ink)}th[aria-sort] button{color:var(--ink);font-weight:600}th[aria-sort="descending"] button::after{content:" ▾" / ""}th[aria-sort="ascending"] button::after{content:" ▴" / ""}tbody td,tbody th{padding:7px 12px;border-bottom:1px solid var(--line-2);text-align:right;white-space:nowrap}tbody th{position:sticky;left:0;z-index:1;background:#09112A;text-align:left;font-weight:400}tbody tr:hover td,tbody tr:hover th{background:#111E3C}tbody tr.cur td,tbody tr.cur th{background:#13234A}.nm-cell{display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:9px;align-items:center}.nm-btn{padding:0;background:none;border:0;cursor:pointer;font-weight:600;color:var(--ink);text-align:left}.nm-btn:hover{text-decoration:underline;text-underline-offset:3px}.en{grid-column:2;display:block;font-size:.75rem;color:var(--ink-3)}td.tier-c{text-align:left}td.tier-c .pips{vertical-align:1px;margin-right:8px;gap:3px}td.tier-c .pips i{width:10px;height:5px}td.tier-c .pips i.on{background:var(--k);box-shadow:none}td.na{color:var(--ink-3)}td .gchip{display:inline-block;width:7px;height:7px;margin-right:7px;vertical-align:1px;transform:skewX(-24deg);background:var(--k)}.tbl-empty{padding:28px 16px;text-align:center !important;color:var(--ink-2);white-space:normal !important}.method{padding-bottom:96px !important}.method > p,.method > ul,.method > h3{max-width:780px}.method h3{margin:28px 0 6px;font-size:1.0625rem;font-weight:600}.method p{margin:0 0 10px;color:var(--ink-2);line-height:1.75}.method p b{color:var(--ink);font-weight:600}.rules{margin:6px 0 12px;padding-left:1.2em;color:var(--ink-2);line-height:1.7}.rules li{margin-bottom:6px}.rules b{color:var(--ink);font-weight:600}.method p.colophon{margin-top:30px;font-size:.8125rem;color:var(--ink-3) !important}@media (min-width: 1180px){.center-col{margin-right:-50px}}@media (min-width: 1180px) and (max-width: 1439px){:root:not(:lang(ko)) .head-live .since{display:none}}@media (min-width: 1180px) and (max-width: 1379px){.stage{grid-template-columns:300px minmax(0,1fr) 350px}.planet-wrap{height:480px}#planet{width:576px;height:480px;margin-left:-288px}.btn-primary{padding:0 22px}.btn-ghost{padding:0 14px}.p-val.big{font-size:42px}}@media (max-width: 1179px){.lang-bar{padding:0 24px}.hud-head{padding:0 24px;grid-template-columns:auto minmax(0,1fr) auto}.head-mid{font-size:.875rem;overflow:hidden;text-overflow:ellipsis}.head-live .rate{display:none}.stage{grid-template-columns:minmax(0,340px) minmax(0,1fr);grid-template-areas:"center center" "id read";column-gap:28px;row-gap:28px;padding:12px 24px 40px;min-height:0}.planet-wrap{height:auto;max-width:560px;aspect-ratio:720 / 600}#planet{position:absolute;inset:0;left:0;width:100%;height:100%;margin:0}.read-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}.p-val.big{font-size:40px}.p-val.mid{font-size:36px}.tier-name{font-size:34px}.id-name{font-size:54px}.id-name.n2{font-size:40px}.id-name.n3{font-size:30px}main > .block{padding:64px 24px 0}}@media (max-width: 1179px) and (min-width: 1000px){.stage{grid-template-columns:340px minmax(0,1fr)}}@media (max-width: 999px){.keys{grid-template-columns:repeat(5,minmax(0,1fr))}}@media (max-width: 999px) and (min-width: 760px){.stage{grid-template-columns:minmax(0,270px) minmax(0,1fr);column-gap:20px}.head-mid{display:none}.hud-head{grid-template-columns:minmax(0,1fr) auto}.read-col{gap:10px}.panel{padding:12px 14px 13px}.p-label{flex-direction:column;gap:0}.p-label small{text-align:left}.p-val.big{font-size:30px}.p-val.mid{font-size:30px}.p-val .unit{font-size:16px;padding-bottom:4px}.p-sub{font-size:14px}.p-gdp .rank{grid-template-columns:minmax(0,1fr)}.p-gdp .rank-r{text-align:left}.tier-name{font-size:26px}.tier-row{gap:10px}}@media (max-width: 759px){:root{--rail:40px}.lang-bar{padding:0 16px}.lang-track label span{padding:6px 9px}.hud-head{height:56px;padding:0 16px;grid-template-columns:minmax(0,1fr) auto;gap:12px}.logo{width:28px;height:28px}.brand-name{font-size:1.0625rem}.head-mid{display:none}.head-live .rate,.head-live .since{display:none}.brand{overflow:hidden}.brand-name{overflow:hidden;text-overflow:ellipsis}.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:none;padding:0 16px;row-gap:18px;column-gap:10px}.center-col,.id-col,.read-col{display:contents}.center-col > *,.id-col > *,.read-col > *{grid-area:auto;grid-column:1 / -1;min-width:0}.planet-wrap{order:1;height:383px;max-width:none;aspect-ratio:auto;margin:0 -16px;width:calc(100% + 32px);overflow:hidden}#planet{position:absolute;inset:0 auto auto 50%;width:460px;height:383px;margin-left:-230px}.id-head{order:2;grid-template-columns:38px fit-content(calc(100% - 120px)) minmax(0,1fr);column-gap:10px;grid-template-areas:"kind kind copy" "chip name sex" "sub sub sub";margin-top:-8px}.id-kind{flex-direction:row;align-items:baseline;gap:10px}.kind-no{font-size:1rem}.chip{width:38px;height:28px;padding:2px;align-self:center;margin-top:8px}.chip::before{inset:2px}.chip::after{background-size:6px 2px,2px 6px,6px 2px,2px 6px}.chip .chip-code{font-size:.625rem}.id-name{margin-top:8px;font-size:34px}.id-name.n2{font-size:26px}.id-name.n3{font-size:26px}.id-name.empty{grid-column:1 / -1;font-size:1rem}.chip.empty{display:none}#copyBtn{justify-self:end}.id-sex{display:block;justify-self:start;align-self:center;margin-top:8px;font-size:.875rem;color:var(--ink-2);padding:2px 8px;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}.id-sex:empty{display:none}.id-sub{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:4px}.id-en{font-size:14px;margin:0}.id-en:empty{display:none}.id-geo{font-size:13px;margin:0}.read-col > .p-prob{order:3;grid-column:1}.read-col > .p-gdp{order:3;grid-column:2}.read-col > .p-tier{order:5}.read-col > .p-life{order:6}.panel{padding:12px 14px 13px}.p-label{flex-direction:column;gap:0}.p-label small{text-align:left}.p-val.big{font-size:28px}.p-val.mid{font-size:34px}.p-val .unit{font-size:17px;padding-bottom:5px}.p-val.na{font-size:20px}.p-sub{font-size:14px}.p-gdp .rank{grid-template-columns:minmax(0,1fr)}.p-gdp .rank-r{text-align:left}.tier-name{font-size:30px}.facts{order:4;margin:0;padding:2px 0;border-top:0;column-gap:10px;row-gap:12px}.fact{padding-left:14px}.actions{order:7;position:sticky;bottom:0;z-index:20;margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr) 64px 64px;gap:8px;background:rgba(5,7,22,.97);border-top:1px solid var(--line)}.actions .btn{height:52px;padding:0 8px}.btn-ghost .lg{display:none}.btn-ghost .sm{display:inline;font-family:var(--num);font-weight:600}.batch-line{order:1;margin:0;text-align:left}#planet .p-hud{display:none}main > .block{padding:56px 16px 0}.block h2{font-size:1.5rem}.h-grid,.m-grid{grid-template-columns:minmax(0,1fr)}.waffle,.legend{max-width:360px}.bars li{grid-template-columns:7em minmax(0,1fr) 4.4em;gap:8px}.cmp li,.cmp.tiers li{grid-template-columns:5.4em minmax(0,1fr) 7.8em;gap:8px}:root:lang(en) .cmp li,:root:lang(es) .cmp li,:root:lang(ru) .cmp li{grid-template-columns:7.2em minmax(0,1fr) 8.6em}.tbl-wrap{max-height:70vh}tbody th{white-space:normal;min-width:9em;max-width:11em}tbody td,tbody th{padding-left:10px;padding-right:10px}.tier-strip span{font-size:.8125rem}}@media (max-width: 479px){.globe{display:none}.lang-sw,.lang-track{flex:1}.lang-track{grid-auto-columns:minmax(0,1fr)}.lang-track label span{padding:6px 2px;font-size:.75rem}}@media (max-width: 379px){.actions{grid-template-columns:minmax(0,1fr) 56px 56px}.actions .btn-primary{font-size:.9375rem;letter-spacing:0}.keys{column-gap:4px;font-size:.6875rem;font-variant-numeric:normal}.keys li{overflow-wrap:normal}:root:lang(ja) .keys li.b-0{white-space:nowrap}}#idName{transition:none !important}@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:1ms !important;animation-delay:0ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important;transition-delay:0ms !important}.rstrip{animation-duration:1ms !important;animation-delay:0ms !important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -41,7 +41,7 @@
 <p class="head-live" id="live"></p>
 </header>
 <main>
-<section class="stage" id="stage" data-tier="NONE" aria-labelledby="idName">
+<section class="stage" id="stage" data-band="0" aria-labelledby="idName">
 <div class="center-col">
 <div class="planet-wrap">
 <div id="planet" aria-hidden="true"></div>
@@ -73,6 +73,10 @@
 <section class="panel p-gdp" aria-labelledby="lbGdp">
 <h3 class="p-label" id="lbGdp"><span data-t="lbGdp"></span> <small id="nGdp"></small></h3>
 <p class="p-val big" id="vGdp"></p>
+<div class="ladder">
+<span class="rungs" id="rungs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<span class="ladder-l" id="ladderL"></span>
+</div>
 <p class="p-sub" id="sGdp"></p>
 <div class="rank" id="rGdp">
 <span class="bar" aria-hidden="true"><b></b><i></i></span>
@@ -129,6 +133,9 @@
 <h3 class="minor" data-t="hByTier"></h3>
 <div class="tier-strip" id="hTier" role="img"></div>
 <ul class="tier-keys" id="hTierKeys"></ul>
+<h3 class="minor gap" data-t="hByBand"></h3>
+<div class="tier-strip band-strip" id="hBand" role="img"></div>
+<ul class="tier-keys band-keys" id="hBandKeys"></ul>
 </div>
 <div class="h-grid">
 <div>
@@ -263,7 +270,7 @@ draw1: '다시 태어나기', draw10: '10번 연속', draw100: '100번 연속',
 copy: '결과 복사', copied: '복사했습니다', copyFail: '복사하지 못했습니다',
 lbProb: '이 나라에 태어날 확률', lbGdp: '1인당 GDP', lbTier: '발전 단계', lbLife: '기대수명',
 atlasTitle: '세계 지도', resetMap: '세계 전체 보기',
-hTitle: '세계 출생아를 100명으로 줄이면', hByTier: '발전 단계로 나누면', hByCont: '대륙으로 나누면', hByCountry: '나라별로 보면',
+hTitle: '세계 출생아를 100명으로 줄이면', hByTier: '발전 단계로 나누면', hByBand: '1인당 GDP 구간으로 나누면', hByCont: '대륙으로 나누면', hByCountry: '나라별로 보면',
 mTitle: '나의 기록', mByCont: '대륙별로 나온 비율', mByTier: '발전 단계별로 나온 비율',
 mNote: '막대는 실제로 나온 비율, 세로선은 출생아 자료로 기대하는 비율입니다. 많이 뽑을수록 둘이 가까워집니다.',
 mRecent: '최근 기록', clear: '기록 지우기',
@@ -308,6 +315,8 @@ years: x => x + '세',
 kids: x => x + '명',
 lifeUnit: '세',
 noData: '자료 없음',
+bandUnder: a => a + ' 미만', bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' 이상',
+bandNo: (i, n) => '구간 ' + i + '/' + n,
 gdpNa: (n, ppp) => 'IMF 세계경제전망에 환율 기준 값이 없는 ' + n + '곳 가운데 한 곳입니다.' + (ppp ? ' 구매력 기준 ' + ppp + '.' : ''),
 gdpLabel: note => (note || '2025년') + ', 환율 기준',
 noPpp: '구매력 기준 값 없음',
@@ -324,17 +333,18 @@ tipBatch: n => '이번 연속 추첨에서 ' + n + '번',
 mapFail: '지도를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로 고침하세요. 추첨과 표는 지도 없이도 쓸 수 있습니다.',
 ledeHtml: s => '2026년에 태어날 아기 <b>' + s + '</b> 명 가운데 한 명이 됩니다',
 atlasLede: '나라는 2026년 출생아 수에 비례해, 성별은 그 나라의 출생 성비에 따라 정해집니다. 원이 클수록 그 나라에 태어날 확률이 큽니다.',
-legend: '원의 크기는 2026년 출생아 수, 색은 발전 단계입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.',
-mapAria: '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 발전 단계를 나타냅니다.',
+legend: '원의 크기는 2026년 출생아 수, 색은 1인당 GDP(환율 기준) 구간입니다. 깜박이는 점은 지금 이 순간 태어나는 아기를 실제 속도로 보여 줍니다. 나라를 누르면 위 화면에 그 나라의 정보를 띄웁니다.',
+mapAria: '세계 지도. 원의 크기는 나라별 2026년 출생아 수, 색은 1인당 GDP(환율 기준) 구간을 나타냅니다.',
+keysAria: '지도의 색: 1인당 GDP(환율 기준) 구간',
 liveB: '초당 탄생', liveD: '초당 사망', liveSince: '화면을 연 뒤 ', liveAfter: '명 탄생',
 tierRules: d => '발전 단계는 두 국제기구의 공식 분류를 그대로 따르고, 오늘 날짜(' + d + ')를 기준으로 계산합니다.',
 gradItem: (n, d) => n + ' ' + d,
 gradSoon: l => '졸업 예정: ' + l + '.',
 gradDone: l => '졸업함: ' + l + '.',
 tierListHtml: o =>
-'<li class="t-ADV"><b>선진국</b>: IMF WEO 2026년 4월 통계 부록 Table B의 선진경제 ' + o.advN + '곳과 그 속령. 지금 ' + o.count.ADV + '곳, 2026년 출생아의 ' + o.pct.ADV + '입니다.</li>' +
-'<li class="t-LDC"><b>최저개발국</b>: UN 최저개발국 목록, 2024년 12월 19일 기준의 ' + o.ldcN + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + (o.grad ? o.grad + ' ' : '') + '지금 ' + o.count.LDC + '곳, ' + o.pct.LDC + '입니다.</li>' +
-'<li class="t-DEV"><b>개발도상국</b>: 나머지 전부. 지금 ' + o.count.DEV + '곳, ' + o.pct.DEV + '입니다.</li>' +
+'<li><b>선진국</b>: IMF WEO 2026년 4월 통계 부록 Table B의 선진경제 ' + o.advN + '곳과 그 속령. 지금 ' + o.count.ADV + '곳, 2026년 출생아의 ' + o.pct.ADV + '입니다.</li>' +
+'<li><b>최저개발국</b>: UN 최저개발국 목록, 2024년 12월 19일 기준의 ' + o.ldcN + '곳. 졸업일이 지나면 개발도상국으로 바뀝니다. ' + (o.grad ? o.grad + ' ' : '') + '지금 ' + o.count.LDC + '곳, ' + o.pct.LDC + '입니다.</li>' +
+'<li><b>개발도상국</b>: 나머지 전부. 지금 ' + o.count.DEV + '곳, ' + o.pct.DEV + '입니다.</li>' +
 '<li>속령과 자유연합국(쿡 제도, 니우에)은 본국의 단계를 따릅니다. 모나코는 IMF 비회원 주권국이라 어느 규칙에도 걸리지 않아 프랑스와 같은 단계로 둡니다. 서사하라, 팔레스타인, 코소보는 선진국의 속령이 아니므로 개발도상국입니다.</li>' +
 '<li>세 비중은 합이 100%가 되도록 반올림했습니다.</li>',
 hundredLede: o => '2026년에 태어나는 아기 100명 가운데 ' + o.first[1] + '명은 ' + o.first[0] + ', ' + o.second[1] + '명은 ' + o.second[0] + '에서 태어납니다. ' +
@@ -342,6 +352,7 @@ o.rest.map(([n, c]) => topic(n) + ' ' + c + '명').join(', ') + '입니다.' +
 o.zero.map(n => ' ' + topic(n) + ' 1명이 채 안 됩니다.').join('') +
 ' 발전 단계로 나누면 선진국에서 ' + o.tiers.ADV + '명, 개발도상국에서 ' + o.tiers.DEV + '명, 최저개발국에서 ' + o.tiers.LDC + '명이 태어납니다.',
 hTierAria: l => '발전 단계별 아기 수: ' + l,
+hBandAria: l => '1인당 GDP(환율 기준) 구간별 아기 수: ' + l,
 nb: x => x + '명',
 cells: n => n + '칸',
 mineEmpty: '아직 뽑은 기록이 없습니다. 위에서 ‘다시 태어나기’를 눌러 첫 기록을 받아 보세요.',
@@ -357,7 +368,7 @@ count: (all, n) => n === all ? all + '곳' : all + '곳 중 ' + n + '곳',
 tTitle: n => n + '개 국가·지역 전체',
 allCont: '모든 대륙', allTier: '모든 발전 단계',
 batchTitle: n => '이번 ' + n + '번',
-batchNote: s => '지도의 점이 이번에 나온 곳입니다(색은 발전 단계). 위 화면에는 마지막 ' + s + '를 띄웠습니다.',
+batchNote: s => '지도의 점이 이번에 나온 곳입니다(색은 1인당 GDP 구간). 위 화면에는 마지막 ' + s + '를 띄웠습니다.',
 batchAria: l => '대륙별로 이번에 나온 횟수와 기대 횟수. ' + l,
 batchItem: (n, c, x) => n + ' ' + c + '번, 기대 ' + x + '번',
 rowNow: '이번', rowExp: '기대',
@@ -367,6 +378,7 @@ drawnOne: (s, n, sex, p, t) => s + '. ' + n + ', ' + sex + '로 태어났습니�
 drawnMany: (k, a, b, c, n) => k + '번을 뽑았습니다. 선진국 ' + a + '번, 개발도상국 ' + b + '번, 최저개발국 ' + c + '번입니다. 마지막은 ' + n + '입니다.',
 reopened: (s, n, t) => s + ' 기록을 다시 펼쳤습니다. ' + n + ', 발전 단계는 ' + t + '입니다.',
 looked: (n, t) => n + ' 정보를 띄웠습니다. 발전 단계는 ' + t + '입니다.',
+bandSay: r => r ? '1인당 GDP는 ' + r + ' 구간입니다.' : '환율 기준 1인당 GDP 자료는 없습니다.',
 clearArm: '한 번 더 누르면 지웁니다', clearArmSay: '기록을 지우려면 한 번 더 누르세요.', cleared: '기록을 지웠습니다.'
 };
 const theEn = (n, code) => ({ 826: 'the United Kingdom', 528: 'the Netherlands', 840: 'the United States' }[code] || n);
@@ -385,7 +397,7 @@ draw1: 'Be born again', draw10: '10 in a row', draw100: '100 in a row',
 copy: 'Copy result', copied: 'Copied', copyFail: 'Could not copy',
 lbProb: 'Chance of being born here', lbGdp: 'GDP per head', lbTier: 'Development tier', lbLife: 'Life expectancy',
 atlasTitle: 'World map', resetMap: 'Show the whole world',
-hTitle: 'If the world’s newborns were 100 babies', hByTier: 'By development tier', hByCont: 'By continent', hByCountry: 'By country',
+hTitle: 'If the world’s newborns were 100 babies', hByTier: 'By development tier', hByBand: 'By GDP per head', hByCont: 'By continent', hByCountry: 'By country',
 mTitle: 'My records', mByCont: 'Share by continent', mByTier: 'Share by development tier',
 mNote: 'Bars show what you actually drew; the vertical line is what the birth data leads you to expect. The more you draw, the closer they get.',
 mRecent: 'Recent records', clear: 'Clear records',
@@ -430,6 +442,8 @@ years: x => x + ' years',
 kids: x => x + ' per woman',
 lifeUnit: 'years',
 noData: 'No data',
+bandUnder: a => 'Under ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' and over',
+bandNo: (i, n) => 'Band ' + i + '/' + n,
 gdpNa: (n, ppp) => 'One of ' + n + ' places with no market-rate figure in the IMF World Economic Outlook.' + (ppp ? ' At PPP: ' + ppp + '.' : ''),
 gdpLabel: note => (note || '2025') + ', market rates',
 noPpp: 'No PPP figure',
@@ -446,17 +460,18 @@ tipBatch: n => 'Drawn ' + n + (n === '1' ? ' time' : ' times') + ' in this run',
 mapFail: 'The map could not be loaded. Check your internet connection and reload. The draw and the table work without the map.',
 ledeHtml: s => 'You become one of the <b>' + s + '</b> babies born in 2026',
 atlasLede: 'The country is chosen in proportion to its 2026 births, and the sex by that country’s sex ratio at birth. The bigger the circle, the bigger the chance of being born there.',
-legend: 'Circle size is 2026 births; color is the development tier. The flashing dots are babies being born right now, at the real rate. Click a country to show it on the screen above.',
-mapAria: 'World map. Circle size shows each country’s 2026 births; color shows the development tier.',
+legend: 'Circle size is 2026 births; color is the band of GDP per head at market rates. The flashing dots are babies being born right now, at the real rate. Click a country to show it on the screen above.',
+mapAria: 'World map. Circle size shows each country’s 2026 births; color shows its band of GDP per head at market rates.',
+keysAria: 'Map colors: bands of GDP per head at market rates',
 liveB: 'Births/sec', liveD: 'Deaths/sec', liveSince: 'Since you arrived: ', liveAfter: ' born',
 tierRules: d => 'Development tiers follow the official classifications of two international organizations, as they stand on today’s date (' + d + ').',
 gradItem: (n, d) => n + ' (' + d + ')',
 gradSoon: l => 'Due to graduate: ' + l + '.',
 gradDone: l => 'Graduated: ' + l + '.',
 tierListHtml: o =>
-'<li class="t-ADV"><b>Advanced</b>: the ' + o.advN + ' advanced economies in the IMF World Economic Outlook, April 2026, Statistical Appendix Table B, and their territories. Currently ' + o.count.ADV + ' places, ' + o.pct.ADV + ' of 2026 births.</li>' +
-'<li class="t-LDC"><b>Least developed</b>: the ' + o.ldcN + ' countries on the UN list of least developed countries as of December 19, 2024. A country counts as developing once its graduation date has passed. ' + (o.grad ? o.grad + ' ' : '') + 'Currently ' + o.count.LDC + ' places, ' + o.pct.LDC + '.</li>' +
-'<li class="t-DEV"><b>Developing</b>: everything else. Currently ' + o.count.DEV + ' places, ' + o.pct.DEV + '.</li>' +
+'<li><b>Advanced</b>: the ' + o.advN + ' advanced economies in the IMF World Economic Outlook, April 2026, Statistical Appendix Table B, and their territories. Currently ' + o.count.ADV + ' places, ' + o.pct.ADV + ' of 2026 births.</li>' +
+'<li><b>Least developed</b>: the ' + o.ldcN + ' countries on the UN list of least developed countries as of December 19, 2024. A country counts as developing once its graduation date has passed. ' + (o.grad ? o.grad + ' ' : '') + 'Currently ' + o.count.LDC + ' places, ' + o.pct.LDC + '.</li>' +
+'<li><b>Developing</b>: everything else. Currently ' + o.count.DEV + ' places, ' + o.pct.DEV + '.</li>' +
 '<li>Territories and freely associated states (Cook Islands, Niue) follow the tier of their sovereign state. Monaco, a sovereign state outside the IMF, fits neither rule and is grouped with France. Western Sahara, Palestine and Kosovo are not territories of an advanced economy, so they are developing.</li>' +
 '<li>The three shares are rounded so that they add up to 100%.</li>',
 hundredLede: o => 'Of every 100 babies born in 2026, ' + o.first[1] + ' are born in ' + o.first[0] + ' and ' + o.second[1] + ' in ' + o.second[0] + '. ' +
@@ -464,6 +479,7 @@ hundredLede: o => 'Of every 100 babies born in 2026, ' + o.first[1] + ' are born
 (o.zero.length ? ' ' + joinAnd(o.zero, ' and ') + (o.zero.length > 1 ? ' each get' : ' gets') + ' fewer than one.' : '') +
 ' By development tier, ' + o.tiers.ADV + ' are born in advanced economies, ' + o.tiers.DEV + ' in developing countries and ' + o.tiers.LDC + ' in least developed countries.',
 hTierAria: l => 'Babies by development tier: ' + l,
+hBandAria: l => 'Babies by band of GDP per head at market rates: ' + l,
 nb: x => x,
 cells: n => n + (n === 1 ? ' square' : ' squares'),
 mineEmpty: 'No records yet. Press “Be born again” above to get your first one.',
@@ -479,7 +495,7 @@ count: (all, n) => n === all ? all + ' places' : n + ' of ' + all + ' places',
 tTitle: n => 'All ' + n + ' countries and territories',
 allCont: 'All continents', allTier: 'All development tiers',
 batchTitle: n => 'This run of ' + n,
-batchNote: s => 'Dots on the map mark where this run landed (color = development tier). The screen above shows the last one, ' + s + '.',
+batchNote: s => 'Dots on the map mark where this run landed (color = band of GDP per head). The screen above shows the last one, ' + s + '.',
 batchAria: l => 'Draws per continent in this run, with the expected number. ' + l,
 batchItem: (n, c, x) => n + ' ' + c + ', expected ' + x,
 rowNow: 'Now', rowExp: 'Exp.',
@@ -489,6 +505,7 @@ drawnOne: (s, n, sex, p, t) => s + '. Born in ' + n + ' as a ' + sex.toLowerCase
 drawnMany: (k, a, b, c, n) => 'Drew ' + k + ' times: advanced ' + a + ', developing ' + b + ', least developed ' + c + '. The last one is ' + n + '.',
 reopened: (s, n, t) => 'Reopened record ' + s + '. ' + n + ', development tier: ' + t + '.',
 looked: (n, t) => 'Showing ' + n + '. Development tier: ' + t + '.',
+bandSay: r => r ? 'GDP per head band: ' + r + '.' : 'No market-rate GDP per head figure.',
 clearArm: 'Press again to clear', clearArmSay: 'Press again to clear your records.', cleared: 'Records cleared.'
 };
 const ja = {
@@ -506,7 +523,7 @@ draw1: '生まれ変わる', draw10: '10回連続', draw100: '100回連続',
 copy: '結果をコピー', copied: 'コピーしました', copyFail: 'コピーできませんでした',
 lbProb: 'この国に生まれる確率', lbGdp: '1人当たりGDP', lbTier: '発展段階', lbLife: '平均寿命',
 atlasTitle: '世界地図', resetMap: '世界全体を表示',
-hTitle: '世界の出生児を100人に縮めると', hByTier: '発展段階別に見ると', hByCont: '大陸別に見ると', hByCountry: '国別に見ると',
+hTitle: '世界の出生児を100人に縮めると', hByTier: '発展段階別に見ると', hByBand: '1人当たりGDPの区分別に見ると', hByCont: '大陸別に見ると', hByCountry: '国別に見ると',
 mTitle: 'わたしの記録', mByCont: '大陸別の出現率', mByTier: '発展段階別の出現率',
 mNote: '棒は実際に出た割合、縦線は出生データから期待される割合です。回数を重ねるほど、両者は近づきます。',
 mRecent: '最近の記録', clear: '記録を消去',
@@ -551,6 +568,8 @@ years: x => x + '歳',
 kids: x => x + '人',
 lifeUnit: '歳',
 noData: 'データなし',
+bandUnder: a => a + '未\u2060満', bandRange: (a, b) => a + '–' + b, bandOver: a => a + '以\u2060上',
+bandNo: (i, n) => '区分 ' + i + '/' + n,
 gdpNa: (n, ppp) => 'IMFの世界経済見通しに為替レート基準の値がない' + n + 'か所のひとつです。' + (ppp ? '購買力平価では' + ppp + 'です。' : ''),
 gdpLabel: note => (note || '2025年') + '・為替レート基準',
 noPpp: '購買力平価の値なし',
@@ -567,17 +586,18 @@ tipBatch: n => '今回の連続抽選で' + n + '回',
 mapFail: '地図を読み込めませんでした。インターネット接続を確認してから再読み込みしてください。抽選と表は地図なしでも使えます。',
 ledeHtml: s => '2026年に生まれる赤ちゃん<b>' + s + '</b>人のうちの1人になります',
 atlasLede: '国は2026年の出生数に比例して、性別はその国の出生性比に従って決まります。円が大きいほど、その国に生まれる確率が高くなります。',
-legend: '円の大きさは2026年の出生数、色は発展段階を表します。点滅する点は、いまこの瞬間に生まれている赤ちゃんを実際の速さで示しています。国を押すと、その国の情報を上の画面に表示します。',
-mapAria: '世界地図。円の大きさは国別の2026年出生数、色は発展段階を表します。',
+legend: '円の大きさは2026年の出生数、色は1人当たりGDP（為替レート基準）の区分を表します。点滅する点は、いまこの瞬間に生まれている赤ちゃんを実際の速さで示しています。国を押すと、その国の情報を上の画面に表示します。',
+mapAria: '世界地図。円の大きさは国別の2026年出生数、色は1人当たりGDP（為替レート基準）の区分を表します。',
+keysAria: '地図の色：1人当たりGDP（為替レート基準）の区分',
 liveB: '出生/秒', liveD: '死亡/秒', liveSince: 'ページを開いてから', liveAfter: '人誕生',
 tierRules: d => '発展段階は2つの国際機関の公式分類にそのまま従い、今日の日付（' + d + '）を基準に計算します。',
 gradItem: (n, d) => n + '（' + d + '）',
 gradSoon: l => '卒業予定：' + l + '。',
 gradDone: l => '卒業済み：' + l + '。',
 tierListHtml: o =>
-'<li class="t-ADV"><b>先進国</b>：IMF世界経済見通し2026年4月版 統計付録 Table Bの先進経済' + o.advN + 'か国・地域と、その属領。現在' + o.count.ADV + 'か所で、2026年の出生数の' + o.pct.ADV + 'です。</li>' +
-'<li class="t-LDC"><b>後発開発途上国</b>：国連の後発開発途上国リスト（2024年12月19日時点）の' + o.ldcN + 'か国。卒業日を過ぎると開発途上国に変わります。' + o.grad + '現在' + o.count.LDC + 'か所、' + o.pct.LDC + 'です。</li>' +
-'<li class="t-DEV"><b>開発途上国</b>：残りのすべて。現在' + o.count.DEV + 'か所、' + o.pct.DEV + 'です。</li>' +
+'<li><b>先進国</b>：IMF世界経済見通し2026年4月版 統計付録 Table Bの先進経済' + o.advN + 'か国・地域と、その属領。現在' + o.count.ADV + 'か所で、2026年の出生数の' + o.pct.ADV + 'です。</li>' +
+'<li><b>後発開発途上国</b>：国連の後発開発途上国リスト（2024年12月19日時点）の' + o.ldcN + 'か国。卒業日を過ぎると開発途上国に変わります。' + o.grad + '現在' + o.count.LDC + 'か所、' + o.pct.LDC + 'です。</li>' +
+'<li><b>開発途上国</b>：残りのすべて。現在' + o.count.DEV + 'か所、' + o.pct.DEV + 'です。</li>' +
 '<li>属領と自由連合国（クック諸島、ニウエ）は、本国の段階に従います。モナコはIMFに加盟していない主権国家で、どの規則にも当てはまらないため、フランスと同じ段階とします。西サハラ、パレスチナ、コソボは先進国の属領ではないため、開発途上国です。</li>' +
 '<li>3つの割合は、合計が100%になるように丸めています。</li>',
 hundredLede: o => '2026年に生まれる赤ちゃん100人のうち、' + o.first[1] + '人は' + o.first[0] + '、' + o.second[1] + '人は' + o.second[0] + 'で生まれます。' +
@@ -585,6 +605,7 @@ hundredLede: o => '2026年に生まれる赤ちゃん100人のうち、' + o.fir
 o.zero.map(n => n + 'は1人未満です。').join('') +
 '発展段階で分けると、先進国で' + o.tiers.ADV + '人、開発途上国で' + o.tiers.DEV + '人、後発開発途上国で' + o.tiers.LDC + '人が生まれます。',
 hTierAria: l => '発展段階別の赤ちゃんの数：' + l,
+hBandAria: l => '1人当たりGDP（為替レート基準）の区分別の赤ちゃんの数：' + l,
 nb: x => x + '人',
 cells: n => n + 'マス',
 mineEmpty: 'まだ記録がありません。上の「生まれ変わる」を押して、最初の記録を受け取ってみてください。',
@@ -600,7 +621,7 @@ count: (all, n) => n === all ? all + 'か所' : all + 'か所中' + n + 'か所'
 tTitle: n => '全' + n + 'の国・地域',
 allCont: 'すべての大陸', allTier: 'すべての発展段階',
 batchTitle: n => '今回の' + n + '回',
-batchNote: s => '地図上の点が今回出た場所です（色は発展段階）。上の画面には最後の' + s + 'を表示しています。',
+batchNote: s => '地図上の点が今回出た場所です（色は1人当たりGDPの区分）。上の画面には最後の' + s + 'を表示しています。',
 batchAria: l => '大陸別の今回の回数と期待回数。' + l,
 batchItem: (n, c, x) => n + ' ' + c + '回、期待 ' + x + '回',
 rowNow: '今回', rowExp: '期待',
@@ -610,6 +631,7 @@ drawnOne: (s, n, sex, p, t) => s + '。' + n + 'で' + sex + 'として生まれ
 drawnMany: (k, a, b, c, n) => k + '回抽選しました。先進国' + a + '回、開発途上国' + b + '回、後発開発途上国' + c + '回です。最後は' + n + 'です。',
 reopened: (s, n, t) => s + 'の記録をもう一度開きました。' + n + '、発展段階は' + t + 'です。',
 looked: (n, t) => n + 'の情報を表示しました。発展段階は' + t + 'です。',
+bandSay: r => r ? '1人当たりGDPは' + r + 'の区分です。' : '為替レート基準の1人当たりGDPのデータはありません。',
 clearArm: 'もう一度押すと消去します', clearArmSay: '記録を消去するには、もう一度押してください。', cleared: '記録を消去しました。'
 };
 const deEs = (n, code) => ({ 826: 'del Reino Unido', 528: 'de los Países Bajos' }[code] || 'de ' + n);
@@ -628,7 +650,7 @@ draw1: 'Volver a nacer', draw10: '10 veces', draw100: '100 veces',
 copy: 'Copiar resultado', copied: 'Copiado', copyFail: 'No se pudo copiar',
 lbProb: 'Probabilidad de nacer aquí', lbGdp: 'PIB per cápita', lbTier: 'Etapa de desarrollo', lbLife: 'Esperanza de vida',
 atlasTitle: 'Mapa del mundo', resetMap: 'Ver el mundo entero',
-hTitle: 'Si los recién nacidos del mundo fueran 100', hByTier: 'Por etapa de desarrollo', hByCont: 'Por continente', hByCountry: 'Por país',
+hTitle: 'Si los recién nacidos del mundo fueran 100', hByTier: 'Por etapa de desarrollo', hByBand: 'Por tramo de PIB per cápita', hByCont: 'Por continente', hByCountry: 'Por país',
 mTitle: 'Mis registros', mByCont: 'Proporción por continente', mByTier: 'Proporción por etapa de desarrollo',
 mNote: 'La barra es la proporción que te ha salido; la línea vertical, la que cabe esperar según los datos de nacimientos. Cuantas más veces juegues, más se acercan.',
 mRecent: 'Registros recientes', clear: 'Borrar registros',
@@ -673,6 +695,8 @@ years: x => x + ' años',
 kids: x => x + ' hijos',
 lifeUnit: 'años',
 noData: 'Sin datos',
+bandUnder: a => 'Menos de ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' o más',
+bandNo: (i, n) => 'Tramo ' + i + '/' + n,
 gdpNa: (n, ppp) => 'Es uno de los ' + n + ' lugares sin dato a tipo de cambio en las Perspectivas de la Economía Mundial del FMI.' + (ppp ? ' Por PPA: ' + ppp + '.' : ''),
 gdpLabel: note => (note || '2025') + ', a tipo de cambio',
 noPpp: 'Sin dato por PPA',
@@ -689,17 +713,18 @@ tipBatch: n => n + (n === '1' ? ' vez' : ' veces') + ' en esta tanda',
 mapFail: 'No se pudo cargar el mapa. Comprueba la conexión a internet y recarga la página. El sorteo y la tabla funcionan sin el mapa.',
 ledeHtml: s => 'Serás uno de los <b>' + s + '</b> de bebés que nacerán en 2026',
 atlasLede: 'El país se elige en proporción a sus nacimientos de 2026 y el sexo, según la proporción de sexos al nacer de ese país. Cuanto mayor es el círculo, mayor es la probabilidad de nacer allí.',
-legend: 'El tamaño del círculo indica los nacimientos de 2026 y el color, la etapa de desarrollo. Los puntos que parpadean son bebés que nacen ahora mismo, al ritmo real. Pulsa un país para ver sus datos en la pantalla de arriba.',
-mapAria: 'Mapa del mundo. El tamaño del círculo indica los nacimientos de 2026 de cada país y el color, la etapa de desarrollo.',
+legend: 'El tamaño del círculo indica los nacimientos de 2026 y el color, el tramo de PIB per cápita a tipo de cambio. Los puntos que parpadean son bebés que nacen ahora mismo, al ritmo real. Pulsa un país para ver sus datos en la pantalla de arriba.',
+mapAria: 'Mapa del mundo. El tamaño del círculo indica los nacimientos de 2026 de cada país y el color, su tramo de PIB per cápita a tipo de cambio.',
+keysAria: 'Colores del mapa: tramos de PIB per cápita a tipo de cambio',
 liveB: 'Nacimientos/s', liveD: 'Muertes/s', liveSince: 'Desde que llegaste: ', liveAfter: ' nacidos',
 tierRules: d => 'Las etapas de desarrollo siguen tal cual las clasificaciones oficiales de dos organismos internacionales y se calculan con la fecha de hoy (' + d + ').',
 gradItem: (n, d) => n + ' (' + d + ')',
 gradSoon: l => 'Graduación prevista: ' + l + '.',
 gradDone: l => 'Ya graduados: ' + l + '.',
 tierListHtml: o =>
-'<li class="t-ADV"><b>Avanzado</b>: las ' + o.advN + ' economías avanzadas del apéndice estadístico (cuadro B) de las Perspectivas de la Economía Mundial del FMI de abril de 2026, y sus territorios. Ahora son ' + o.count.ADV + ' lugares, el ' + o.pct.ADV + ' de los nacimientos de 2026.</li>' +
-'<li class="t-LDC"><b>Menos adelantado</b>: los ' + o.ldcN + ' países de la lista de países menos adelantados de la ONU a 19 de diciembre de 2024. Pasan a estar en desarrollo cuando llega su fecha de graduación. ' + (o.grad ? o.grad + ' ' : '') + 'Ahora son ' + o.count.LDC + ' lugares, el ' + o.pct.LDC + '.</li>' +
-'<li class="t-DEV"><b>En desarrollo</b>: todos los demás. Ahora son ' + o.count.DEV + ' lugares, el ' + o.pct.DEV + '.</li>' +
+'<li><b>Avanzado</b>: las ' + o.advN + ' economías avanzadas del apéndice estadístico (cuadro B) de las Perspectivas de la Economía Mundial del FMI de abril de 2026, y sus territorios. Ahora son ' + o.count.ADV + ' lugares, el ' + o.pct.ADV + ' de los nacimientos de 2026.</li>' +
+'<li><b>Menos adelantado</b>: los ' + o.ldcN + ' países de la lista de países menos adelantados de la ONU a 19 de diciembre de 2024. Pasan a estar en desarrollo cuando llega su fecha de graduación. ' + (o.grad ? o.grad + ' ' : '') + 'Ahora son ' + o.count.LDC + ' lugares, el ' + o.pct.LDC + '.</li>' +
+'<li><b>En desarrollo</b>: todos los demás. Ahora son ' + o.count.DEV + ' lugares, el ' + o.pct.DEV + '.</li>' +
 '<li>Los territorios dependientes y los Estados en libre asociación (Islas Cook, Niue) siguen la etapa de su Estado soberano. Mónaco, Estado soberano que no es miembro del FMI, no encaja en ninguna regla y se agrupa con Francia. Sáhara Occidental, Palestina y Kosovo no son territorios de una economía avanzada, así que están en desarrollo.</li>' +
 '<li>Las tres proporciones se redondean para que sumen 100 %.</li>',
 hundredLede: o => 'De cada 100 bebés que nacen en 2026, ' + o.first[1] + ' nacen en ' + o.first[0] + ' y ' + o.second[1] + ' en ' + o.second[0] + '. ' +
@@ -707,6 +732,7 @@ hundredLede: o => 'De cada 100 bebés que nacen en 2026, ' + o.first[1] + ' nace
 (o.zero.length ? ' ' + joinAnd(o.zero, ' y ') + ', menos de uno.' : '') +
 ' Por etapa de desarrollo, ' + o.tiers.ADV + ' nacen en países avanzados, ' + o.tiers.DEV + ' en países en desarrollo y ' + o.tiers.LDC + ' en países menos adelantados.',
 hTierAria: l => 'Bebés por etapa de desarrollo: ' + l,
+hBandAria: l => 'Bebés por tramo de PIB per cápita a tipo de cambio: ' + l,
 nb: x => x,
 cells: n => n + (n === 1 ? ' casilla' : ' casillas'),
 mineEmpty: 'Todavía no hay registros. Pulsa «Volver a nacer» arriba para conseguir el primero.',
@@ -722,7 +748,7 @@ count: (all, n) => n === all ? all + ' lugares' : n + ' de ' + all + ' lugares',
 tTitle: n => 'Los ' + n + ' países y territorios',
 allCont: 'Todos los continentes', allTier: 'Todas las etapas',
 batchTitle: n => 'Esta tanda de ' + n,
-batchNote: s => 'Los puntos del mapa son los lugares que han salido en esta tanda (el color indica la etapa de desarrollo). La pantalla de arriba muestra el último, ' + s + '.',
+batchNote: s => 'Los puntos del mapa son los lugares que han salido en esta tanda (el color indica el tramo de PIB per cápita). La pantalla de arriba muestra el último, ' + s + '.',
 batchAria: l => 'Veces por continente en esta tanda y veces esperadas. ' + l,
 batchItem: (n, c, x) => n + ' ' + c + ', esperado ' + x,
 rowNow: 'Ahora', rowExp: 'Esp.',
@@ -732,6 +758,7 @@ drawnOne: (s, n, sex, p, t) => s + '. Has nacido en ' + n + ' como ' + sex.toLow
 drawnMany: (k, a, b, c, n) => 'Has sacado ' + k + ' veces: avanzado ' + a + ', en desarrollo ' + b + ', menos adelantado ' + c + '. La última es ' + n + '.',
 reopened: (s, n, t) => 'Se ha vuelto a abrir el registro ' + s + '. ' + n + ', etapa de desarrollo: ' + t + '.',
 looked: (n, t) => 'Mostrando ' + n + '. Etapa de desarrollo: ' + t + '.',
+bandSay: r => r ? 'Tramo de PIB per cápita: ' + r + '.' : 'Sin dato de PIB per cápita a tipo de cambio.',
 clearArm: 'Pulsa otra vez para borrar', clearArmSay: 'Para borrar los registros, pulsa otra vez.', cleared: 'Registros borrados.'
 };
 const ruN = n => (typeof n === 'number' ? n : +String(n).replace(/\s/g, '').replace(',', '.'));
@@ -758,7 +785,7 @@ draw1: 'Родиться заново', draw10: '10 раз', draw100: '100 ра�
 copy: 'Копировать', copied: 'Скопировано', copyFail: 'Не удалось скопировать',
 lbProb: 'Вероятность родиться здесь', lbGdp: 'ВВП на душу населения', lbTier: 'Этап развития', lbLife: 'Продолжительность жизни',
 atlasTitle: 'Карта мира', resetMap: 'Показать весь мир',
-hTitle: 'Если бы новорождённых в мире было 100', hByTier: 'По этапам развития', hByCont: 'По континентам', hByCountry: 'По странам',
+hTitle: 'Если бы новорождённых в мире было 100', hByTier: 'По этапам развития', hByBand: 'По ВВП на душу населения', hByCont: 'По континентам', hByCountry: 'По странам',
 mTitle: 'Мои записи', mByCont: 'Доля по континентам', mByTier: 'Доля по этапам развития',
 mNote: 'Полоса — доля, которая выпала у вас; вертикальная линия — доля, которой можно ожидать по данным о рождениях. Чем больше розыгрышей, тем ближе они друг к другу.',
 mRecent: 'Последние записи', clear: 'Удалить записи',
@@ -803,6 +830,8 @@ years: x => x + ' ' + ruPl(x, 'год', 'года', 'лет'),
 kids: x => x + ' ' + ruPl(x, 'ребёнок', 'ребёнка', 'детей'),
 lifeUnit: 'года',
 noData: 'Нет данных',
+bandUnder: a => 'Менее ' + a, bandRange: (a, b) => a + '–' + b, bandOver: a => a + ' и выше',
+bandNo: (i, n) => 'Диапазон ' + i + '/' + n,
 gdpNa: (n, ppp) => 'Одно из ' + n + ' мест без данных по рыночному курсу в «Перспективах развития мировой экономики» МВФ.' + (ppp ? ' По ППС: ' + ppp + '.' : ''),
 gdpLabel: note => (note || '2025 г.') + ', по рыночному курсу',
 noPpp: 'Нет данных по ППС',
@@ -819,17 +848,18 @@ tipBatch: n => 'В этой серии: ' + n + ' ' + ruPl(n, 'раз', 'раз�
 mapFail: 'Не удалось загрузить карту. Проверьте подключение к интернету и обновите страницу. Розыгрыш и таблица работают и без карты.',
 ledeHtml: s => 'Вы — один из <b>' + s + '</b> детей 2026 года',
 atlasLede: 'Страна выбирается пропорционально числу рождений в 2026 году, пол — по соотношению полов при рождении в этой стране. Чем больше круг, тем выше вероятность родиться там.',
-legend: 'Размер круга — число рождений в 2026 году, цвет — этап развития. Мигающие точки — дети, которые рождаются прямо сейчас, в реальном темпе. Нажмите на страну, чтобы показать её на экране выше.',
-mapAria: 'Карта мира. Размер круга — число рождений в каждой стране в 2026 году, цвет — этап развития.',
+legend: 'Размер круга — число рождений в 2026 году, цвет — диапазон ВВП на душу населения по рыночному курсу. Мигающие точки — дети, которые рождаются прямо сейчас, в реальном темпе. Нажмите на страну, чтобы показать её на экране выше.',
+mapAria: 'Карта мира. Размер круга — число рождений в каждой стране в 2026 году, цвет — диапазон ВВП на душу населения по рыночному курсу.',
+keysAria: 'Цвета карты: диапазоны ВВП на душу населения по рыночному курсу',
 liveB: 'Рождений/с', liveD: 'Смертей/с', liveSince: 'Родилось с открытия: ', liveAfter: ' чел.',
 tierRules: d => 'Этапы развития следуют официальным классификациям двух международных организаций и рассчитываются на сегодняшнюю дату (' + d + ').',
 gradItem: (n, d) => n + ' (' + d + ')',
 gradSoon: l => 'Выход из списка запланирован: ' + l + '.',
 gradDone: l => 'Уже вышли из списка: ' + l + '.',
 tierListHtml: o =>
-'<li class="t-ADV"><b>Развитые</b>: развитые экономики из Статистического приложения (таблица B) «Перспектив развития мировой экономики» МВФ за апрель 2026 года (всего ' + o.advN + ') и их территории. Сейчас это ' + o.count.ADV + ' ' + ruPl(o.count.ADV, 'место', 'места', 'мест') + ', ' + o.pct.ADV + ' рождений 2026 года.</li>' +
-'<li class="t-LDC"><b>Наименее развитые</b>: страны из списка наименее развитых стран ООН на 19 декабря 2024 года (всего ' + o.ldcN + '). После даты выхода из списка страна считается развивающейся. ' + (o.grad ? o.grad + ' ' : '') + 'Сейчас это ' + o.count.LDC + ' ' + ruPl(o.count.LDC, 'место', 'места', 'мест') + ', ' + o.pct.LDC + '.</li>' +
-'<li class="t-DEV"><b>Развивающиеся</b>: все остальные. Сейчас это ' + o.count.DEV + ' ' + ruPl(o.count.DEV, 'место', 'места', 'мест') + ', ' + o.pct.DEV + '.</li>' +
+'<li><b>Развитые</b>: развитые экономики из Статистического приложения (таблица B) «Перспектив развития мировой экономики» МВФ за апрель 2026 года (всего ' + o.advN + ') и их территории. Сейчас это ' + o.count.ADV + ' ' + ruPl(o.count.ADV, 'место', 'места', 'мест') + ', ' + o.pct.ADV + ' рождений 2026 года.</li>' +
+'<li><b>Наименее развитые</b>: страны из списка наименее развитых стран ООН на 19 декабря 2024 года (всего ' + o.ldcN + '). После даты выхода из списка страна считается развивающейся. ' + (o.grad ? o.grad + ' ' : '') + 'Сейчас это ' + o.count.LDC + ' ' + ruPl(o.count.LDC, 'место', 'места', 'мест') + ', ' + o.pct.LDC + '.</li>' +
+'<li><b>Развивающиеся</b>: все остальные. Сейчас это ' + o.count.DEV + ' ' + ruPl(o.count.DEV, 'место', 'места', 'мест') + ', ' + o.pct.DEV + '.</li>' +
 '<li>Зависимые территории и государства в свободной ассоциации (Острова Кука, Ниуэ) следуют этапу своего суверенного государства. Монако — суверенное государство вне МВФ — не подпадает ни под одно правило и отнесено к той же группе, что и Франция. Западная Сахара, Палестина и Косово не являются территориями развитых экономик, поэтому считаются развивающимися.</li>' +
 '<li>Три доли округлены так, чтобы в сумме давать 100 %.</li>',
 hundredLede: o => 'Из 100 детей, родившихся в 2026 году, ' + o.first[1] + ' появляются на свет ' + ruIn[o.first[2]] + ' и ' + o.second[1] + ' — ' + ruIn[o.second[2]] + '. ' +
@@ -837,6 +867,7 @@ hundredLede: o => 'Из 100 детей, родившихся в 2026 году, '
 o.zero.map(n => ' ' + n + ' — меньше одного.').join('') +
 ' По этапам развития: ' + o.tiers.ADV + ' — в развитых странах, ' + o.tiers.DEV + ' — в развивающихся и ' + o.tiers.LDC + ' — в наименее развитых.',
 hTierAria: l => 'Дети по этапам развития: ' + l,
+hBandAria: l => 'Дети по диапазонам ВВП на душу населения по рыночному курсу: ' + l,
 nb: x => x,
 cells: n => n + ' ' + ruPl(n, 'клетка', 'клетки', 'клеток'),
 mineEmpty: 'Записей пока нет. Нажмите «Родиться заново» выше, чтобы получить первую.',
@@ -852,7 +883,7 @@ count: (all, n) => n === all ? all + ' ' + ruPl(all, 'место', 'места',
 tTitle: n => 'Все ' + n + ' стран и территорий',
 allCont: 'Все континенты', allTier: 'Все этапы развития',
 batchTitle: n => 'Серия из ' + n,
-batchNote: s => 'Точки на карте — места, выпавшие в этой серии (цвет — этап развития). На экране выше показана последняя запись, ' + s + '.',
+batchNote: s => 'Точки на карте — места, выпавшие в этой серии (цвет — диапазон ВВП на душу населения). На экране выше показана последняя запись, ' + s + '.',
 batchAria: l => 'Выпадения по континентам в этой серии и ожидаемые значения. ' + l,
 batchItem: (n, c, x) => n + ' ' + c + ', ожидалось ' + x,
 rowNow: 'Серия', rowExp: 'Ожид.',
@@ -862,6 +893,7 @@ drawnOne: (s, n, sex, p, t) => s + '. ' + n + ', ' + sex.toLowerCase() + '. Ве
 drawnMany: (k, a, b, c, n) => 'Серия из ' + k + ': развитые — ' + a + ', развивающиеся — ' + b + ', наименее развитые — ' + c + '. Последняя запись: ' + n + '.',
 reopened: (s, n, t) => 'Снова открыта запись ' + s + ': ' + n + ', этап развития — ' + t.toLowerCase() + '.',
 looked: (n, t) => 'Показаны данные: ' + n + '. Этап развития — ' + t.toLowerCase() + '.',
+bandSay: r => r ? 'ВВП на душу населения: ' + r + '.' : 'Данных о ВВП на душу населения по рыночному курсу нет.',
 clearArm: 'Нажмите ещё раз, чтобы удалить', clearArmSay: 'Чтобы удалить записи, нажмите ещё раз.', cleared: 'Записи удалены.'
 };
 return { LANGS: ['en', 'ja', 'es', 'ko', 'ru'], en, ja, es, ko, ru };
@@ -872,10 +904,20 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
+const BAND_EDGES = [1000, 3000, 7000, 15000, 30000, 50000, 75000, 100000]; // 9 bands
+const NBANDS = BAND_EDGES.length + 1;
+const BAND_LIST = Array.from({ length: NBANDS + 1 }, (_, i) => (i + 1) % (NBANDS + 1));
+function bandOf(v) {
+if (v == null) return 0;
+let b = 1;
+while (b < NBANDS && v >= BAND_EDGES[b - 1]) b++;
+return b;
+}
 const LOCS = D.LOC.map((r, i) => {
 const o = { i };
 FIELDS.forEach((k, j) => { o[k] = r[j]; });
 o.pm = o.srb / (1 + o.srb);
+o.band = bandOf(o.gdpN);
 return o;
 });
 const BY = new Map(LOCS.map(l => [l.code, l]));
@@ -925,6 +967,7 @@ tierCache = { day, count, births, share, p2, p1 };
 return tierCache;
 }
 const tierIdx = t => TIERS.indexOf(t);
+const lvCls = t => 'lv' + TIER_PIPS[t];
 const pipsHTML = t => '<span class="pips" aria-hidden="true">' + [0, 1, 2].map(i => '<i' + (i < TIER_PIPS[t] ? ' class="on"' : '') + '></i>').join('') + '</span>';
 const U32 = new Uint32Array(2);
 const HAS_CRYPTO = !!(window.crypto && crypto.getRandomValues);
@@ -1007,6 +1050,12 @@ return nf({ maximumSignificantDigits: 1 }).format(v);
 }
 const usd = v => '$' + fmtInt(v);
 const intl = v => S.intl(fmtInt(v));
+function bandName(b) {
+if (!b) return S.noData;
+const lo = BAND_EDGES[b - 2], hi = BAND_EDGES[b - 1];
+return lo === undefined ? S.bandUnder(usd(hi)) : hi === undefined ? S.bandOver(usd(lo)) : S.bandRange(usd(lo), fmtInt(hi));
+}
+const bandSay = L => S.bandSay(L.band ? bandName(L.band) : null);
 const sexName = s => S.sex[s];
 const DATE_OPT = { year: 'numeric', month: 'long', day: 'numeric' };
 function today(t) { return new Intl.DateTimeFormat(S.locale, DATE_OPT).format(t ? new Date(t) : new Date()); }
@@ -1160,7 +1209,7 @@ lastStrip.addEventListener('animationcancel', done);
 }
 let current = { type: 'empty' };
 const stage = $('#stage');
-const TIER_HOSTS = ['.lang-bar', '.hud-head', '#stage', '#atlas', '#hundred'].map(s => $(s));
+const ACC_HOSTS = ['.lang-bar', '.hud-head', '#stage', '#atlas', '#hundred'].map(s => $(s));
 function flagChip(el, L) {
 el.className = 'chip' + (L ? '' : ' empty');
 el.textContent = '';
@@ -1223,9 +1272,9 @@ const animate = !!opt.animate && !REDUCED.matches, spd = opt.speed || 1;
 stage.style.setProperty('--spd', spd);
 stage.classList.remove('fx');
 const empty = st.type === 'empty', L = empty ? null : st.loc, draw = st.type === 'draw';
-const tier = empty ? 'NONE' : tierOf(L);
+const tier = empty ? 'NONE' : tierOf(L), band = empty ? 0 : L.band;
 const T = tierStats();
-TIER_HOSTS.forEach(el => { el.dataset.tier = tier; });
+ACC_HOSTS.forEach(el => { el.dataset.band = band; });
 flagChip($('#chip'), L);
 $('#kindL').textContent = st.type === 'lookup' ? S.kindLookup : S.kindDraw;
 const no = $('#kindNo');
@@ -1249,7 +1298,10 @@ $('#facts').innerHTML = empty
 fact(S.fPop, people(L.pop), S.ofWorld(fmtPct(L.pop / TOT.pop))) +
 fact(S.fMed, S.years(fx(L.med, 1)), S.world(S.years(fx(WR.med, 1)))) +
 fact(S.fTfr, S.kids(fx(L.tfr, 2)), S.world(S.kids(fx(WR.tfr, 2))));
-const bl = $('#tierBarL');
+const bl = $('#tierBarL'), ll = $('#ladderL');
+$('#rungs').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k === band - 1));
+ll.className = 'ladder-l fx-sm';
+ll.innerHTML = empty ? '' : band ? '<b>' + esc(S.bandNo(band, NBANDS)) + '</b> · ' + esc(bandName(band)) : esc(S.noData);
 if (empty) {
 ['vProb', 'vGdp', 'vLife', 'vTier'].forEach(id => { $('#' + id).textContent = dash; $('#' + id).classList.remove('na'); });
 ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier', 'sTier', 'fLife'].forEach(id => { $('#' + id).textContent = ''; });
@@ -1293,8 +1345,8 @@ $('#pips').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < 
 $('#vTier').textContent = S.tier[tier];
 $('#dTier').textContent = tierDesc(L);
 $('#dTier').className = 'tier-desc fx-sm';
-$('#tierBar').innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
-bl.innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
+$('#tierBar').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
+bl.innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
 $('#sTier').innerHTML = S.tierSayHtml(fx(T.p1[tier], 1));
 $('#sTier').className = 'tier-say fx-sm';
 const vl = $('#vLife');
@@ -1460,22 +1512,25 @@ const cv = $('canvas', box), ctx = cv.getContext('2d'), sphere = $('.sphere', bo
 const brks = Array.from(box.querySelectorAll('.brk'));
 const hud = { lat: $('#hudLat'), lng: $('#hudLng'), zoom: $('#hudZoom'), status: $('#hudStatus'), code: $('#hudCode') };
 const cellCv = document.createElement('canvas'), cellCtx = cellCv.getContext('2d');
-const hexRGB = s => { const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim()); const n = m ? parseInt(m[1], 16) : 0x8497B8; return [n >> 16, (n >> 8) & 255, n & 255]; };
-const TIER_RGB = (() => {
+const hexRGB = s => { const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim()); const n = m ? parseInt(m[1], 16) : 0x76829C; return [n >> 16, (n >> 8) & 255, n & 255]; };
+const BAND_RGB = (() => {
 const cs = getComputedStyle(document.documentElement);
-return { ADV: hexRGB(cs.getPropertyValue('--tier-adv')), DEV: hexRGB(cs.getPropertyValue('--tier-dev')), LDC: hexRGB(cs.getPropertyValue('--tier-ldc')), NONE: hexRGB(cs.getPropertyValue('--tier-none')) };
+return Array.from({ length: NBANDS + 1 }, (_, b) => hexRGB(cs.getPropertyValue('--band-' + b)));
 })();
 const toWhite = (c, t) => c.map(v => Math.round(v + (255 - v) * t));
 const LE = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
 const word = c => LE ? (c[2] << 16 | c[1] << 8 | c[0]) : (c[0] << 24 | c[1] << 16 | c[2] << 8) >>> 0;
 const ASH = LE ? 24 : 0;
 let COL = null, WORD = null; // [land, drawn country, its border] as RGB and as words
-function setTier(t) {
-const c = TIER_RGB[t] || TIER_RGB.NONE;
+const LAND_DIM = 0.55;
+let LK = 1;
+function setBand(b) {
+const c = BAND_RGB[b] || BAND_RGB[0];
 COL = [c, toWhite(c, .10), toWhite(c, .50)];
 WORD = COL.map(word);
+LK = b === NBANDS ? LAND_DIM : 1;
 }
-setTier('NONE');
+setBand(0);
 function rasterize(W, H, lon0, lat0, hw, hh, code) {
 const c = document.createElement('canvas');
 c.width = W; c.height = H;
@@ -1600,7 +1655,7 @@ lon0 -= 360 * Math.floor(lon0 / 360);
 if (w) { wl0 = w.lon0 + 180; wl0 -= 360 * Math.floor(wl0 / 360); }
 const wv = w ? w.v : null, wW = w ? w.W : 0, wH = w ? w.H : 0, whw = w ? w.hw : 0, wh2 = w ? 2 * w.hh : 0;
 const wtop = w ? w.lat0 + w.hh : 0, wsx = w ? w.sx : 0, wsy = w ? w.sy : 0;
-const inv = 1 / step, XW = 1024 / 360, wL = WORD[0], wT = WORD[1], wB = WORD[2];
+const inv = 1 / step, XW = 1024 / 360, wL = WORD[0], wT = WORD[1], wB = WORD[2], lk = LK;
 const sr = scan >= 0 ? (scan % 1100) / 1100 * N : -99, r0 = sr - 3, r1 = sr + 2;
 const put = (p, c, a) => { px[p] = (c | (a > 255 ? 255 : a) << ASH) >>> 0; };
 px.fill(0);
@@ -1621,7 +1676,7 @@ if (dl > -whw && dl < whw && dy >= 0 && dy < wh2) x = wv[Math.min(wH - 1, (dy * 
 if (x < 0) x = Wm[wy[q] + ((lw * XW) | 0)];
 val[p] = x;
 let a = 0, c = wL;
-if (x === 1) a = aL[p];
+if (x === 1) a = aL[p] * lk | 0;
 else if (x === 2) { a = aC[p]; c = wT; inCountry.push(p); }
 else {
 const k = kla[p], kl = kla[p - 1], ku = kla[p - N];
@@ -1648,8 +1703,8 @@ spread(inCountry, ring1, 2);
 spread(ring1, ring2, 3);
 const lit = (p, a) => { const j = (p / N) | 0; return j > r0 && j < r1 ? a + 60 : a; };
 for (const p of inCountry) if (val[p - 1] !== 2 || val[p + 1] !== 2 || val[p - N] !== 2 || val[p + N] !== 2) put(p, wB, 255);
-for (const p of ring1) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 40 : 92));
-for (const p of ring2) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 18 : 46));
+for (const p of ring1) put(p, wL, lit(p, val[p] === 1 ? (aL[p] * lk | 0) + 40 : 92));
+for (const p of ring2) put(p, wL, lit(p, val[p] === 1 ? (aL[p] * lk | 0) + 18 : 46));
 for (const p of inCountry) near[p] = 0;
 for (const p of ring1) near[p] = 0;
 for (const p of ring2) near[p] = 0;
@@ -1833,7 +1888,7 @@ if ('IntersectionObserver' in window) new IntersectionObserver(es => { visible =
 function show(st, opt = {}) {
 stop();
 const empty = st.type === 'empty';
-setTier(empty ? 'NONE' : tierOf(st.loc));
+setBand(empty ? 0 : st.loc.band);
 if (empty) { idle(); return; }
 const L = st.loc;
 hud.code.textContent = 'M49 ' + String(L.code).padStart(3, '0') + ' · ' + L.iso2;
@@ -1894,7 +1949,7 @@ const maxB = d3.max(LOCS, l => l.births);
 const rBase = LOCS.map(l => Math.max(1.1, 25 * Math.sqrt(l.births / maxB)));
 const order = LOCS.map(l => l.i).sort((a, b) => LOCS[b].births - LOCS[a].births);
 const bub = zl.append('g').selectAll('circle').data(order).join('circle')
-.attr('class', i => 'bubble t-' + LOCS[i].tier)
+.attr('class', i => 'bubble b-' + LOCS[i].band)
 .attr('cx', i => pos[i][0]).attr('cy', i => pos[i][1])
 .attr('r', i => rBase[i])
 .attr('data-code', i => LOCS[i].code);
@@ -1961,9 +2016,9 @@ MAP.showBatch = counts => {
 batchCounts = counts;
 const data = [...counts].map(([code, n]) => {
 const L = BY.get(code), p = proj([L.lng, L.lat]);
-return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n), t: L.tier };
+return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n), b: L.band };
 }).sort((a, b) => b.n - a.n);
-batchG.selectAll('circle').data(data).join('circle').attr('class', d => 'bdot t-' + d.t)
+batchG.selectAll('circle').data(data).join('circle').attr('class', d => 'bdot b-' + d.b)
 .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r / K).attr('data-code', d => d.code);
 };
 MAP.clearBatch = () => { batchCounts = null; batchG.selectAll('*').remove(); };
@@ -1978,7 +2033,8 @@ if (ev.pointerType === 'touch') return;
 const code = codeAt(ev), L = BY.get(code);
 if (!L) { tip.hidden = true; return; }
 const r = wrap.getBoundingClientRect();
-let h = '<b>' + esc(nm(L)) + '</b> <span class="t t-' + L.tier + '">' + S.tier[L.tier] + '</span><br>' + esc(S.kv(S.births2026, people(L.births))) +
+let h = '<b>' + esc(nm(L)) + '</b> <span class="tt">' + S.tier[L.tier] + '</span><br>' +
+S.kv(esc(S.lbGdp), '<span class="t b-' + L.band + '">' + esc(bandName(L.band)) + '</span>') + '<br>' + esc(S.kv(S.births2026, people(L.births))) +
 '<br>' + esc(S.kv(S.lbProb, fmtPct(L.births / TOT.births)));
 if (batchCounts && batchCounts.has(code)) h += '<br>' + esc(S.tipBatch(fmtInt(batchCounts.get(code))));
 tip.innerHTML = h;
@@ -2075,7 +2131,9 @@ $('#lede').innerHTML = S.ledeHtml(big(WR.births, 4));
 $('#atlasLede').textContent = S.atlasLede;
 $('#legend').textContent = S.legend;
 $('#map').setAttribute('aria-label', S.mapAria);
-$('#keys').innerHTML = TIERS.map(t => '<li class="t-' + t + '">' + pipsHTML(t) + S.tier[t] + '</li>').join('');
+const keys = $('#keys');
+keys.innerHTML = BAND_LIST.map(b => '<li class="b-' + b + '"><i aria-hidden="true"></i><span>' + esc(bandName(b)).replace('–', '–<wbr>') + '</span></li>').join('');
+keys.setAttribute('aria-label', S.keysAria);
 $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span><span class="rate">' + S.liveD + '<b>' + fx(RATE_D, 1) + '</b></span>' +
 '<span><span class="dot" aria-hidden="true"></span><span class="since">' + S.liveSince + '</span><b id="liveN">0</b>' + S.liveAfter + '</span>';
 }
@@ -2110,9 +2168,15 @@ rest: rest.map(ci => [contName(ci), cells[ci], ci]),
 zero: order.filter(ci => cells[ci] === 0).map(contName),
 tiers: { ADV: fx(T.p1.ADV, 1), DEV: fx(T.p1.DEV, 1), LDC: fx(T.p1.LDC, 1) }
 });
-$('#hTier').innerHTML = TIERS.map(t => '<span class="t-' + t + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
+$('#hTier').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
 $('#hTier').setAttribute('aria-label', S.hTierAria(TIERS.map(t => S.tier[t] + ' ' + S.nb(fx(T.p1[t], 1))).join(S.comma)));
-$('#hTierKeys').innerHTML = TIERS.map(t => '<li class="t-' + t + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');
+$('#hTierKeys').innerHTML = TIERS.map(t => '<li class="' + lvCls(t) + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');
+const bands = BAND_LIST, bb = bands.map(() => 0);
+LOCS.forEach(l => { bb[bands.indexOf(l.band)] += l.births; });
+const b1 = largestRemainder(bb.map(v => v / tot * 1000), 1000).map(v => v / 10);
+$('#hBand').innerHTML = bands.map((b, i) => b1[i] > 0 ? '<span class="b-' + b + '" style="flex:' + b1[i] + ' 1 0" title="' + esc(S.kv(bandName(b), S.nb(fx(b1[i], 1)))) + '">' + (b1[i] >= 6 ? fx(b1[i], 1) : '') + '</span>' : '').join('');
+$('#hBand').setAttribute('aria-label', S.hBandAria(bands.map((b, i) => bandName(b) + ' ' + S.nb(fx(b1[i], 1))).join(S.comma)));
+$('#hBandKeys').innerHTML = bands.map((b, i) => '<li class="b-' + b + '"><i></i>' + esc(bandName(b)) + ' <b>' + S.nb(fx(b1[i], 1)) + '</b></li>').join('');
 const waffle = $('#waffle');
 waffle.innerHTML = order.map(ci => ('<span class="k' + ci + '"></span>').repeat(cells[ci])).join('');
 waffle.setAttribute('aria-label', order.map(ci => contName(ci) + ' ' + S.cells(cells[ci])).join(S.comma));
@@ -2140,7 +2204,7 @@ const order = CONT.map((_, i) => i).sort((a, b) => exp[b] - exp[a]);
 const li = (cls, name, obs, ex) => '<li class="' + cls + '"><span>' + esc(name) + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (ex * 100).toFixed(2) + '%"></i></span>' +
 '<span class="v">' + pctF(obs, 1) + ' <small>' + esc(S.exp(pctF(ex, 1))) + '</small></span></li>';
 $('#mCmp').innerHTML = order.map(ci => li('k' + ci, contName(ci), st.cont[ci] / st.n, exp[ci])).join('');
-$('#mTier').innerHTML = TIERS.map((t, i) => li('t-' + t, S.tier[t], st.tier[i] / st.n, T.share[t])).join('');
+$('#mTier').innerHTML = TIERS.map((t, i) => li(lvCls(t), S.tier[t], st.tier[i] / st.n, T.share[t])).join('');
 const tops = Object.entries(st.top).map(([c, n]) => [BY.get(+c), n]).filter(x => x[0])
 .sort((x, y) => y[1] - x[1] || y[0].births - x[0].births).slice(0, 5);
 $('#mTop').textContent = S.mostFrequent + tops.map(([l, n]) => S.topItem(nm(l), fmtInt(n), fmtSmall(st.n * l.births / tot))).join(S.comma) + S.period;
@@ -2152,7 +2216,7 @@ list.innerHTML = '<li><p class="empty-hint">' + esc(S.emptyHint) + '</p></li>';
 list.innerHTML = store.recent.map(r => {
 const l = BY.get(r.c), t = tierOf(l);
 return '<li><button type="button" data-no="' + r.no + '"' + (current.type === 'draw' && current.serial === r.no ? ' aria-current="true"' : '') + '>' +
-'<span class="r-name t-' + t + '"><span class="sr-only">' + S.tier[t] + S.comma + '</span><span class="r-txt">' + esc(nm(l)) + S.comma + sexName(r.s) + '</span></span>' +
+'<span class="r-name b-' + l.band + '"><span class="sr-only">' + S.tier[t] + S.comma + esc(S.kv(S.lbGdp, bandName(l.band))) + S.comma + '</span><span class="r-txt">' + esc(nm(l)) + S.comma + sexName(r.s) + '</span></span>' +
 '<span class="r-no">' + (r.b ? '<small>' + esc(S.lastOf(fmtInt(r.b))) + '</small>' : '') + esc(S.serial(fmtInt(r.no))) + '</span></button></li>';
 }).join('');
 }
@@ -2176,9 +2240,10 @@ const s = TBL.key === c.key ? ' aria-sort="' + (TBL.dir > 0 ? 'ascending' : 'des
 return '<th scope="col"' + (c.cls ? ' class="' + c.cls + '"' : '') + s + '><button type="button" data-key="' + c.key + '">' + esc(S.cols[c.key]) + '</button></th>';
 }).join('');
 }
-function gdpCell(v, n, f) {
-if (v == null) return '<td class="na" title="' + esc(S.noData) + '">—</td>';
-return '<td' + (n ? ' title="' + esc(note(n)) + '"' : '') + '>' + f(v) + (n ? '*' : '') + '</td>';
+function gdpCell(v, n, f, chip) {
+const c = chip ? '<i class="gchip b-' + bandOf(v) + '" aria-hidden="true"></i>' : '';
+if (v == null) return '<td class="na" title="' + esc(S.noData) + '">' + c + '—</td>';
+return '<td' + (n ? ' title="' + esc(note(n)) + '"' : '') + '>' + c + f(v) + (n ? '*' : '') + '</td>';
 }
 function renderTable() {
 tierStats();
@@ -2198,9 +2263,9 @@ $('#tBody').innerHTML = rows.length ? rows.map(l =>
 '<tr' + (l.code === cur ? ' class="cur"' : '') + '><th scope="row"><div class="nm-cell"><span class="chip xs"><img src="assets/flags/' + l.iso2.toLowerCase() + '.svg" alt="" width="22" height="16" loading="lazy" decoding="async"></span>' +
 '<button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(nm(l)) + '</button><span class="en">' + esc(nmSub(l)) + '</span></div></th>' +
 '<td>' + compact(l.births) + '</td><td>' + compact(l.pop) + '</td><td>' + fmtPct(l.births / TOT.births) + '</td>' +
-'<td class="tier-c t-' + l.tier + '">' + pipsHTML(l.tier) + S.tier[l.tier] + '</td>' +
+'<td class="tier-c ' + lvCls(l.tier) + '">' + pipsHTML(l.tier) + S.tier[l.tier] + '</td>' +
 '<td>' + fx(l.e0B, 1) + '</td>' +
-gdpCell(l.gdpN, l.gdpNNote, usd) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
+gdpCell(l.gdpN, l.gdpNNote, usd, true) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
 '</tr>').join('') : '<tr><td colspan="8" class="tbl-empty">' + esc(S.tblEmpty) + '</td></tr>';
 $('#tCount').textContent = S.count(LOCS.length, rows.length);
 }
@@ -2248,7 +2313,7 @@ box.innerHTML =
 '<p class="batch-top">' + esc(S.mostFrequent + tops.map(([c, k]) => S.topItem(nm(BY.get(c)), fmtInt(k), fmtSmall(BY.get(c).births / tot * n))).join(S.comma) + S.period) + '</p>';
 box.hidden = false;
 const line = $('#batchLine');
-line.innerHTML = S.batchLineHtml(n, TIERS.map((t, i) => '<span class="t-' + t + '">' + S.tier[t] + ' <b>' + tierN[i] + '</b></span>').join(S.comma),
+line.innerHTML = S.batchLineHtml(n, TIERS.map((t, i) => '<span>' + S.tier[t] + ' <b>' + tierN[i] + '</b></span>').join(S.comma),
 TIERS.map(t => fx(T.share[t] * n, 1)).join(' / ')) +
 '<a href="#atlas" id="toMap">' + esc(S.toMap) + '</a>';
 line.hidden = false;
@@ -2289,9 +2354,9 @@ renderMine();
 renderHundred();
 markTableRow();
 const L = last.loc;
-announce(n === 1
+announce((n === 1
 ? S.drawnOne(S.serial(fmtInt(last.serial)), nm(L), sexName(last.sex), fmtPct(L.births / TOT.births), S.tier[tierOf(L)])
-: S.drawnMany(n, tierN[0], tierN[1], tierN[2], nm(L)));
+: S.drawnMany(n, tierN[0], tierN[1], tierN[2], nm(L))) + S.sp + bandSay(L));
 }
 function reopen(no) {
 const r = store.recent.find(x => x.no === no);
@@ -2303,7 +2368,7 @@ if (MAP.ready) MAP.pick(st.loc.code, true);
 renderHundred();
 renderMine();
 markTableRow();
-announce(S.reopened(S.serial(fmtInt(no)), nm(st.loc), S.tier[tierOf(st.loc)]));
+announce(S.reopened(S.serial(fmtInt(no)), nm(st.loc), S.tier[tierOf(st.loc)]) + S.sp + bandSay(st.loc));
 reveal();
 }
 function lookup(code) {
@@ -2315,7 +2380,7 @@ if (MAP.ready) MAP.pick(code, true);
 renderHundred();
 renderMine();
 markTableRow();
-announce(S.looked(nm(L), S.tier[tierOf(L)]));
+announce(S.looked(nm(L), S.tier[tierOf(L)]) + S.sp + bandSay(L));
 reveal();
 }
 function pickLang() {

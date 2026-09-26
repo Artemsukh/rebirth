@@ -54,7 +54,7 @@ def json_script(obj):
 
 css = min_css(read(os.path.join(SRC, 'style.css')))
 body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('\n') if l.strip())
-# page text in four languages, read by app.js (it must come first in the same script)
+# page text in five languages, read by app.js (it must come first in the same script)
 i18n = min_js(read(os.path.join(SRC, 'i18n.js')))
 app = min_js(read(os.path.join(SRC, 'app.js')))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))

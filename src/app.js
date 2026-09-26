@@ -6,11 +6,25 @@ const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
+/* Colour means one thing on this page: GDP per head in US$ at market rates (gdpN, the figure shown,
+   fallback years included), in nine bands. An edge belongs to the band above it; a place with no
+   figure is band 0. Bands are worked out here at start, never stored. */
+const BAND_EDGES = [1000, 3000, 7000, 15000, 30000, 50000, 75000, 100000]; // 9 bands
+const NBANDS = BAND_EDGES.length + 1;
+/* the order bands are listed in: 1 to 9, then no data */
+const BAND_LIST = Array.from({ length: NBANDS + 1 }, (_, i) => (i + 1) % (NBANDS + 1));
+function bandOf(v) {
+  if (v == null) return 0;
+  let b = 1;
+  while (b < NBANDS && v >= BAND_EDGES[b - 1]) b++;
+  return b;
+}
 /* rows are plain arrays; LOC_FIELDS names each column so removing one cannot shift the rest */
 const LOCS = D.LOC.map((r, i) => {
   const o = { i };
   FIELDS.forEach((k, j) => { o[k] = r[j]; });
   o.pm = o.srb / (1 + o.srb);
+  o.band = bandOf(o.gdpN);
   return o;
 });
 const BY = new Map(LOCS.map(l => [l.code, l]));
@@ -71,6 +85,8 @@ function tierStats() {
   return tierCache;
 }
 const tierIdx = t => TIERS.indexOf(t);
+/* tiers have no hue: side by side they are three greys, lv3 (advanced) to lv1, as many as their pips */
+const lvCls = t => 'lv' + TIER_PIPS[t];
 const pipsHTML = t => '<span class="pips" aria-hidden="true">' + [0, 1, 2].map(i => '<i' + (i < TIER_PIPS[t] ? ' class="on"' : '') + '></i>').join('') + '</span>';
 
 /* ================= random ================= */
@@ -161,6 +177,14 @@ function fmtSmall(v) {
 }
 const usd = v => '$' + fmtInt(v);
 const intl = v => S.intl(fmtInt(v));
+/* a band in words: under $1,000, $1,000–3,000, $100,000 and over; no data for band 0 */
+function bandName(b) {
+  if (!b) return S.noData;
+  const lo = BAND_EDGES[b - 2], hi = BAND_EDGES[b - 1];
+  return lo === undefined ? S.bandUnder(usd(hi)) : hi === undefined ? S.bandOver(usd(lo)) : S.bandRange(usd(lo), fmtInt(hi));
+}
+/* the sentence screen readers hear after a draw or lookup */
+const bandSay = L => S.bandSay(L.band ? bandName(L.band) : null);
 const sexName = s => S.sex[s];
 const DATE_OPT = { year: 'numeric', month: 'long', day: 'numeric' };
 function today(t) { return new Intl.DateTimeFormat(S.locale, DATE_OPT).format(t ? new Date(t) : new Date()); }
@@ -340,7 +364,8 @@ function roll(el, text, base = 0, speed = 1, animate = true) {
 /* ================= result screen ================= */
 let current = { type: 'empty' };
 const stage = $('#stage');
-const TIER_HOSTS = ['.lang-bar', '.hud-head', '#stage', '#atlas', '#hundred'].map(s => $(s));
+/* the parts that take the shown country's band colour as --acc (see style.css) */
+const ACC_HOSTS = ['.lang-bar', '.hud-head', '#stage', '#atlas', '#hundred'].map(s => $(s));
 
 function flagChip(el, L) {
   el.className = 'chip' + (L ? '' : ' empty');
@@ -411,9 +436,9 @@ function renderStage(st, opt = {}) {
   stage.style.setProperty('--spd', spd);
   stage.classList.remove('fx');
   const empty = st.type === 'empty', L = empty ? null : st.loc, draw = st.type === 'draw';
-  const tier = empty ? 'NONE' : tierOf(L);
+  const tier = empty ? 'NONE' : tierOf(L), band = empty ? 0 : L.band;
   const T = tierStats();
-  TIER_HOSTS.forEach(el => { el.dataset.tier = tier; });
+  ACC_HOSTS.forEach(el => { el.dataset.band = band; });
 
   /* identity */
   flagChip($('#chip'), L);
@@ -441,7 +466,10 @@ function renderStage(st, opt = {}) {
       fact(S.fTfr, S.kids(fx(L.tfr, 2)), S.world(S.kids(fx(WR.tfr, 2))));
 
   /* read-outs */
-  const bl = $('#tierBarL');
+  const bl = $('#tierBarL'), ll = $('#ladderL');
+  $('#rungs').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k === band - 1));
+  ll.className = 'ladder-l fx-sm';
+  ll.innerHTML = empty ? '' : band ? '<b>' + esc(S.bandNo(band, NBANDS)) + '</b> · ' + esc(bandName(band)) : esc(S.noData);
   if (empty) {
     ['vProb', 'vGdp', 'vLife', 'vTier'].forEach(id => { $('#' + id).textContent = dash; $('#' + id).classList.remove('na'); });
     ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier', 'sTier', 'fLife'].forEach(id => { $('#' + id).textContent = ''; });
@@ -487,8 +515,8 @@ function renderStage(st, opt = {}) {
     $('#vTier').textContent = S.tier[tier];
     $('#dTier').textContent = tierDesc(L);
     $('#dTier').className = 'tier-desc fx-sm';
-    $('#tierBar').innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
-    bl.innerHTML = TIERS.map(t => '<span class="t-' + t + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
+    $('#tierBar').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
+    bl.innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
     $('#sTier').innerHTML = S.tierSayHtml(fx(T.p1[tier], 1));
     $('#sTier').className = 'tier-say fx-sm';
 
@@ -684,11 +712,11 @@ const PLANET = (() => {
   /* the cell image is drawn at one pixel per cell here, then scaled up onto the page canvas */
   const cellCv = document.createElement('canvas'), cellCtx = cellCv.getContext('2d');
 
-  /* ---- colours: one hue per tier; brightness is carried by alpha alone ---- */
-  const hexRGB = s => { const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim()); const n = m ? parseInt(m[1], 16) : 0x8497B8; return [n >> 16, (n >> 8) & 255, n & 255]; };
-  const TIER_RGB = (() => {
+  /* ---- colours: one hue, the drawn country's GDP band; brightness is carried by alpha alone ---- */
+  const hexRGB = s => { const m = /^#?([0-9a-f]{6})$/i.exec(String(s).trim()); const n = m ? parseInt(m[1], 16) : 0x76829C; return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const BAND_RGB = (() => {
     const cs = getComputedStyle(document.documentElement);
-    return { ADV: hexRGB(cs.getPropertyValue('--tier-adv')), DEV: hexRGB(cs.getPropertyValue('--tier-dev')), LDC: hexRGB(cs.getPropertyValue('--tier-ldc')), NONE: hexRGB(cs.getPropertyValue('--tier-none')) };
+    return Array.from({ length: NBANDS + 1 }, (_, b) => hexRGB(cs.getPropertyValue('--band-' + b)));
   })();
   const toWhite = (c, t) => c.map(v => Math.round(v + (255 - v) * t));
   /* a cell is written as one 32-bit RGBA word: colour bits here, alpha added per cell */
@@ -696,12 +724,17 @@ const PLANET = (() => {
   const word = c => LE ? (c[2] << 16 | c[1] << 8 | c[0]) : (c[0] << 24 | c[1] << 16 | c[2] << 8) >>> 0;
   const ASH = LE ? 24 : 0;
   let COL = null, WORD = null; // [land, drawn country, its border] as RGB and as words
-  function setTier(t) {
-    const c = TIER_RGB[t] || TIER_RGB.NONE;
+  /* the top band's platinum is already near white, so the whitened country hardly stands out from the
+     land by colour; there the rest of the land is dimmed instead (LK scales its alpha) */
+  const LAND_DIM = 0.55;
+  let LK = 1;
+  function setBand(b) {
+    const c = BAND_RGB[b] || BAND_RGB[0];
     COL = [c, toWhite(c, .10), toWhite(c, .50)];
     WORD = COL.map(word);
+    LK = b === NBANDS ? LAND_DIM : 1;
   }
-  setTier('NONE');
+  setBand(0);
 
   /* ---- land rasters ---- */
   /* an equirectangular grid of lon0 +- hw by lat0 +- hh: 0 sea, 1 land, 2 the drawn country (painted
@@ -848,7 +881,7 @@ const PLANET = (() => {
     if (w) { wl0 = w.lon0 + 180; wl0 -= 360 * Math.floor(wl0 / 360); }
     const wv = w ? w.v : null, wW = w ? w.W : 0, wH = w ? w.H : 0, whw = w ? w.hw : 0, wh2 = w ? 2 * w.hh : 0;
     const wtop = w ? w.lat0 + w.hh : 0, wsx = w ? w.sx : 0, wsy = w ? w.sy : 0;
-    const inv = 1 / step, XW = 1024 / 360, wL = WORD[0], wT = WORD[1], wB = WORD[2];
+    const inv = 1 / step, XW = 1024 / 360, wL = WORD[0], wT = WORD[1], wB = WORD[2], lk = LK;
     /* the scan line: rows within 2.5 cells of it */
     const sr = scan >= 0 ? (scan % 1100) / 1100 * N : -99, r0 = sr - 3, r1 = sr + 2;
     const put = (p, c, a) => { px[p] = (c | (a > 255 ? 255 : a) << ASH) >>> 0; };
@@ -870,7 +903,7 @@ const PLANET = (() => {
       if (x < 0) x = Wm[wy[q] + ((lw * XW) | 0)];
       val[p] = x;
       let a = 0, c = wL;
-      if (x === 1) a = aL[p];
+      if (x === 1) a = aL[p] * lk | 0;
       else if (x === 2) { a = aC[p]; c = wT; inCountry.push(p); }
       else {
         /* graticule, sea only: a cell is on a line when the cell to its left or above lies in another
@@ -901,8 +934,8 @@ const PLANET = (() => {
       spread(ring1, ring2, 3);
       const lit = (p, a) => { const j = (p / N) | 0; return j > r0 && j < r1 ? a + 60 : a; };
       for (const p of inCountry) if (val[p - 1] !== 2 || val[p + 1] !== 2 || val[p - N] !== 2 || val[p + N] !== 2) put(p, wB, 255);
-      for (const p of ring1) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 40 : 92));
-      for (const p of ring2) put(p, wL, lit(p, val[p] === 1 ? aL[p] + 18 : 46));
+      for (const p of ring1) put(p, wL, lit(p, val[p] === 1 ? (aL[p] * lk | 0) + 40 : 92));
+      for (const p of ring2) put(p, wL, lit(p, val[p] === 1 ? (aL[p] * lk | 0) + 18 : 46));
       for (const p of inCountry) near[p] = 0;
       for (const p of ring1) near[p] = 0;
       for (const p of ring2) near[p] = 0;
@@ -1101,7 +1134,7 @@ const PLANET = (() => {
   function show(st, opt = {}) {
     stop();
     const empty = st.type === 'empty';
-    setTier(empty ? 'NONE' : tierOf(st.loc));
+    setBand(empty ? 0 : st.loc.band);
     if (empty) { idle(); return; }
     const L = st.loc;
     hud.code.textContent = 'M49 ' + String(L.code).padStart(3, '0') + ' · ' + L.iso2;
@@ -1170,7 +1203,7 @@ function initMap() {
   const rBase = LOCS.map(l => Math.max(1.1, 25 * Math.sqrt(l.births / maxB)));
   const order = LOCS.map(l => l.i).sort((a, b) => LOCS[b].births - LOCS[a].births);
   const bub = zl.append('g').selectAll('circle').data(order).join('circle')
-    .attr('class', i => 'bubble t-' + LOCS[i].tier)
+    .attr('class', i => 'bubble b-' + LOCS[i].band)
     .attr('cx', i => pos[i][0]).attr('cy', i => pos[i][1])
     .attr('r', i => rBase[i])
     .attr('data-code', i => LOCS[i].code);
@@ -1241,9 +1274,9 @@ function initMap() {
     batchCounts = counts;
     const data = [...counts].map(([code, n]) => {
       const L = BY.get(code), p = proj([L.lng, L.lat]);
-      return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n), t: L.tier };
+      return { code, n, x: p[0], y: p[1], r: 2 + 2.1 * Math.sqrt(n), b: L.band };
     }).sort((a, b) => b.n - a.n);
-    batchG.selectAll('circle').data(data).join('circle').attr('class', d => 'bdot t-' + d.t)
+    batchG.selectAll('circle').data(data).join('circle').attr('class', d => 'bdot b-' + d.b)
       .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r / K).attr('data-code', d => d.code);
   };
   MAP.clearBatch = () => { batchCounts = null; batchG.selectAll('*').remove(); };
@@ -1260,7 +1293,8 @@ function initMap() {
     const code = codeAt(ev), L = BY.get(code);
     if (!L) { tip.hidden = true; return; }
     const r = wrap.getBoundingClientRect();
-    let h = '<b>' + esc(nm(L)) + '</b> <span class="t t-' + L.tier + '">' + S.tier[L.tier] + '</span><br>' + esc(S.kv(S.births2026, people(L.births))) +
+    let h = '<b>' + esc(nm(L)) + '</b> <span class="tt">' + S.tier[L.tier] + '</span><br>' +
+      S.kv(esc(S.lbGdp), '<span class="t b-' + L.band + '">' + esc(bandName(L.band)) + '</span>') + '<br>' + esc(S.kv(S.births2026, people(L.births))) +
       '<br>' + esc(S.kv(S.lbProb, fmtPct(L.births / TOT.births)));
     if (batchCounts && batchCounts.has(code)) h += '<br>' + esc(S.tipBatch(fmtInt(batchCounts.get(code))));
     tip.innerHTML = h;
@@ -1364,7 +1398,10 @@ function renderIntro() {
   $('#atlasLede').textContent = S.atlasLede;
   $('#legend').textContent = S.legend;
   $('#map').setAttribute('aria-label', S.mapAria);
-  $('#keys').innerHTML = TIERS.map(t => '<li class="t-' + t + '">' + pipsHTML(t) + S.tier[t] + '</li>').join('');
+  /* the nine bands then no data; a range may break after its dash */
+  const keys = $('#keys');
+  keys.innerHTML = BAND_LIST.map(b => '<li class="b-' + b + '"><i aria-hidden="true"></i><span>' + esc(bandName(b)).replace('–', '–<wbr>') + '</span></li>').join('');
+  keys.setAttribute('aria-label', S.keysAria);
   $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span><span class="rate">' + S.liveD + '<b>' + fx(RATE_D, 1) + '</b></span>' +
     '<span><span class="dot" aria-hidden="true"></span><span class="since">' + S.liveSince + '</span><b id="liveN">0</b>' + S.liveAfter + '</span>';
 }
@@ -1402,9 +1439,17 @@ function renderHundred() {
     zero: order.filter(ci => cells[ci] === 0).map(contName),
     tiers: { ADV: fx(T.p1.ADV, 1), DEV: fx(T.p1.DEV, 1), LDC: fx(T.p1.LDC, 1) }
   });
-  $('#hTier').innerHTML = TIERS.map(t => '<span class="t-' + t + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
+  $('#hTier').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
   $('#hTier').setAttribute('aria-label', S.hTierAria(TIERS.map(t => S.tier[t] + ' ' + S.nb(fx(T.p1[t], 1))).join(S.comma)));
-  $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="t-' + t + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');
+  $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="' + lvCls(t) + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');
+  /* by GDP band, bands 1-9 then no data, in babies out of 100 to one decimal; a part that rounds to 0.0
+     is left out of the strip and kept in the keys, and only parts wide enough carry their number */
+  const bands = BAND_LIST, bb = bands.map(() => 0);
+  LOCS.forEach(l => { bb[bands.indexOf(l.band)] += l.births; });
+  const b1 = largestRemainder(bb.map(v => v / tot * 1000), 1000).map(v => v / 10);
+  $('#hBand').innerHTML = bands.map((b, i) => b1[i] > 0 ? '<span class="b-' + b + '" style="flex:' + b1[i] + ' 1 0" title="' + esc(S.kv(bandName(b), S.nb(fx(b1[i], 1)))) + '">' + (b1[i] >= 6 ? fx(b1[i], 1) : '') + '</span>' : '').join('');
+  $('#hBand').setAttribute('aria-label', S.hBandAria(bands.map((b, i) => bandName(b) + ' ' + S.nb(fx(b1[i], 1))).join(S.comma)));
+  $('#hBandKeys').innerHTML = bands.map((b, i) => '<li class="b-' + b + '"><i></i>' + esc(bandName(b)) + ' <b>' + S.nb(fx(b1[i], 1)) + '</b></li>').join('');
   const waffle = $('#waffle');
   waffle.innerHTML = order.map(ci => ('<span class="k' + ci + '"></span>').repeat(cells[ci])).join('');
   waffle.setAttribute('aria-label', order.map(ci => contName(ci) + ' ' + S.cells(cells[ci])).join(S.comma));
@@ -1434,7 +1479,7 @@ function renderMine() {
     const li = (cls, name, obs, ex) => '<li class="' + cls + '"><span>' + esc(name) + '</span><span class="bar"><b style="--w:' + (obs * 100).toFixed(2) + '%"></b><i style="--x:' + (ex * 100).toFixed(2) + '%"></i></span>' +
       '<span class="v">' + pctF(obs, 1) + ' <small>' + esc(S.exp(pctF(ex, 1))) + '</small></span></li>';
     $('#mCmp').innerHTML = order.map(ci => li('k' + ci, contName(ci), st.cont[ci] / st.n, exp[ci])).join('');
-    $('#mTier').innerHTML = TIERS.map((t, i) => li('t-' + t, S.tier[t], st.tier[i] / st.n, T.share[t])).join('');
+    $('#mTier').innerHTML = TIERS.map((t, i) => li(lvCls(t), S.tier[t], st.tier[i] / st.n, T.share[t])).join('');
     const tops = Object.entries(st.top).map(([c, n]) => [BY.get(+c), n]).filter(x => x[0])
       .sort((x, y) => y[1] - x[1] || y[0].births - x[0].births).slice(0, 5);
     $('#mTop').textContent = S.mostFrequent + tops.map(([l, n]) => S.topItem(nm(l), fmtInt(n), fmtSmall(st.n * l.births / tot))).join(S.comma) + S.period;
@@ -1446,7 +1491,7 @@ function renderMine() {
     list.innerHTML = store.recent.map(r => {
       const l = BY.get(r.c), t = tierOf(l);
       return '<li><button type="button" data-no="' + r.no + '"' + (current.type === 'draw' && current.serial === r.no ? ' aria-current="true"' : '') + '>' +
-        '<span class="r-name t-' + t + '"><span class="sr-only">' + S.tier[t] + S.comma + '</span><span class="r-txt">' + esc(nm(l)) + S.comma + sexName(r.s) + '</span></span>' +
+        '<span class="r-name b-' + l.band + '"><span class="sr-only">' + S.tier[t] + S.comma + esc(S.kv(S.lbGdp, bandName(l.band))) + S.comma + '</span><span class="r-txt">' + esc(nm(l)) + S.comma + sexName(r.s) + '</span></span>' +
         '<span class="r-no">' + (r.b ? '<small>' + esc(S.lastOf(fmtInt(r.b))) + '</small>' : '') + esc(S.serial(fmtInt(r.no))) + '</span></button></li>';
     }).join('');
   }
@@ -1474,9 +1519,11 @@ function renderTableHead() {
     return '<th scope="col"' + (c.cls ? ' class="' + c.cls + '"' : '') + s + '><button type="button" data-key="' + c.key + '">' + esc(S.cols[c.key]) + '</button></th>';
   }).join('');
 }
-function gdpCell(v, n, f) {
-  if (v == null) return '<td class="na" title="' + esc(S.noData) + '">—</td>';
-  return '<td' + (n ? ' title="' + esc(note(n)) + '"' : '') + '>' + f(v) + (n ? '*' : '') + '</td>';
+/* with chip set (the market-rate column) the cell starts with a chip in its GDP band's colour */
+function gdpCell(v, n, f, chip) {
+  const c = chip ? '<i class="gchip b-' + bandOf(v) + '" aria-hidden="true"></i>' : '';
+  if (v == null) return '<td class="na" title="' + esc(S.noData) + '">' + c + '—</td>';
+  return '<td' + (n ? ' title="' + esc(note(n)) + '"' : '') + '>' + c + f(v) + (n ? '*' : '') + '</td>';
 }
 function renderTable() {
   tierStats();
@@ -1496,9 +1543,9 @@ function renderTable() {
     '<tr' + (l.code === cur ? ' class="cur"' : '') + '><th scope="row"><div class="nm-cell"><span class="chip xs"><img src="assets/flags/' + l.iso2.toLowerCase() + '.svg" alt="" width="22" height="16" loading="lazy" decoding="async"></span>' +
     '<button type="button" class="nm-btn" data-code="' + l.code + '">' + esc(nm(l)) + '</button><span class="en">' + esc(nmSub(l)) + '</span></div></th>' +
     '<td>' + compact(l.births) + '</td><td>' + compact(l.pop) + '</td><td>' + fmtPct(l.births / TOT.births) + '</td>' +
-    '<td class="tier-c t-' + l.tier + '">' + pipsHTML(l.tier) + S.tier[l.tier] + '</td>' +
+    '<td class="tier-c ' + lvCls(l.tier) + '">' + pipsHTML(l.tier) + S.tier[l.tier] + '</td>' +
     '<td>' + fx(l.e0B, 1) + '</td>' +
-    gdpCell(l.gdpN, l.gdpNNote, usd) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
+    gdpCell(l.gdpN, l.gdpNNote, usd, true) + gdpCell(l.gdp, l.gdpNote, v => fmtInt(v)) +
     '</tr>').join('') : '<tr><td colspan="8" class="tbl-empty">' + esc(S.tblEmpty) + '</td></tr>';
   $('#tCount').textContent = S.count(LOCS.length, rows.length);
 }
@@ -1553,7 +1600,7 @@ function renderBatch(n, batch, last, tierN) {
     '<p class="batch-top">' + esc(S.mostFrequent + tops.map(([c, k]) => S.topItem(nm(BY.get(c)), fmtInt(k), fmtSmall(BY.get(c).births / tot * n))).join(S.comma) + S.period) + '</p>';
   box.hidden = false;
   const line = $('#batchLine');
-  line.innerHTML = S.batchLineHtml(n, TIERS.map((t, i) => '<span class="t-' + t + '">' + S.tier[t] + ' <b>' + tierN[i] + '</b></span>').join(S.comma),
+  line.innerHTML = S.batchLineHtml(n, TIERS.map((t, i) => '<span>' + S.tier[t] + ' <b>' + tierN[i] + '</b></span>').join(S.comma),
     TIERS.map(t => fx(T.share[t] * n, 1)).join(' / ')) +
     '<a href="#atlas" id="toMap">' + esc(S.toMap) + '</a>';
   line.hidden = false;
@@ -1595,9 +1642,9 @@ function doDraws(n) {
   renderHundred();
   markTableRow();
   const L = last.loc;
-  announce(n === 1
+  announce((n === 1
     ? S.drawnOne(S.serial(fmtInt(last.serial)), nm(L), sexName(last.sex), fmtPct(L.births / TOT.births), S.tier[tierOf(L)])
-    : S.drawnMany(n, tierN[0], tierN[1], tierN[2], nm(L)));
+    : S.drawnMany(n, tierN[0], tierN[1], tierN[2], nm(L))) + S.sp + bandSay(L));
 }
 
 function reopen(no) {
@@ -1610,7 +1657,7 @@ function reopen(no) {
   renderHundred();
   renderMine();
   markTableRow();
-  announce(S.reopened(S.serial(fmtInt(no)), nm(st.loc), S.tier[tierOf(st.loc)]));
+  announce(S.reopened(S.serial(fmtInt(no)), nm(st.loc), S.tier[tierOf(st.loc)]) + S.sp + bandSay(st.loc));
   reveal();
 }
 
@@ -1623,7 +1670,7 @@ function lookup(code) {
   renderHundred();
   renderMine();
   markTableRow();
-  announce(S.looked(nm(L), S.tier[tierOf(L)]));
+  announce(S.looked(nm(L), S.tier[tierOf(L)]) + S.sp + bandSay(L));
   reveal();
 }
 
