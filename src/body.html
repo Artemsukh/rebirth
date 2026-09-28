@@ -46,9 +46,17 @@
         <h2 class="id-name" id="idName"></h2>
         <span class="id-sex" id="idSex"></span>
         <div class="id-sub"><p class="id-en" id="idEn"></p><p class="id-geo" id="idGeo"></p></div>
-        <button type="button" class="btn btn-mini" id="copyBtn" data-t="copy" hidden></button>
       </div>
       <dl class="facts" id="facts"></dl>
+      <div class="passport-panel" id="passportPanel" hidden>
+        <img id="passportCover" width="130" height="184" decoding="async" alt="" hidden>
+        <div><p class="minor" data-t="passportLabel"></p><p id="passportNote"></p><a id="passportSource" data-t="imageSource" target="_blank" rel="noopener" hidden></a></div>
+      </div>
+      <div class="result-actions" id="resultActions" hidden>
+        <button type="button" class="btn btn-mini" id="saveBtn" data-t="saveImage"></button>
+        <button type="button" class="btn btn-mini" id="copyBtn" data-t="copy"></button>
+      </div>
+      <p class="result-status" id="cardStatus" role="status"></p>
     </div>
 
     <div class="read-col" id="readCol" tabindex="-1">
@@ -216,4 +224,11 @@
     <p class="colophon" data-t="colophon"></p>
   </section>
 </main>
+<dialog id="cardDialog" aria-labelledby="cardTitle">
+  <div class="card-dialog-head"><h2 id="cardTitle"></h2><button type="button" class="btn btn-mini" id="cardClose"></button></div>
+  <img id="cardPreview" width="1080" height="1350" alt="">
+  <p id="cardHint"></p>
+  <div class="card-dialog-actions"><a class="btn btn-primary" id="cardDownload"></a><button type="button" class="btn btn-ghost" id="cardShare" hidden></button></div>
+  <p id="cardDialogStatus" role="status"></p>
+</dialog>
 <p class="sr-only" aria-live="polite" id="sr"></p>

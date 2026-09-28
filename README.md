@@ -9,6 +9,8 @@ Be born again, at random, as one of the 132.5 million babies of 2026. The countr
 - **Coverage:** All 236 countries and areas in the UN World Population Prospects 2024. Only the Holy See, with fewer than 1,000 people, is left out. Kosovo uses UN code 412.
 - **Draw:** There is one basis, 2026 births. A country is picked in proportion to its number of births, then the sex is set by that country's sex ratio at birth. Random numbers take 53 bits from `crypto.getRandomValues`.
 - **Measures:** Chance of being born in this country, GDP per head (at market exchange rates and at purchasing power parity), development tier and life expectancy.
+- **Share a result:** “Save image” creates a 1080 × 1350 PNG with the country, sex, birth probability, nominal GDP per head, life expectancy, development tier, and passport cover. Preview it before downloading, or use the device share sheet when file sharing is supported. Text copying remains available and includes the site URL. Image generation freezes the current result and language, so another draw cannot change a card halfway through.
+- **Passport covers:** 175 explicitly mapped covers from Wikimedia Commons, covering about 96.44% of the simulated 2026 births. The other 61 places use flags on saved cards. Covers are representative ordinary passports and may be older editions; they do not imply citizenship from birthplace. Images load on demand from this repository. [Image credits](passport-credits.html) records creators, individual licenses, source links, and changes; the credit link also travels with each PNG.
 - **Ranks:** Ranks count people, not countries. "Top 7%" means that among the babies of the same sex born in the same year, about 7% are born in a country that does better on that measure than this one.
 - **Result screen:** Styled like a space-probe scanner. The screen's accent color is the GDP-per-head band color of the drawn country (see "Color" below). The planet in the middle is a dot-matrix globe painted in that one color. Brightness is shown only through dot opacity: the drawn country is the brightest, and its border glows white. On a draw, the camera pulls back to the whole globe, then turns toward the country and zooms in. So that small countries stay visible, the angle away from the center is stretched up to 22× before being wrapped back onto the sphere. The GDP-per-head readout panel has a nine-step band ladder under the large number; only the country's band lights up, with a label beside it such as "Band 3/9 · $3,000–7,000". The development tier panel shows the tier with pips (3, 2 or 1 bars) and the tier name. Numbers spin once like a slot machine before stopping, and turn into plain text when they stop. With the reduced-motion setting, all motion is turned off.
 - **Frame rules:** So that a phone left open on the page does not heat up, it draws only while something is moving. On the idle screen the globe turns 0.75° eight times a second, and stops when the planet is off screen or the tab is hidden. The draw flight renders at no more than 30 frames per second, and drawing stops once the result settles. The only things that keep turning are the two HUD rings, each on its own composited layer, so they never repaint the planet. The map's birth pulses are drawn on a canvas laid over the map, and only while the map is visible. No translucent blur (`backdrop-filter`) or filter animations are used.
@@ -81,6 +83,7 @@ The planet is a single canvas. The globe is divided into a grid of radius R cell
 | GDP per head | IMF World Economic Outlook, April 2026 edition, 2025 estimates (via a Worldometers table). Where there is no IMF value, a World Bank or UN value is used and marked as such |
 | Development tier | IMF WEO April 2026 Statistical Appendix Table B, UN list of least developed countries |
 | Flags | 4:3 SVGs from [flag-icons](https://github.com/lipis/flag-icons) 7.5.0 (MIT license, `vendor/flag-icons.LICENSE`) |
+| Passport covers | Wikimedia Commons; individual sources and licenses in `data/passport-sources.json` and `passport-credits.html` |
 | Japanese, Spanish and Russian country names | Unicode CLDR 48 (the ICU in Node 22), with some replaced in `pipeline/names.py` |
 | Map | Natural Earth (public domain), via world-atlas |
 
@@ -89,11 +92,13 @@ GDP per head is shown as two values. The large number is in US dollars converted
 ## Folder structure
 
 ```
-index.html        Build output. Everything except the flags is in this one file.
+index.html        Build output. App code and data are inline; flags and passport covers load on demand.
 build.py          Combines src/ and data/ into a single index.html.
-src/              body.html (structure), style.css (appearance), i18n.js (text in five languages), app.js (behavior), topo.js (TopoJSON decoding)
+src/              body.html (structure), style.css (appearance), i18n.js (text in five languages), app.js (behavior), share.js (PNG renderer), topo.js (TopoJSON decoding)
 data/             appdata.json (processed population, economic and classification data), world.topo.json (map)
 assets/flags/     Flag SVGs for the 236 places (loaded on demand from the same origin as index.html)
+assets/passports/ Passport covers, proportionally resized to at most 400 × 568 and converted to WebP
+passport-credits.html  Image attribution page, generated from data/passport-sources.json
 vendor/           flag-icons license, topojson-client 3.1.0 (for cross-checking src/topo.js, ISC)
 pipeline/         Scripts that produced the data
 ```
@@ -110,6 +115,9 @@ pipeline/         Scripts that produced the data
 | `build_iso.py` | Fills in the two-letter ISO codes (`iso2`), copies the flags from flag-icons and shrinks them with svgo. Needs `pip install pycountry` and npm. |
 | `names.py` | Adds the Japanese, Spanish and Russian country names (`ja`, `es`, `ru`) and the continent and subregion names (`NAMES`). Needs Node. Running it again gives the same result. |
 | `check_topo.js` | Checks that `src/topo.js` decodes the map exactly as topojson-client does. |
+| `import_passports.js` | Imports reviewed local cover images using an audit JSON, creates WebP files and the runtime/source/missing manifests. Requires `sharp`; see the script header for inputs. |
+| `build_passport_credits.py` | Rebuilds the image attribution page from the source and missing-cover manifests. Run after changing passport sources. |
+| `check_share.js` | Checks cover mappings and attribution, formats every country in all five languages, and renders PNGs for long names and image failures. Requires `@napi-rs/canvas`; use `CARD_TEST_FONT` for a CJK-capable font and an optional output directory for visual review. This is an offline renderer test, not a browser/device test. |
 | `check_bands.js` | Applies `BAND_EDGES` and the band logic from `src/app.js` to the data, and checks the number of places and share of births per band, sample countries and edge values. |
 | `check_palette.py` | Checks that the band colors and tier grays in `src/style.css` meet the contrast and color vision deficiency color-difference conditions. Needs `pip install colorspacious`. |
 
@@ -119,13 +127,17 @@ pipeline/         Scripts that produced the data
 python3 build.py
 ```
 
+After updating passport sources, also run `python3 pipeline/build_passport_credits.py`. Keep the three passport manifests and the bundled assets together. To add a cover, record its M49 code, Commons file title/page, creator, license and license URL, then review that it is an ordinary front cover. Do not assign a sovereign state's passport automatically to its territories. Existing bundled files do not require re-downloading to build the app.
+
+Image export uses native Canvas and same-origin files, with no screenshot library or remote image requests. Missing images fall back to a flag, or an ISO code if the flag also fails. The preview's PNG link works independently of Web Share. Before publishing UI changes, check saving, cancellation and focus restoration in desktop browsers and on iOS/Android; native photo-library and share-sheet behavior varies by device.
+
 The build strips only comments and indentation from the CSS and JS. The only things loaded from outside are d3 7.9.0 (from cdnjs, falling back to jsDelivr) and Google Fonts (Orbit, Chakra Petch and IBM Plex Sans KR, plus IBM Plex Sans JP when Japanese is chosen, and IBM Plex Sans and Jura when Russian is chosen). d3 is used only for the map at the bottom. If d3 fails to load, the draw, readouts, table and planet keep working, and a notice appears in place of the map. If a flag file is missing, a chip with the two-letter code is shown instead.
 
 Records are stored only in the browser's localStorage (`rebirth-simulator-v2`). If data in the old format (`dasi-taeeonandamyeon-v1`) exists, it is migrated once on first open: birth-based statistics and records are carried over, population-based records are dropped, and serial numbers continue where they left off.
 
 ## Publishing with GitHub Pages
 
-In the repository's Settings → Pages, set Source to "Deploy from a branch", Branch to `main` and the folder to `/ (root)`, and the site will open at https://artemsukh.github.io/rebirth/. The flags are served from `assets/flags/` on the same origin, so they must be published along with `index.html`. On a free account, the repository must be public for Pages to be turned on.
+In the repository's Settings → Pages, set Source to "Deploy from a branch", Branch to `main` and the folder to `/ (root)`, and the site will open at https://artemsukh.github.io/rebirth/. Publish `assets/flags/`, `assets/passports/`, `passport-credits.html` and the license files along with `index.html`. On a free account, the repository must be public for Pages to be turned on.
 
 ## Limitations
 

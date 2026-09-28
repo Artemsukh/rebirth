@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Assemble the single-file app: src/{style.css, body.html, i18n.js, app.js} + data + topology.
 
-Flags under assets/flags/ are not inlined; the page loads the one it needs as a
-same-origin static file (GitHub Pages serves it next to index.html)."""
+Flags and passport covers under assets/ are not inlined; the page loads the ones
+it needs as same-origin static files (GitHub Pages serves them next to index.html)."""
 import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -57,13 +57,15 @@ body = '\n'.join(l.strip() for l in read(os.path.join(SRC, 'body.html')).split('
 # page text in five languages, read by app.js (it must come first in the same script)
 i18n = min_js(read(os.path.join(SRC, 'i18n.js')))
 app = min_js(read(os.path.join(SRC, 'app.js')))
+share = min_js(read(os.path.join(SRC, 'share.js')))
+passports = json.load(open(os.path.join(HERE, 'data', 'passports.json'), encoding='utf-8'))
 data = json.load(open(os.path.join(HERE, 'data', 'appdata.json'), encoding='utf-8'))
 topo = json.load(open(os.path.join(HERE, 'data', 'world.topo.json'), encoding='utf-8'))
 # TopoJSON decoding: src/topo.js gives the same output as topojson-client 3.1.0 for this map
 # (pipeline/check_topo.js compares them) in a seventh of the size
 tj = min_js(read(os.path.join(SRC, 'topo.js')))
 
-for name, s in (('i18n.js', i18n), ('app.js', app), ('topo.js', tj)):
+for name, s in (('i18n.js', i18n), ('share.js', share), ('app.js', app), ('topo.js', tj)):
     if '</script' in s.lower():
         sys.exit(name + ' contains </script')
 
@@ -87,12 +89,14 @@ html = f'''<!doctype html>
 <body>
 {body}
 <script type="application/json" id="app-data">{json_script(data)}</script>
+<script type="application/json" id="passport-data">{json_script(passports)}</script>
 <script type="application/json" id="map-data">{json_script(topo)}</script>
 <script>
 {tj}
 </script>
 <script>
 {i18n}
+{share}
 {app}
 </script>
 </body>
