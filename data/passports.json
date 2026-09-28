@@ -1,0 +1,702 @@
+{
+  "4": {
+    "file": "assets/passports/af.webp",
+    "credit": "Kabul Central Passport Department · Public domain"
+  },
+  "8": {
+    "file": "assets/passports/al.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "12": {
+    "file": "assets/passports/dz.webp",
+    "credit": "Algerian Government · Public domain"
+  },
+  "20": {
+    "file": "assets/passports/ad.webp",
+    "credit": "Boigandorra · CC BY-SA 4.0"
+  },
+  "24": {
+    "file": "assets/passports/ao.webp",
+    "credit": "The Radioactive Box · Public domain"
+  },
+  "28": {
+    "file": "assets/passports/ag.webp",
+    "credit": "Mateusxw7 · Public domain"
+  },
+  "31": {
+    "file": "assets/passports/az.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "32": {
+    "file": "assets/passports/ar.webp",
+    "credit": "Argentine government · CC BY 4.0"
+  },
+  "36": {
+    "file": "assets/passports/au.webp",
+    "credit": "Australian Government - Australian Passport Office · CC BY 3.0"
+  },
+  "40": {
+    "file": "assets/passports/at.webp",
+    "credit": "Government of Austria · Public domain"
+  },
+  "48": {
+    "file": "assets/passports/bh.webp",
+    "credit": "Government of Bahrain · Public domain"
+  },
+  "50": {
+    "file": "assets/passports/bd.webp",
+    "credit": "Xi Knight Originally vectorized & uploaded by: Dr. Editorial · CC BY-SA 3.0"
+  },
+  "51": {
+    "file": "assets/passports/am.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "56": {
+    "file": "assets/passports/be.webp",
+    "credit": "Eurokid238 · Public domain"
+  },
+  "60": {
+    "file": "assets/passports/bm.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "68": {
+    "file": "assets/passports/bo.webp",
+    "credit": "Unknown author · Public domain"
+  },
+  "70": {
+    "file": "assets/passports/ba.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "76": {
+    "file": "assets/passports/br.webp",
+    "credit": "Casa da Moeda do Brasil · CC BY-SA 4.0"
+  },
+  "84": {
+    "file": "assets/passports/bz.webp",
+    "credit": "chatgpt · Public domain"
+  },
+  "96": {
+    "file": "assets/passports/bn.webp",
+    "credit": "Globalpasser · Public domain"
+  },
+  "104": {
+    "file": "assets/passports/mm.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "108": {
+    "file": "assets/passports/bi.webp",
+    "credit": "Chetoc · CC BY-SA 4.0"
+  },
+  "112": {
+    "file": "assets/passports/by.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "116": {
+    "file": "assets/passports/kh.webp",
+    "credit": "GJX1123 · CC BY-SA 4.0"
+  },
+  "120": {
+    "file": "assets/passports/cm.webp",
+    "credit": "Rancherscuckoo · CC BY-SA 4.0"
+  },
+  "124": {
+    "file": "assets/passports/ca.webp",
+    "credit": "SpinnerLaserzthe2nd · Public domain"
+  },
+  "132": {
+    "file": "assets/passports/cv.webp",
+    "credit": "Waldir · CC BY-SA 4.0"
+  },
+  "136": {
+    "file": "assets/passports/ky.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "140": {
+    "file": "assets/passports/cf.webp",
+    "credit": "Government of the Central African Republic · Public domain"
+  },
+  "144": {
+    "file": "assets/passports/lk.webp",
+    "credit": "Themanlk · Public domain"
+  },
+  "148": {
+    "file": "assets/passports/td.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "156": {
+    "file": "assets/passports/cn.webp",
+    "credit": "Government of the People's Republic of China · Public domain"
+  },
+  "158": {
+    "file": "assets/passports/tw.webp",
+    "credit": "中華民國外交部 Ministry of Foreign Affairs, Republic of China (Taiwan) · Public domain"
+  },
+  "170": {
+    "file": "assets/passports/co.webp",
+    "credit": "Rpou08 · CC BY 4.0"
+  },
+  "174": {
+    "file": "assets/passports/km.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "178": {
+    "file": "assets/passports/cg.webp",
+    "credit": "Government of the Republic of Congo · Public domain"
+  },
+  "180": {
+    "file": "assets/passports/cd.webp",
+    "credit": "Government of the Democratic Republic of the Congo · Public domain"
+  },
+  "191": {
+    "file": "assets/passports/hr.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "192": {
+    "file": "assets/passports/cu.webp",
+    "credit": "Rindo75 · Public domain"
+  },
+  "196": {
+    "file": "assets/passports/cy.webp",
+    "credit": "Kxeon · CC BY-SA 4.0"
+  },
+  "203": {
+    "file": "assets/passports/cz.webp",
+    "credit": "Martin Cvrgy · CC BY-SA 4.0"
+  },
+  "204": {
+    "file": "assets/passports/bj.webp",
+    "credit": "Ajeannoel · CC BY-SA 4.0"
+  },
+  "208": {
+    "file": "assets/passports/dk.webp",
+    "credit": "The original uploader was PZFUN at English Wikipedia. · Public domain"
+  },
+  "212": {
+    "file": "assets/passports/dm.webp",
+    "credit": "Alphacenturia123 · Public domain"
+  },
+  "214": {
+    "file": "assets/passports/do.webp",
+    "credit": "Unknown author · Public domain"
+  },
+  "218": {
+    "file": "assets/passports/ec.webp",
+    "credit": "Fabrizzio Cedeño · CC BY-SA 4.0"
+  },
+  "231": {
+    "file": "assets/passports/et.webp",
+    "credit": "Mbusin · Public domain"
+  },
+  "232": {
+    "file": "assets/passports/er.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "233": {
+    "file": "assets/passports/ee.webp",
+    "credit": "Eesti valitsus · Public domain"
+  },
+  "234": {
+    "file": "assets/passports/fo.webp",
+    "credit": "Conseil de l'Europe · Attribution"
+  },
+  "250": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0"
+  },
+  "262": {
+    "file": "assets/passports/dj.webp",
+    "credit": "Skilla1st · CC BY-SA 4.0"
+  },
+  "266": {
+    "file": "assets/passports/ga.webp",
+    "credit": "Wikola · CC BY-SA 4.0"
+  },
+  "268": {
+    "file": "assets/passports/ge.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "275": {
+    "file": "assets/passports/ps.webp",
+    "credit": "Dylam X · Public domain"
+  },
+  "276": {
+    "file": "assets/passports/de.webp",
+    "credit": "Bundesrepublik Deutschland, Bundesministerium des Innern · Public domain"
+  },
+  "288": {
+    "file": "assets/passports/gh.webp",
+    "credit": "Government of Ghana / Ghana Immigration Service · Public domain"
+  },
+  "292": {
+    "file": "assets/passports/gi.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "300": {
+    "file": "assets/passports/gr.webp",
+    "credit": "Friday divine Public domain because of Greek Copyright Law (§ on educational purpose) · Public domain"
+  },
+  "304": {
+    "file": "assets/passports/gl.webp",
+    "credit": "Conseil de l'Europe · Attribution"
+  },
+  "308": {
+    "file": "assets/passports/gd.webp",
+    "credit": "Jura695 · CC BY-SA 4.0"
+  },
+  "320": {
+    "file": "assets/passports/gt.webp",
+    "credit": "Encyclopedia2001 · Public domain"
+  },
+  "324": {
+    "file": "assets/passports/gn.webp",
+    "credit": "Aboubacarkhoraa · CC BY-SA 4.0"
+  },
+  "328": {
+    "file": "assets/passports/gy.webp",
+    "credit": "Government of Guyana · Public domain"
+  },
+  "332": {
+    "file": "assets/passports/ht.webp",
+    "credit": "Willy509 · CC BY-SA 4.0"
+  },
+  "340": {
+    "file": "assets/passports/hn.webp",
+    "credit": "Ernestosierra04 · CC BY-SA 4.0"
+  },
+  "344": {
+    "file": "assets/passports/hk.webp",
+    "credit": "Swapnil1101 · Public domain"
+  },
+  "348": {
+    "file": "assets/passports/hu.webp",
+    "credit": "Udv 21:59, 25 June 2006 (UTC) · Public domain (government work)"
+  },
+  "352": {
+    "file": "assets/passports/is.webp",
+    "credit": "Gumol (talk) · Public domain"
+  },
+  "356": {
+    "file": "assets/passports/in.webp",
+    "credit": "FireDragonValo · CC BY-SA 4.0"
+  },
+  "360": {
+    "file": "assets/passports/id.webp",
+    "credit": "Bamboofirdaus · Public domain"
+  },
+  "364": {
+    "file": "assets/passports/ir.webp",
+    "credit": "Behniar · CC BY-SA 3.0"
+  },
+  "368": {
+    "file": "assets/passports/iq.webp",
+    "credit": "Fareeq Almayoofee · CC BY-SA 4.0"
+  },
+  "372": {
+    "file": "assets/passports/ie.webp",
+    "credit": "The original uploader was Classicalgas at English Wikipedia. · Public domain"
+  },
+  "376": {
+    "file": "assets/passports/il.webp",
+    "credit": "Swapnil1101 · CC BY-SA 4.0"
+  },
+  "380": {
+    "file": "assets/passports/it.webp",
+    "credit": "Albanian_Italian_biometric_Passport.JPG: Alblefter derivative work: Fred the Oyster (talk) · CC BY 3.0"
+  },
+  "384": {
+    "file": "assets/passports/ci.webp",
+    "credit": "Soren17 · CC BY-SA 4.0"
+  },
+  "392": {
+    "file": "assets/passports/jp.webp",
+    "credit": "Muttley · Public domain"
+  },
+  "398": {
+    "file": "assets/passports/kz.webp",
+    "credit": "Murat Karibay · Public domain (government work)"
+  },
+  "400": {
+    "file": "assets/passports/jo.webp",
+    "credit": "Thafor3he · Public domain"
+  },
+  "404": {
+    "file": "assets/passports/ke.webp",
+    "credit": "Travis andre · CC BY-SA 4.0"
+  },
+  "408": {
+    "file": "assets/passports/kp.webp",
+    "credit": "Government of the Democratic People's Republic of Korea · Public domain"
+  },
+  "410": {
+    "file": "assets/passports/kr.webp",
+    "credit": "Globalpasser · Public domain"
+  },
+  "412": {
+    "file": "assets/passports/xk.webp",
+    "credit": "Siirski · CC BY-SA 4.0"
+  },
+  "417": {
+    "file": "assets/passports/kg.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "418": {
+    "file": "assets/passports/la.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "422": {
+    "file": "assets/passports/lb.webp",
+    "credit": "Da3ouk · Public domain"
+  },
+  "428": {
+    "file": "assets/passports/lv.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "430": {
+    "file": "assets/passports/lr.webp",
+    "credit": "Kernel NickM · CC BY-SA 4.0"
+  },
+  "438": {
+    "file": "assets/passports/li.webp",
+    "credit": "The original uploader was PZFUN at English Wikipedia. · CC BY-SA 3.0"
+  },
+  "440": {
+    "file": "assets/passports/lt.webp",
+    "credit": "Government of Lithuania · Public domain"
+  },
+  "442": {
+    "file": "assets/passports/lu.webp",
+    "credit": "Jonas Magnus Lystad · CC BY-SA 4.0"
+  },
+  "446": {
+    "file": "assets/passports/mo.webp",
+    "credit": "澳門特別行政區身份證明局 / Identification Services Bureau, Macao Special Administrative Region · Public domain"
+  },
+  "450": {
+    "file": "assets/passports/mg.webp",
+    "credit": "SuperShayan · CC BY-SA 4.0"
+  },
+  "458": {
+    "file": "assets/passports/my.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "462": {
+    "file": "assets/passports/mv.webp",
+    "credit": "Department of Immigration & Emigration of Maldives · Public domain"
+  },
+  "470": {
+    "file": "assets/passports/mt.webp",
+    "credit": "Government of Malta · Public domain"
+  },
+  "478": {
+    "file": "assets/passports/mr.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "484": {
+    "file": "assets/passports/mx.webp",
+    "credit": "Colohisto · Public domain (government work)"
+  },
+  "492": {
+    "file": "assets/passports/mc.webp",
+    "credit": "Starcis · Public domain (government work)"
+  },
+  "496": {
+    "file": "assets/passports/mn.webp",
+    "credit": "Chinneeb · CC BY 4.0"
+  },
+  "498": {
+    "file": "assets/passports/md.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain (government work)"
+  },
+  "499": {
+    "file": "assets/passports/me.webp",
+    "credit": "Government of Montenegro · Public domain"
+  },
+  "500": {
+    "file": "assets/passports/ms.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "504": {
+    "file": "assets/passports/ma.webp",
+    "credit": "Tafounast · Public domain"
+  },
+  "508": {
+    "file": "assets/passports/mz.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "516": {
+    "file": "assets/passports/na.webp",
+    "credit": "Wells1991 · CC BY-SA 4.0"
+  },
+  "524": {
+    "file": "assets/passports/np.webp",
+    "credit": "Kinsu08 · CC BY-SA 4.0"
+  },
+  "528": {
+    "file": "assets/passports/nl.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0"
+  },
+  "548": {
+    "file": "assets/passports/vu.webp",
+    "credit": "Alphacenturia123 · CC BY-SA 4.0"
+  },
+  "558": {
+    "file": "assets/passports/ni.webp",
+    "credit": "LaNicoya- · CC BY 2.0"
+  },
+  "562": {
+    "file": "assets/passports/ne.webp",
+    "credit": "Bruno Melo · Public domain"
+  },
+  "566": {
+    "file": "assets/passports/ng.webp",
+    "credit": "Peters Temiloluwa · CC BY-SA 4.0"
+  },
+  "578": {
+    "file": "assets/passports/no.webp",
+    "credit": "Cyygma · Public domain (government work)"
+  },
+  "583": {
+    "file": "assets/passports/fm.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0"
+  },
+  "584": {
+    "file": "assets/passports/mh.webp",
+    "credit": "Marshall Islands government · Public domain"
+  },
+  "586": {
+    "file": "assets/passports/pk.webp",
+    "credit": "MuhammadSarimShoukat · Public domain"
+  },
+  "591": {
+    "file": "assets/passports/pa.webp",
+    "credit": "ElliotHewitt · CC BY-SA 4.0"
+  },
+  "598": {
+    "file": "assets/passports/pg.webp",
+    "credit": "Papua New Guine government · Public domain"
+  },
+  "604": {
+    "file": "assets/passports/pe.webp",
+    "credit": "Goverment of Peru · Public domain"
+  },
+  "608": {
+    "file": "assets/passports/ph.webp",
+    "credit": "Department of Foreign Affairs Vectorization: Sean Ronquillo (Ubediplomacy) · Public domain"
+  },
+  "616": {
+    "file": "assets/passports/pl.webp",
+    "credit": "Gnesener1900 · CC BY-SA 4.0"
+  },
+  "620": {
+    "file": "assets/passports/pt.webp",
+    "credit": "Drd97 · CC BY-SA 4.0"
+  },
+  "624": {
+    "file": "assets/passports/gw.webp",
+    "credit": "User:Dantadd · Public domain"
+  },
+  "626": {
+    "file": "assets/passports/tl.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "642": {
+    "file": "assets/passports/ro.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "643": {
+    "file": "assets/passports/ru.webp",
+    "credit": "Swapnil1101 · Public domain (government work)"
+  },
+  "646": {
+    "file": "assets/passports/rw.webp",
+    "credit": "Moise Segikwiye · CC BY-SA 4.0"
+  },
+  "654": {
+    "file": "assets/passports/sh.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "659": {
+    "file": "assets/passports/kn.webp",
+    "credit": "Abhaybrar7 · CC BY-SA 4.0"
+  },
+  "660": {
+    "file": "assets/passports/ai.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "662": {
+    "file": "assets/passports/lc.webp",
+    "credit": "Samueldho · Public domain"
+  },
+  "670": {
+    "file": "assets/passports/vc.webp",
+    "credit": "Hairouna · CC BY-SA 4.0"
+  },
+  "674": {
+    "file": "assets/passports/sm.webp",
+    "credit": "AndresvaAeditarUwU · CC BY-SA 4.0"
+  },
+  "678": {
+    "file": "assets/passports/st.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "682": {
+    "file": "assets/passports/sa.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "686": {
+    "file": "assets/passports/sn.webp",
+    "credit": "Benj90 · CC BY-SA 3.0"
+  },
+  "688": {
+    "file": "assets/passports/rs.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "690": {
+    "file": "assets/passports/sc.webp",
+    "credit": "The National Police of the Netherlands · CC BY 4.0"
+  },
+  "694": {
+    "file": "assets/passports/sl.webp",
+    "credit": "Government of Sierra Leone · Public domain"
+  },
+  "702": {
+    "file": "assets/passports/sg.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "703": {
+    "file": "assets/passports/sk.webp",
+    "credit": "Julianaldn1 · CC BY-SA 4.0"
+  },
+  "704": {
+    "file": "assets/passports/vn.webp",
+    "credit": "Vietnamese Government · Public domain (government work)"
+  },
+  "705": {
+    "file": "assets/passports/si.webp",
+    "credit": "Reneturk · CC BY-SA 4.0"
+  },
+  "706": {
+    "file": "assets/passports/so.webp",
+    "credit": "Passport Index · Public domain"
+  },
+  "710": {
+    "file": "assets/passports/za.webp",
+    "credit": "Mrllamax · Public domain"
+  },
+  "724": {
+    "file": "assets/passports/es.webp",
+    "credit": "Spain Government vectorized by:Amartin2671 · Public domain"
+  },
+  "729": {
+    "file": "assets/passports/sd.webp",
+    "credit": "Serongadamwiki · Public domain"
+  },
+  "752": {
+    "file": "assets/passports/se.webp",
+    "credit": "Pandrej01 · CC BY-SA 4.0"
+  },
+  "756": {
+    "file": "assets/passports/ch.webp",
+    "credit": "Schweizerische Eidgenossenschaft, Bundesamt für Polizei (fedpol) · Public domain"
+  },
+  "760": {
+    "file": "assets/passports/sy.webp",
+    "credit": "JohnGold6000 · Public domain"
+  },
+  "762": {
+    "file": "assets/passports/tj.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "764": {
+    "file": "assets/passports/th.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY-SA 4.0"
+  },
+  "768": {
+    "file": "assets/passports/tg.webp",
+    "credit": "Stratforder · CC BY-SA 3.0"
+  },
+  "780": {
+    "file": "assets/passports/tt.webp",
+    "credit": "TriniRedMan · CC BY-SA 4.0"
+  },
+  "784": {
+    "file": "assets/passports/ae.webp",
+    "credit": "Swapnil1101 · Public domain"
+  },
+  "788": {
+    "file": "assets/passports/tn.webp",
+    "credit": "Mohatatou · CC BY-SA 4.0"
+  },
+  "792": {
+    "file": "assets/passports/tr.webp",
+    "credit": "Swapnil1101 · CC BY-SA 4.0"
+  },
+  "795": {
+    "file": "assets/passports/tm.webp",
+    "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "796": {
+    "file": "assets/passports/tc.webp",
+    "credit": "EdisonTD · Public domain"
+  },
+  "798": {
+    "file": "assets/passports/tv.webp",
+    "credit": "Noble · CC BY-SA 3.0"
+  },
+  "800": {
+    "file": "assets/passports/ug.webp",
+    "credit": "AKibombo · CC BY-SA 4.0"
+  },
+  "804": {
+    "file": "assets/passports/ua.webp",
+    "credit": "ДП «Поліграфічний комбінат «Україна» · Public domain"
+  },
+  "807": {
+    "file": "assets/passports/mk.webp",
+    "credit": "North Macedonian government · Public domain"
+  },
+  "818": {
+    "file": "assets/passports/eg.webp",
+    "credit": "Unknown author · Public domain"
+  },
+  "826": {
+    "file": "assets/passports/gb.webp",
+    "credit": "Thepekinite · CC BY 4.0"
+  },
+  "831": {
+    "file": "assets/passports/gg.webp",
+    "credit": "ZElsb · CC BY-SA 4.0"
+  },
+  "832": {
+    "file": "assets/passports/je.webp",
+    "credit": "ZElsb · CC BY-SA 4.0"
+  },
+  "833": {
+    "file": "assets/passports/im.webp",
+    "credit": "ZElsb · CC BY-SA 4.0"
+  },
+  "834": {
+    "file": "assets/passports/tz.webp",
+    "credit": "Zachariahct · CC BY-SA 4.0"
+  },
+  "840": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain"
+  },
+  "854": {
+    "file": "assets/passports/bf.webp",
+    "credit": "Rakoon · CC BY 3.0"
+  },
+  "860": {
+    "file": "assets/passports/uz.webp",
+    "credit": "Government of Uzbekistan · Public domain (government work)"
+  },
+  "862": {
+    "file": "assets/passports/ve.webp",
+    "credit": "Osmar Rodríguez · Public domain"
+  },
+  "887": {
+    "file": "assets/passports/ye.webp",
+    "credit": "มองโกเลีย๔๔ · CC BY 4.0"
+  }
+}

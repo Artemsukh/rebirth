@@ -1,0 +1,307 @@
+[
+  {
+    "code": 454,
+    "country": "Malawi",
+    "iso2": "MW"
+  },
+  {
+    "code": 480,
+    "country": "Mauritius",
+    "iso2": "MU"
+  },
+  {
+    "code": 175,
+    "country": "Mayotte",
+    "iso2": "YT"
+  },
+  {
+    "code": 638,
+    "country": "Réunion",
+    "iso2": "RE"
+  },
+  {
+    "code": 728,
+    "country": "South Sudan",
+    "iso2": "SS"
+  },
+  {
+    "code": 894,
+    "country": "Zambia",
+    "iso2": "ZM"
+  },
+  {
+    "code": 716,
+    "country": "Zimbabwe",
+    "iso2": "ZW"
+  },
+  {
+    "code": 226,
+    "country": "Equatorial Guinea",
+    "iso2": "GQ"
+  },
+  {
+    "code": 434,
+    "country": "Libya",
+    "iso2": "LY"
+  },
+  {
+    "code": 732,
+    "country": "Western Sahara",
+    "iso2": "EH"
+  },
+  {
+    "code": 72,
+    "country": "Botswana",
+    "iso2": "BW"
+  },
+  {
+    "code": 748,
+    "country": "Eswatini",
+    "iso2": "SZ"
+  },
+  {
+    "code": 426,
+    "country": "Lesotho",
+    "iso2": "LS"
+  },
+  {
+    "code": 270,
+    "country": "Gambia",
+    "iso2": "GM"
+  },
+  {
+    "code": 466,
+    "country": "Mali",
+    "iso2": "ML"
+  },
+  {
+    "code": 64,
+    "country": "Bhutan",
+    "iso2": "BT"
+  },
+  {
+    "code": 414,
+    "country": "Kuwait",
+    "iso2": "KW"
+  },
+  {
+    "code": 512,
+    "country": "Oman",
+    "iso2": "OM"
+  },
+  {
+    "code": 634,
+    "country": "Qatar",
+    "iso2": "QA"
+  },
+  {
+    "code": 100,
+    "country": "Bulgaria",
+    "iso2": "BG"
+  },
+  {
+    "code": 246,
+    "country": "Finland",
+    "iso2": "FI"
+  },
+  {
+    "code": 533,
+    "country": "Aruba",
+    "iso2": "AW"
+  },
+  {
+    "code": 44,
+    "country": "Bahamas",
+    "iso2": "BS"
+  },
+  {
+    "code": 52,
+    "country": "Barbados",
+    "iso2": "BB"
+  },
+  {
+    "code": 535,
+    "country": "Bonaire, Sint Eustatius and Saba",
+    "iso2": "BQ"
+  },
+  {
+    "code": 92,
+    "country": "British Virgin Islands",
+    "iso2": "VG"
+  },
+  {
+    "code": 531,
+    "country": "Curaçao",
+    "iso2": "CW"
+  },
+  {
+    "code": 312,
+    "country": "Guadeloupe",
+    "iso2": "GP"
+  },
+  {
+    "code": 388,
+    "country": "Jamaica",
+    "iso2": "JM"
+  },
+  {
+    "code": 474,
+    "country": "Martinique",
+    "iso2": "MQ"
+  },
+  {
+    "code": 630,
+    "country": "Puerto Rico",
+    "iso2": "PR"
+  },
+  {
+    "code": 652,
+    "country": "Saint Barthélemy",
+    "iso2": "BL"
+  },
+  {
+    "code": 663,
+    "country": "Saint Martin (French part)",
+    "iso2": "MF"
+  },
+  {
+    "code": 534,
+    "country": "Sint Maarten (Dutch part)",
+    "iso2": "SX"
+  },
+  {
+    "code": 850,
+    "country": "United States Virgin Islands",
+    "iso2": "VI"
+  },
+  {
+    "code": 188,
+    "country": "Costa Rica",
+    "iso2": "CR"
+  },
+  {
+    "code": 222,
+    "country": "El Salvador",
+    "iso2": "SV"
+  },
+  {
+    "code": 152,
+    "country": "Chile",
+    "iso2": "CL"
+  },
+  {
+    "code": 238,
+    "country": "Falkland Islands",
+    "iso2": "FK"
+  },
+  {
+    "code": 254,
+    "country": "French Guiana",
+    "iso2": "GF"
+  },
+  {
+    "code": 600,
+    "country": "Paraguay",
+    "iso2": "PY"
+  },
+  {
+    "code": 740,
+    "country": "Suriname",
+    "iso2": "SR"
+  },
+  {
+    "code": 858,
+    "country": "Uruguay",
+    "iso2": "UY"
+  },
+  {
+    "code": 666,
+    "country": "Saint Pierre and Miquelon",
+    "iso2": "PM"
+  },
+  {
+    "code": 554,
+    "country": "New Zealand",
+    "iso2": "NZ"
+  },
+  {
+    "code": 242,
+    "country": "Fiji",
+    "iso2": "FJ"
+  },
+  {
+    "code": 540,
+    "country": "New Caledonia",
+    "iso2": "NC"
+  },
+  {
+    "code": 90,
+    "country": "Solomon Islands",
+    "iso2": "SB"
+  },
+  {
+    "code": 316,
+    "country": "Guam",
+    "iso2": "GU"
+  },
+  {
+    "code": 296,
+    "country": "Kiribati",
+    "iso2": "KI"
+  },
+  {
+    "code": 520,
+    "country": "Nauru",
+    "iso2": "NR"
+  },
+  {
+    "code": 580,
+    "country": "Northern Mariana Islands",
+    "iso2": "MP"
+  },
+  {
+    "code": 585,
+    "country": "Palau",
+    "iso2": "PW"
+  },
+  {
+    "code": 16,
+    "country": "American Samoa",
+    "iso2": "AS"
+  },
+  {
+    "code": 184,
+    "country": "Cook Islands",
+    "iso2": "CK"
+  },
+  {
+    "code": 258,
+    "country": "French Polynesia",
+    "iso2": "PF"
+  },
+  {
+    "code": 570,
+    "country": "Niue",
+    "iso2": "NU"
+  },
+  {
+    "code": 882,
+    "country": "Samoa",
+    "iso2": "WS"
+  },
+  {
+    "code": 772,
+    "country": "Tokelau",
+    "iso2": "TK"
+  },
+  {
+    "code": 776,
+    "country": "Tonga",
+    "iso2": "TO"
+  },
+  {
+    "code": 876,
+    "country": "Wallis and Futuna",
+    "iso2": "WF"
+  }
+]
