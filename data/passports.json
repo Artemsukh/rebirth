@@ -79,6 +79,10 @@
     "file": "assets/passports/bn.webp",
     "credit": "Globalpasser · Public domain"
   },
+  "100": {
+    "file": "assets/passports/bg.webp",
+    "credit": "Preprolog · Public domain"
+  },
   "104": {
     "file": "assets/passports/mm.webp",
     "credit": "Noble · CC BY-SA 3.0"
@@ -121,7 +125,11 @@
   },
   "148": {
     "file": "assets/passports/td.webp",
-    "credit": "Noble · CC BY-SA 3.0"
+    "credit": "Matarimi1 · CC BY 4.0"
+  },
+  "152": {
+    "file": "assets/passports/cl.webp",
+    "credit": "Marc CAT · CC BY-SA 3.0"
   },
   "156": {
     "file": "assets/passports/cn.webp",
@@ -146,6 +154,10 @@
   "180": {
     "file": "assets/passports/cd.webp",
     "credit": "Government of the Democratic Republic of the Congo · Public domain"
+  },
+  "188": {
+    "file": "assets/passports/cr.webp",
+    "credit": "Presidencia de la República de Costa Rica · CC BY-SA 4.0"
   },
   "191": {
     "file": "assets/passports/hr.webp",
@@ -198,6 +210,10 @@
   "234": {
     "file": "assets/passports/fo.webp",
     "credit": "Conseil de l'Europe · Attribution"
+  },
+  "246": {
+    "file": "assets/passports/fi.webp",
+    "credit": "Noble · CC BY-SA 3.0"
   },
   "250": {
     "file": "assets/passports/fr.webp",
@@ -439,6 +455,10 @@
     "file": "assets/passports/vu.webp",
     "credit": "Alphacenturia123 · CC BY-SA 4.0"
   },
+  "554": {
+    "file": "assets/passports/nz.webp",
+    "credit": "Qlinz · CC BY-SA 3.0"
+  },
   "558": {
     "file": "assets/passports/ni.webp",
     "credit": "LaNicoya- · CC BY 2.0"
@@ -475,6 +495,10 @@
     "file": "assets/passports/pg.webp",
     "credit": "Papua New Guine government · Public domain"
   },
+  "600": {
+    "file": "assets/passports/py.webp",
+    "credit": "Santi oporto · CC0"
+  },
   "604": {
     "file": "assets/passports/pe.webp",
     "credit": "Goverment of Peru · Public domain"
@@ -498,6 +522,10 @@
   "626": {
     "file": "assets/passports/tl.webp",
     "credit": "มองโกเลีย๔๔ · Public domain"
+  },
+  "634": {
+    "file": "assets/passports/qa.webp",
+    "credit": "JohnGold6000 · Public domain"
   },
   "642": {
     "file": "assets/passports/ro.webp",
@@ -586,6 +614,10 @@
   "724": {
     "file": "assets/passports/es.webp",
     "credit": "Spain Government vectorized by:Amartin2671 · Public domain"
+  },
+  "728": {
+    "file": "assets/passports/ss.webp",
+    "credit": "Chetoc · CC BY-SA 4.0"
   },
   "729": {
     "file": "assets/passports/sd.webp",

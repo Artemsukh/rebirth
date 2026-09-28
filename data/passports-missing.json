@@ -20,11 +20,6 @@
     "iso2": "RE"
   },
   {
-    "code": 728,
-    "country": "South Sudan",
-    "iso2": "SS"
-  },
-  {
     "code": 894,
     "country": "Zambia",
     "iso2": "ZM"
@@ -88,21 +83,6 @@
     "code": 512,
     "country": "Oman",
     "iso2": "OM"
-  },
-  {
-    "code": 634,
-    "country": "Qatar",
-    "iso2": "QA"
-  },
-  {
-    "code": 100,
-    "country": "Bulgaria",
-    "iso2": "BG"
-  },
-  {
-    "code": 246,
-    "country": "Finland",
-    "iso2": "FI"
   },
   {
     "code": 533,
@@ -175,19 +155,9 @@
     "iso2": "VI"
   },
   {
-    "code": 188,
-    "country": "Costa Rica",
-    "iso2": "CR"
-  },
-  {
     "code": 222,
     "country": "El Salvador",
     "iso2": "SV"
-  },
-  {
-    "code": 152,
-    "country": "Chile",
-    "iso2": "CL"
   },
   {
     "code": 238,
@@ -198,11 +168,6 @@
     "code": 254,
     "country": "French Guiana",
     "iso2": "GF"
-  },
-  {
-    "code": 600,
-    "country": "Paraguay",
-    "iso2": "PY"
   },
   {
     "code": 740,
@@ -218,11 +183,6 @@
     "code": 666,
     "country": "Saint Pierre and Miquelon",
     "iso2": "PM"
-  },
-  {
-    "code": 554,
-    "country": "New Zealand",
-    "iso2": "NZ"
   },
   {
     "code": 242,
