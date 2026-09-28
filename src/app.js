@@ -32,7 +32,6 @@ const BY = new Map(LOCS.map(l => [l.code, l]));
 const TOT = { births: 0, pop: 0 };
 LOCS.forEach(l => { TOT.births += l.births; TOT.pop += l.pop; });
 const RATE_B = WR.births / (365 * 86400);
-const RATE_D = WR.deaths / (365 * 86400);
 
 /* ================= language ================= */
 /* S is the text table for the page language (src/i18n.js); names come from the data columns */
@@ -418,14 +417,14 @@ function fitTier() {
 }
 
 function tierDesc(L) {
-  const T = tierStats(), t = tierOf(L), sov = L.sov ? BY.get(L.sov) : null;
+  const t = tierOf(L), sov = L.sov ? BY.get(L.sov) : null;
   let s;
   if (L.code === 492) s = S.tdMonaco;
   else if (sov && (L.code === 184 || L.code === 570)) s = S.tdAssoc(nm(sov), sov.code);
   else if (sov) s = S.tdTerr(nm(sov), sov.code);
-  else if (t === 'ADV') s = S.tdAdv(D.CLASS.adv.length);
-  else if (t === 'LDC') s = S.tdLdc(T.count.LDC);
-  else s = S.tdDev(T.count.DEV);
+  else if (t === 'ADV') s = S.tdAdv;
+  else if (t === 'LDC') s = S.tdLdc;
+  else s = '';
   const g = D.CLASS.ldc[L.sov || L.code];
   if (g && t === 'LDC') s += S.tdSoon(dateOf(g));
   else if (g && t === 'DEV') s += S.tdDone(dateOf(g));
@@ -468,9 +467,8 @@ function renderStage(st, opt = {}) {
   const dash = '—';
   const fact = (dt, dd, sm) => '<div class="fact"><dt>' + esc(dt) + '</dt><dd>' + esc(dd) + (sm ? '<small class="fx-sm">' + esc(sm) + '</small>' : '') + '</dd></div>';
   $('#facts').innerHTML = empty
-    ? fact(S.fSex, dash) + fact(S.fPop, dash) + fact(S.fMed, dash) + fact(S.fTfr, dash)
-    : fact(S.fSex, sex, S.srb(fmtInt(L.srb * 100))) +
-      fact(S.fPop, people(L.pop), S.ofWorld(fmtPct(L.pop / TOT.pop))) +
+    ? fact(S.fPop, dash) + fact(S.fMed, dash) + fact(S.fTfr, dash)
+    : fact(S.fPop, people(L.pop), S.ofWorld(fmtPct(L.pop / TOT.pop))) +
       fact(S.fMed, S.years(fx(L.med, 1)), S.world(S.years(fx(WR.med, 1)))) +
       fact(S.fTfr, S.kids(fx(L.tfr, 2)), S.world(S.kids(fx(WR.tfr, 2))));
 
@@ -478,10 +476,11 @@ function renderStage(st, opt = {}) {
   const bl = $('#tierBarL'), ll = $('#ladderL');
   $('#rungs').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k === band - 1));
   ll.className = 'ladder-l fx-sm';
-  ll.innerHTML = empty ? '' : band ? '<b>' + esc(S.bandNo(band, NBANDS)) + '</b> · ' + esc(bandName(band)) : esc(S.noData);
+  ll.innerHTML = empty ? '' : band ? esc(bandName(band)) : esc(S.noData);
   if (empty) {
     ['vProb', 'vGdp', 'vLife', 'vTier'].forEach(id => { $('#' + id).textContent = dash; $('#' + id).classList.remove('na'); });
-    ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier', 'sTier', 'fLife'].forEach(id => { $('#' + id).textContent = ''; });
+    ['sProb', 'sGdp', 'nGdp', 'wGdp', 'kGdp', 'wLife', 'kLife', 'dTier'].forEach(id => { $('#' + id).textContent = ''; });
+    $('#dTier').hidden = true;
     setRank('rGdp', null); setRank('rLife', null);
     $('#pips').querySelectorAll('i').forEach(i => i.classList.remove('on'));
     $('#tierBar').innerHTML = '';
@@ -499,8 +498,7 @@ function renderStage(st, opt = {}) {
       vg.textContent = S.noData;
       $('#nGdp').textContent = '';
       sg.className = 'p-sub memo fx-sm';
-      const nNa = LOCS.filter(l => l.gdpN == null).length;
-      sg.textContent = S.gdpNa(nNa, L.gdp == null ? '' : intl(L.gdp) + (L.gdpNote ? S.paren(note(L.gdpNote)) : ''));
+      sg.textContent = S.gdpNa(L.gdp == null ? '' : intl(L.gdp) + (L.gdpNote ? S.paren(note(L.gdpNote)) : ''));
       setRank('rGdp', null);
       $('#kGdp').textContent = '';
     } else {
@@ -522,12 +520,13 @@ function renderStage(st, opt = {}) {
 
     $('#pips').querySelectorAll('i').forEach((i, k) => i.classList.toggle('on', k < TIER_PIPS[tier]));
     $('#vTier').textContent = S.tier[tier];
-    $('#dTier').textContent = tierDesc(L);
+    /* a developing country has no line of its own; the row folds away */
+    const td = tierDesc(L).trim();
+    $('#dTier').textContent = td;
+    $('#dTier').hidden = !td;
     $('#dTier').className = 'tier-desc fx-sm';
     $('#tierBar').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '" style="width:' + (T.share[t] * 100).toFixed(3) + '%"></span>').join('');
     bl.innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + (t === tier ? ' on' : '') + '">' + S.tier[t] + ' ' + pctF(T.p2[t], 2) + '</span>').join('');
-    $('#sTier').innerHTML = S.tierSayHtml(fx(T.p1[tier], 1));
-    $('#sTier').className = 'tier-say fx-sm';
 
     const vl = $('#vLife');
     vl.textContent = '';
@@ -540,7 +539,6 @@ function renderStage(st, opt = {}) {
     setRank('rLife', M.life.r);
     $('#wLife').textContent = S.world(S.years(fx(M.life.world, 1)));
     $('#kLife').textContent = rankText(M.life.r);
-    $('#fLife').textContent = S.rankScope(draw ? st.sex : null);
   }
 
   fitName();
@@ -636,11 +634,11 @@ function cardPayload(st) {
     metrics: [
       { label: S.lbProb, value: fmtPct(M.share), detail: oneIn(M.share) },
       { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail,
-        ladder: { band: L.band, of: NBANDS, label: L.band ? S.bandNo(L.band, NBANDS) : S.noData } },
+        ladder: { band: L.band, of: NBANDS, label: L.band ? bandName(L.band) : S.noData } },
       { label: S.lbLife, value: S.years(fx(M.life.v, 1)), detail: rankText(M.life.r) + ' · ' + S.rankScope(draw ? st.sex : null) },
       { label: S.lbTier, value: S.tier[tierOf(L)], detail: S.tierSayHtml(fx(tierStats().p1[tierOf(L)], 1)).replace(/<[^>]*>/g, '') }
     ],
-    note: S.cardNote, callToAction: S.cardCta,
+    note: S.cardNote,
     credit: cover ? 'Passport: ' + cover.credit + cardLicence : '',
     flagCredit: 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.',
     creditLink: 'artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
@@ -1516,14 +1514,13 @@ function loadScript(src) {
 /* ================= page text ================= */
 function renderIntro() {
   $('#lede').innerHTML = S.ledeHtml(big(WR.births, 4));
-  $('#atlasLede').textContent = S.atlasLede;
   $('#legend').textContent = S.legend;
   $('#map').setAttribute('aria-label', S.mapAria);
   /* the nine bands then no data; a range may break after its dash */
   const keys = $('#keys');
   keys.innerHTML = BAND_LIST.map(b => '<li class="b-' + b + '"><i aria-hidden="true"></i><span>' + esc(bandName(b)).replace('–', '–<wbr>') + '</span></li>').join('');
   keys.setAttribute('aria-label', S.keysAria);
-  $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span><span class="rate">' + S.liveD + '<b>' + fx(RATE_D, 1) + '</b></span>' +
+  $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span>' +
     '<span><span class="dot" aria-hidden="true"></span><span class="since">' + S.liveSince + '</span><b id="liveN">0</b>' + S.liveAfter + '</span>';
 }
 const T0 = performance.now();
@@ -1552,14 +1549,6 @@ function renderHundred() {
   LOCS.forEach(l => { shares[l.cont] += l.births / tot; });
   const exact = shares.map(s => s * 100), cells = largestRemainder(exact, 100);
   const order = CONT.map((_, i) => i).sort((a, b) => exact[b] - exact[a]);
-  const named = order.filter(ci => cells[ci] > 0);
-  const [a, b] = named, rest = named.slice(2);
-  $('#hLede').textContent = S.hundredLede({
-    first: [contName(a), cells[a], a], second: [contName(b), cells[b], b],
-    rest: rest.map(ci => [contName(ci), cells[ci], ci]),
-    zero: order.filter(ci => cells[ci] === 0).map(contName),
-    tiers: { ADV: fx(T.p1.ADV, 1), DEV: fx(T.p1.DEV, 1), LDC: fx(T.p1.LDC, 1) }
-  });
   $('#hTier').innerHTML = TIERS.map(t => '<span class="' + lvCls(t) + '" style="flex:' + T.p1[t] + ' 1 0">' + fx(T.p1[t], 1) + '</span>').join('');
   $('#hTier').setAttribute('aria-label', S.hTierAria(TIERS.map(t => S.tier[t] + ' ' + S.nb(fx(T.p1[t], 1))).join(S.comma)));
   $('#hTierKeys').innerHTML = TIERS.map(t => '<li class="' + lvCls(t) + '"><i></i>' + S.tier[t] + ' <b>' + S.nb(fx(T.p1[t], 1)) + '</b></li>').join('');

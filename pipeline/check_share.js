@@ -97,7 +97,7 @@ const payloadFn = app.slice(app.indexOf('function cardPayload('), app.indexOf('a
 vm.runInContext(prefix + '\nconst stage = {};\n' + payloadFn + '\n' +
   'globalThis.makePayload = (code, lang, type = "draw") => { LANG = lang; S = I18N[lang]; return cardPayload({type,loc:BY.get(code),sex:"F",serial:42}); };' +
   '\nglobalThis.card = BirthCard; globalThis.translations = I18N;', context);
-const keys = ['saveImage', 'cardBusy', 'cardTitle', 'cardDownload', 'cardShare', 'cardClose', 'cardHint', 'cardError', 'cardShareError', 'passportAlt', 'creditsLink', 'cardNote', 'cardCta', 'cardAlt', 'cardGdpYear'];
+const keys = ['saveImage', 'cardBusy', 'cardTitle', 'cardDownload', 'cardShare', 'cardClose', 'cardHint', 'cardError', 'cardShareError', 'passportAlt', 'creditsLink', 'cardNote', 'cardAlt', 'cardGdpYear'];
 const langs = ['ko', 'en', 'ja', 'es', 'ru'];
 const outDir = process.argv[2];
 if (outDir) fs.mkdirSync(outDir, { recursive: true });

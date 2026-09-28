@@ -147,8 +147,7 @@ async function render(p) {
   });
   lines(p.note, 72, 1089, 936, 19, 2, muted);
   rule(72, 1140, 936);
-  text('artemsukh.github.io/rebirth', 72, 1190, 28, ink, 500);
-  text(p.callToAction, 72, 1226, 21, acc);
+  text('artemsukh.github.io/rebirth', 72, 1208, 28, ink, 500);
   // Attribution travels with the exported image; the linked local page contains full credits.
   const credit = passport ? p.credit : p.flagCredit;
   text(credit, 72, 1274, 16, muted, 400, 936);
