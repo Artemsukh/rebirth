@@ -195,14 +195,18 @@ a:hover { text-decoration-color: currentColor; }
 }
 .id-head > .chip { grid-area: chip; }
 .id-kind { grid-area: kind; display: flex; flex-direction: column; min-width: 0; }
+/* the two wrappers only group the name lines for the passport layout below; without a cover they
+   step aside, and the name, sex and sub lines are items of this grid */
+.id-main, .id-title { display: contents; }
 .id-name { grid-area: name; }
 .id-sex { grid-area: sex; display: none; }
 .id-sub { grid-area: sub; }
+.pp, .mini-flag { display: none; }
 .kind-l { font-size: .8125rem; color: var(--ink-3); line-height: 1.4; }
 .kind-no { font-family: var(--num); font-size: 1.25rem; font-weight: 600; line-height: 1.3; min-height: 1.3em; font-variant-numeric: tabular-nums; }
 .id-name {
   margin: 18px 0 0; font-family: var(--display); font-weight: 400; color: var(--ink-hi);
-  font-size: 64px; line-height: 1.12; letter-spacing: -.01em; white-space: nowrap;
+  font-size: 64px; line-height: 1.12; letter-spacing: -.01em; white-space: nowrap; overflow-wrap: normal;
   text-shadow: 0 0 24px rgba(5, 7, 22, .9);
 }
 .id-name.n2 { font-size: 46px; }
@@ -225,6 +229,38 @@ a:hover { text-decoration-color: currentColor; }
   linear-gradient(var(--acc), var(--acc)) left top / 10px 2px, linear-gradient(var(--acc), var(--acc)) left top / 2px 10px,
   linear-gradient(var(--acc), var(--acc)) right bottom / 10px 2px, linear-gradient(var(--acc), var(--acc)) right bottom / 2px 10px;
   background-repeat: no-repeat; }
+/* passport layout (.has-pp, set by app.js when the place has a cover): the record line on top, then
+   the cover in an ID-photo box beside the name, and a small flag leading the English name and region.
+   The box is sized before the image arrives and shows a dark blank until it does; the flag chip's
+   band-coloured corner brackets move to it. Name sizes follow the same three classes, scaled to the
+   narrower column (about 70% of the full width) */
+.id-head.has-pp { grid-template-columns: 88px minmax(0, 1fr); grid-template-areas: "kind kind" "pp main"; row-gap: 12px; }
+.has-pp > .chip { display: none; }
+.has-pp > .id-kind { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; }
+.has-pp > .pp {
+  grid-area: pp; display: block; position: relative; width: 88px; height: 124px;
+  border: 1px solid var(--acc); border-color: color-mix(in srgb, var(--acc) 70%, transparent); background: #0B1426;
+}
+.pp img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.pp::after { content: ""; position: absolute; inset: -1px; pointer-events: none; background:
+  linear-gradient(var(--acc), var(--acc)) left top / 10px 2px, linear-gradient(var(--acc), var(--acc)) left top / 2px 10px,
+  linear-gradient(var(--acc), var(--acc)) right bottom / 10px 2px, linear-gradient(var(--acc), var(--acc)) right bottom / 2px 10px;
+  background-repeat: no-repeat; }
+.has-pp .id-main { grid-area: main; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.has-pp .id-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.has-pp .id-name { margin: 0; min-width: 0; font-size: 44px; }
+.has-pp .id-name.n2 { font-size: 34px; }
+.has-pp .id-name.n3 { font-size: 28px; }
+.has-pp .id-sex { display: block; flex: none; font-size: .875rem; line-height: 1.5; color: var(--ink-2); padding: 1px 8px; box-shadow: inset 0 0 0 1px var(--line); white-space: nowrap; }
+.has-pp .id-sex:empty { display: none; }
+.has-pp .id-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+.has-pp .mini-flag { display: block; flex: none; width: 27px; height: 18px; object-fit: cover; box-shadow: 0 0 0 1px rgba(234, 242, 255, .3); }
+.has-pp .id-en { margin: 0; font-size: 16px; }
+.has-pp .id-en:empty { display: none; }
+/* region and coordinates are items of the line too, so the coordinates alone drop to a third line
+   when the three do not fit */
+.has-pp .id-geo { display: contents; }
+.has-pp .id-geo .coord { margin-left: 0; white-space: nowrap; }
 .chip.xs { width: 24px; height: 18px; padding: 1px; vertical-align: -3px; }
 .chip.xs::before { display: none; }
 .chip.xs .chip-code { font-size: 8px; letter-spacing: 0; }
@@ -309,8 +345,8 @@ a:hover { text-decoration-color: currentColor; }
 /* @keyframes r0..r9 are generated in app.js: end at -(10 + d) / 20 of the strip */
 
 /* ---------- entrance effects (re-triggered by toggling .fx on the stage) ---------- */
-.stage.fx .id-name:not(.empty), .stage.fx .tier-name { animation: nameIn 520ms cubic-bezier(.2, .8, .2, 1) both; }
-.stage.fx .fx-sm { animation: smIn 500ms ease-out 250ms both; }
+.stage.fx .id-name:not(.empty), .stage.fx .tier-name, .stage.fx .has-pp > .pp { animation: nameIn 520ms cubic-bezier(.2, .8, .2, 1) both; }
+.stage.fx .fx-sm, .stage.fx .has-pp .mini-flag, .stage.fx .has-pp .id-geo > span { animation: smIn 500ms ease-out 250ms both; }
 @keyframes nameIn { from { opacity: 0; transform: translateY(10px); } }
 @keyframes smIn { from { transform: translateY(6px); opacity: 0; } }
 
@@ -528,6 +564,9 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   .btn-primary { padding: 0 22px; }
   .btn-ghost { padding: 0 14px; }
   .p-val.big { font-size: 42px; }
+  .has-pp .id-name { font-size: 38px; }
+  .has-pp .id-name.n2 { font-size: 30px; }
+  .has-pp .id-name.n3 { font-size: 26px; }
 }
 
 /* ---------- tablet 760..1179 ---------- */
@@ -574,6 +613,9 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   .p-gdp .rank-r { text-align: left; }
   .tier-name { font-size: 26px; }
   .tier-row { gap: 10px; }
+  .has-pp .id-name { font-size: 34px; }
+  .has-pp .id-name.n2 { font-size: 28px; }
+  .has-pp .id-name.n3 { font-size: 24px; }
 }
 
 /* ---------- phone < 760 ---------- */
@@ -596,9 +638,15 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   }
   .center-col, .id-col, .read-col { display: contents; }
   .center-col > *, .id-col > *, .read-col > * { grid-area: auto; grid-column: 1 / -1; min-width: 0; }
-  .planet-wrap { order: 1; height: 383px; max-width: none; aspect-ratio: auto; margin: 0 -16px; width: calc(100% + 32px); overflow: hidden; }
-  #planet { position: absolute; inset: 0 auto auto 50%; width: 460px; height: 383px; margin-left: -230px; }
-  .id-head { order: 2; grid-template-columns: 38px fit-content(calc(100% - 120px)) minmax(0, 1fr); column-gap: 10px;
+  /* the planet is 383px tall, less on short screens: it gives up height so that the name and the save
+     buttons are on the first screen, above the draw bar (400px: the two bars at the top, the identity
+     block with a cover and a two-line name, the buttons and the draw bar) */
+  .stage { --ph: clamp(160px, calc(100vh - 400px), 383px); --ph: clamp(160px, calc(100svh - 400px), 383px); }
+  .planet-wrap { order: 1; height: var(--ph); max-width: none; aspect-ratio: auto; margin: 0 -16px; width: calc(100% + 32px); overflow: hidden; }
+  #planet { position: absolute; inset: 0 auto auto 50%; width: calc(var(--ph) * 1.2); height: var(--ph); margin-left: calc(var(--ph) * -.6); }
+  /* chip, name, sex: the sex label keeps its own width ("Both sexes", "Ambos sexos") and the name,
+     shrunk by fitName, takes the rest, so the row never runs past the screen */
+  .id-head { order: 2; grid-template-columns: 38px minmax(0, max-content) auto; column-gap: 10px;
     grid-template-areas: "kind kind kind" "chip name sex" "sub sub sub"; margin-top: -8px; }
   .id-kind { flex-direction: row; align-items: baseline; gap: 10px; }
   .kind-no { font-size: 1rem; }
@@ -617,6 +665,19 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   .id-en { font-size: 14px; margin: 0; }
   .id-en:empty { display: none; }
   .id-geo { font-size: 13px; margin: 0; }
+  .id-head.has-pp { grid-template-columns: 64px minmax(0, 1fr); column-gap: 12px; row-gap: 10px; }
+  .has-pp > .pp { width: 64px; height: 90px; margin: 0; }
+  .has-pp .id-main { gap: 4px; }
+  .has-pp .id-name { margin: 0; font-size: 32px; }
+  .has-pp .id-name.n2 { font-size: 26px; }
+  .has-pp .id-name.n3 { font-size: 24px; }
+  .has-pp .id-sex { margin: 0; align-self: center; }
+  .has-pp .id-sub { margin: 0; gap: 2px 8px; }
+  .has-pp .mini-flag { width: 21px; height: 14px; }
+  .has-pp .id-en { font-size: 14px; }
+  /* the save and copy buttons follow the name at once, above the probability | GDP row, half each */
+  .id-col > .result-actions { order: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+  .id-col > .result-status { order: 2; margin: -8px 0 0; }
   /* parent-qualified so they outrank .read-col > * above whatever the source order */
   .read-col > .p-prob { order: 3; grid-column: 1; }
   .read-col > .p-gdp { order: 3; grid-column: 2; }
@@ -637,7 +698,7 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
      label starts under the panel title above it */
   .facts { order: 4; margin: 0; padding: 2px 0; border-top: 0; column-gap: 10px; row-gap: 12px; }
   .fact { padding-left: 14px; }
-  /* After the result panels, passport and export buttons, including on narrow phones. */
+  /* the draw buttons stay in a bar at the bottom of the screen, after every result panel */
   .actions {
     order: 9; position: sticky; bottom: 0; z-index: 20; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
     display: grid; grid-template-columns: minmax(0, 1fr) 64px 64px; gap: 8px;
@@ -679,21 +740,16 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   :root:lang(ja) .keys li.b-0 { white-space: nowrap; }
 }
 
-#idName { transition: none !important; }
+/* measured while being shrunk to fit (fitName, fitTier): with reduced motion every property would
+   otherwise take a 1ms transition, and the size read back would still be the old one */
+#idName, #vTier { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
   .rstrip { animation-duration: 1ms !important; animation-delay: 0ms !important; }
   html { scroll-behavior: auto; }
 }
 
-/* Passport illustration and image export */
-.passport-panel { display: flex; align-items: center; gap: 18px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
-.passport-panel[hidden], .result-actions[hidden], .passport-panel img[hidden], #cardShare[hidden] { display: none; }
-.passport-panel img { width: 100px; height: 142px; flex: 0 0 auto; object-fit: contain; }
-.passport-panel > div { min-width: 0; }
-.passport-panel .minor { margin: 0 0 6px; }
-#passportNote { color: var(--ink-3); font-size: 12px; line-height: 1.6; margin: 0 0 8px; }
-#passportSource { color: var(--ink-2); font-size: 12px; text-underline-offset: 3px; }
+/* image export */
 .result-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
 #saveBtn { color: var(--acc); border-color: var(--acc); }
 .result-status { font-size: 13px; color: var(--ink-2); }
@@ -707,10 +763,3 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
 #cardDialogStatus:empty { display: none; }
 .card-dialog-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .card-dialog-actions a { text-decoration: none; }
-@media (max-width: 759px) {
-  .id-col > .passport-panel { order: 7; margin: 0; padding: 14px; background: rgba(12, 22, 46, .92); border: 0; }
-  .passport-panel img { width: 82px; height: 116px; }
-  .id-col > .result-actions { order: 8; margin: 0; }
-  .id-col > .result-status { order: 8; margin: 0; }
-  .result-actions .btn { flex: 1; }
-}

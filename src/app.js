@@ -193,6 +193,7 @@ function dateOf(iso) { return new Intl.DateTimeFormat(S.locale, Object.assign({ 
 function coordText(lat, lng) {
   return Math.abs(lat).toFixed(1) + '°' + (lat >= 0 ? 'N' : 'S') + ' ' + Math.abs(lng).toFixed(1) + '°' + (lng >= 0 ? 'E' : 'W');
 }
+const flagSrc = L => 'assets/flags/' + L.iso2.toLowerCase() + '.svg';
 
 /* ================= storage ================= */
 /* v2 lives under its own key; a v1 record (births and population modes) is migrated once:
@@ -297,10 +298,11 @@ function paintSpace() {
    When the last strip stops the number becomes plain text, so no moving layer is left behind. */
 const STRIP = Array.from({ length: 20 }, (_, i) => i % 10).join(' ');
 /* digit advance widths in em for the element's font, so a stopped number is spaced like plain text.
-   Kept per font; forgotten whenever web fonts finish loading, since a fallback font may have been measured. */
+   Kept per font; forgotten whenever web fonts finish loading, since a fallback font may have been measured.
+   The name and tier are fitted again then too: a language's fonts can arrive after document.fonts.ready */
 const DIGW = new Map();
 let digCtx = null;
-if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => DIGW.clear());
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { DIGW.clear(); fitName(); });
 function digitWidths(el) {
   const cs = getComputedStyle(el);
   if (!el.isConnected || !cs.fontFamily) return Array(10).fill(0.6);
@@ -373,7 +375,7 @@ function flagChip(el, L) {
   el.textContent = '';
   if (!L) return;
   const img = new Image();
-  img.src = 'assets/flags/' + L.iso2.toLowerCase() + '.svg';
+  img.src = flagSrc(L);
   img.alt = S.flagOf(nm(L));
   img.decoding = 'async';
   img.onerror = () => {
@@ -388,18 +390,23 @@ function flagChip(el, L) {
 }
 
 /* font size by name length (Latin letters are narrower than Hangul or kana, so the limits are
-   per language), then shrink if the name still overflows its box */
+   per language), then shrink if the name still overflows its box. A long name (n3) may take two
+   lines, three beside a passport cover (a narrower column, but as tall as the cover): it is too tall
+   from the next line on (glyphs overhang the 1.12 line box a little, so the limit sits half a line
+   past the last one allowed), and no word may be wider than the box. A word still too wide at the
+   smallest size is broken rather than let out of the column */
 function nameClass(name) { const n = [...name].length, [a, b] = S.nameFit; return n <= a ? '' : n <= b ? 'n2' : 'n3'; }
 function fitName() {
   fitTier();
   const el = $('#idName');
-  el.style.fontSize = '';
+  el.style.fontSize = ''; el.style.overflowWrap = '';
   if (el.classList.contains('empty') || !el.clientWidth) return;
   let f = parseFloat(getComputedStyle(el).fontSize);
-  const f0 = f, wrap = el.classList.contains('n3');
-  const over = () => wrap ? el.scrollHeight > f * 1.12 * 2 + 2 : el.scrollWidth > el.clientWidth + 1;
+  const f0 = f, wrap = el.classList.contains('n3'), maxLines = $('#idHead').classList.contains('has-pp') ? 3 : 2;
+  const over = () => el.scrollWidth > el.clientWidth + 1 || (wrap && el.scrollHeight > f * 1.12 * (maxLines + .5));
   while (f > 18 && over()) { f -= 2; el.style.fontSize = f + 'px'; }
   if (f === f0) el.style.fontSize = '';
+  if (over()) el.style.overflowWrap = 'anywhere';
 }
 /* the tier name stays on one line: Least developed and Menos adelantado are shrunk to fit */
 function fitTier() {
@@ -454,7 +461,7 @@ function renderStage(st, opt = {}) {
   $('#idSex').textContent = sex;
   $('#idEn').textContent = empty ? '' : nmSub(L);
   $('#idEn').className = 'id-en fx-sm';
-  $('#idGeo').innerHTML = empty ? '' : esc(subName(L.sub)) + '<span class="coord">' + coordText(L.lat, L.lng) + '</span>';
+  $('#idGeo').innerHTML = empty ? '' : '<span class="geo-r">' + esc(subName(L.sub)) + '</span><span class="coord">' + coordText(L.lat, L.lng) + '</span>';
   $('#idGeo').className = 'id-geo fx-sm';
   $('#resultActions').hidden = empty;
   renderPassport(L);
@@ -575,23 +582,38 @@ async function onCopy(ev) {
   setTimeout(() => { if (btn.isConnected) btn.textContent = S.copy; }, 1800);
 }
 
-/* Covers are explicit per-place mappings: never infer a passport from a territory's sov field. */
+/* The passport cover sits where an ID photo would, left of the name, with a small flag before the
+   English name and region. Its box is laid out before the image is asked for, so a late image never
+   moves the name; until then the box is a dark blank. Without a cover, or when it fails to load, the
+   box folds away and the big flag chip returns. Only the result left on screen asks for its cover (a
+   series renders its last draw alone), and the token keeps a late image from an earlier result out.
+   Covers are explicit per-place mappings: never infer a passport from a territory's sov field. */
 let passportToken = 0;
 function renderPassport(L) {
-  const token = ++passportToken, panel = $('#passportPanel'), img = $('#passportCover');
-  const noteEl = $('#passportNote'), source = $('#passportSource');
-  panel.hidden = !L; img.hidden = true; img.onload = img.onerror = null;
-  img.removeAttribute('src'); source.hidden = true; source.removeAttribute('href');
-  if (!L) return;
-  const cover = PASSPORTS[String(L.code)];
-  noteEl.textContent = cover ? S.passportNote : S.passportMissing;
+  const head = $('#idHead'), img = $('#ppImg'), mini = $('#miniFlag');
+  const cover = L ? PASSPORTS[String(L.code)] : null;
+  head.classList.toggle('has-pp', !!cover);
+  if (cover) {
+    img.alt = S.passportAlt(nm(L));
+    if (mini.getAttribute('src') !== flagSrc(L)) { mini.hidden = false; mini.src = flagSrc(L); }
+  }
+  /* the same cover again (a language switch, the same place drawn twice): keep the image as it is */
+  if (cover && img.dataset.file === cover.file) return;
+  const token = ++passportToken;
+  img.onload = img.onerror = null;
+  img.hidden = true; img.removeAttribute('src'); delete img.dataset.file;
   if (!cover) return;
-  source.href = 'passport-credits.html#p' + L.code; source.hidden = false;
-  img.alt = S.passportAlt(nm(L));
   img.onload = () => { if (token === passportToken) img.hidden = false; };
-  img.onerror = () => { if (token === passportToken) { img.hidden = true; noteEl.textContent = S.passportFailed; } };
+  img.onerror = () => {
+    if (token !== passportToken) return;
+    delete img.dataset.file;
+    head.classList.remove('has-pp');
+    fitName();
+  };
+  img.dataset.file = cover.file;
   img.src = cover.file;
 }
+$('#miniFlag').addEventListener('error', e => { e.target.hidden = true; });
 
 let cardBusy = false, cardUrl = null, cardFile = null, cardStrings = null, cardOpener = null;
 function cardPayload(st) {
@@ -599,21 +621,23 @@ function cardPayload(st) {
   const css = getComputedStyle(stage), draw = st.type === 'draw';
   const basis = L.gdpNNote ? note(L.gdpNNote) : S.cardGdpYear;
   const detail = M.gdp.v == null ? '' : basis + ' · ' + rankText(M.gdp.r);
+  /* a ShareAlike cover makes the whole card an adaptation, so the card states its own licence too */
+  const cardLicence = cover && /CC BY-SA/.test(cover.credit) ? ' · Card: CC BY-SA 4.0' : '';
   return {
     name: nm(L), subtitle: nmSub(L), iso2: L.iso2,
     kicker: (draw ? S.kindDraw + ' · ' + S.serial(fmtInt(st.serial)) : S.kindLookup),
     sex: draw ? sexName(st.sex) : S.both, region: subName(L.sub),
-    flag: 'assets/flags/' + L.iso2.toLowerCase() + '.svg', passport: cover ? cover.file : null,
-    passportLabel: S.passportLabel, flagLabel: S.cardFlag,
+    flag: flagSrc(L), passport: cover ? cover.file : null,
     accent: css.getPropertyValue('--band-' + L.band).trim(), font: css.getPropertyValue('--sans').trim(),
     metrics: [
       { label: S.lbProb, value: fmtPct(M.share), detail: oneIn(M.share) },
-      { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail },
+      { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail,
+        ladder: { band: L.band, of: NBANDS, label: L.band ? S.bandNo(L.band, NBANDS) : S.noData } },
       { label: S.lbLife, value: S.years(fx(M.life.v, 1)), detail: rankText(M.life.r) + ' · ' + S.rankScope(draw ? st.sex : null) },
       { label: S.lbTier, value: S.tier[tierOf(L)], detail: S.tierSayHtml(fx(tierStats().p1[tierOf(L)], 1)).replace(/<[^>]*>/g, '') }
     ],
     note: S.cardNote, callToAction: S.cardCta,
-    credit: cover ? 'Passport: ' + cover.credit : '',
+    credit: cover ? 'Passport: ' + cover.credit + cardLicence : '',
     flagCredit: 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.',
     creditLink: 'artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
   };

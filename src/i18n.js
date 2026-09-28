@@ -724,61 +724,46 @@ Object.assign(ko, {
   saveImage: '이미지 저장', cardBusy: '이미지 만드는 중…', cardTitle: '결과 이미지', cardDownload: 'PNG 저장', cardShare: '공유', cardClose: '닫기',
   cardHint: 'PNG로 저장하거나 공유할 수 있습니다. 휴대폰에서는 이미지를 길게 눌러 저장할 수도 있습니다.',
   cardError: '이미지를 만들지 못했습니다. 다시 시도해 주세요.', cardShareError: '공유하지 못했습니다. PNG 저장을 이용해 주세요.',
-  passportLabel: '여권 표지', passportAlt: n => n + ' 여권 표지', imageSource: '이미지 출처',
-  passportNote: '해당 국가·지역의 여권 표지입니다. 출생만으로 국적이나 여권 취득이 보장되지는 않습니다.',
-  passportMissing: '이 국가·지역의 표지는 아직 준비되지 않았습니다. 저장 이미지에는 국기가 표시됩니다.',
-  passportFailed: '표지를 불러오지 못했습니다. 저장 이미지에는 국기가 표시됩니다.',
+  passportAlt: n => n + ' 여권 표지', creditsLink: '이미지 출처·라이선스',
   cardNote: '국가 평균을 비교한 시뮬레이션입니다. 출생·기대수명은 2026년 추계이며 개인의 삶이나 국적을 뜻하지 않습니다.',
-  cardFlag: '국기', cardCta: '다시 태어난다면, 어디일까요?', cardAlt: n => n + ' 출생 결과 카드',
-  cardGdpYear: '2025년 환율 기준', cardSources: '출처·이용 조건'
+  cardCta: '다시 태어난다면, 어디일까요?', cardAlt: n => n + ' 출생 결과 카드',
+  cardGdpYear: '2025년 환율 기준'
 });
 Object.assign(en, {
   saveImage: 'Save image', cardBusy: 'Creating image…', cardTitle: 'Result image', cardDownload: 'Save PNG', cardShare: 'Share', cardClose: 'Close',
   cardHint: 'Save the PNG or share it. On a phone, you can also press and hold the image to save it.',
   cardError: 'Could not create the image. Please try again.', cardShareError: 'Could not share. Please use Save PNG.',
-  passportLabel: 'Passport cover', passportAlt: n => n + ' passport cover', imageSource: 'Image source',
-  passportNote: 'A passport cover from this country or territory. Birth here does not guarantee citizenship or a passport.',
-  passportMissing: 'A cover is not available for this country or territory yet. The saved image uses its flag.',
-  passportFailed: 'The cover could not load. The saved image uses the flag.',
+  passportAlt: n => n + ' passport cover', creditsLink: 'Image credits and licenses',
   cardNote: 'A simulation of national averages. Births and life expectancy are 2026 projections, not an individual life or citizenship.',
-  cardFlag: 'Flag', cardCta: 'Where would you be born next?', cardAlt: n => n + ' birth result card',
-  cardGdpYear: '2025, market rates', cardSources: 'Sources and licenses'
+  cardCta: 'Where would you be born next?', cardAlt: n => n + ' birth result card',
+  cardGdpYear: '2025, market rates'
 });
 Object.assign(ja, {
   saveImage: '画像を保存', cardBusy: '画像を作成中…', cardTitle: '結果画像', cardDownload: 'PNGを保存', cardShare: '共有', cardClose: '閉じる',
   cardHint: 'PNGを保存、または共有できます。スマートフォンでは画像を長押しして保存することもできます。',
   cardError: '画像を作成できませんでした。もう一度お試しください。', cardShareError: '共有できませんでした。PNGを保存してください。',
-  passportLabel: 'パスポートの表紙', passportAlt: n => n + 'のパスポートの表紙', imageSource: '画像の出典',
-  passportNote: 'この国・地域のパスポートの表紙です。出生だけで国籍やパスポートの取得が保証されるわけではありません。',
-  passportMissing: 'この国・地域の表紙はまだ用意できていません。保存画像には国旗を表示します。',
-  passportFailed: '表紙を読み込めませんでした。保存画像には国旗を表示します。',
+  passportAlt: n => n + 'のパスポートの表紙', creditsLink: '画像の出典・ライセンス',
   cardNote: '国の平均値を比較するシミュレーションです。出生数・平均寿命は2026年の推計であり、個人の人生や国籍を示しません。',
-  cardFlag: '国旗', cardCta: '生まれ変わるなら、どこでしょう？', cardAlt: n => n + 'の出生結果カード',
-  cardGdpYear: '2025年、為替レート基準', cardSources: '出典・利用条件'
+  cardCta: '生まれ変わるなら、どこでしょう？', cardAlt: n => n + 'の出生結果カード',
+  cardGdpYear: '2025年、為替レート基準'
 });
 Object.assign(es, {
   saveImage: 'Guardar imagen', cardBusy: 'Creando imagen…', cardTitle: 'Imagen del resultado', cardDownload: 'Guardar PNG', cardShare: 'Compartir', cardClose: 'Cerrar',
   cardHint: 'Guarda el PNG o compártelo. En el móvil también puedes mantener pulsada la imagen para guardarla.',
   cardError: 'No se pudo crear la imagen. Inténtalo de nuevo.', cardShareError: 'No se pudo compartir. Usa Guardar PNG.',
-  passportLabel: 'Portada del pasaporte', passportAlt: n => 'Portada del pasaporte de ' + n, imageSource: 'Fuente de la imagen',
-  passportNote: 'Portada de un pasaporte de este país o territorio. Nacer aquí no garantiza la ciudadanía ni un pasaporte.',
-  passportMissing: 'La portada de este país o territorio aún no está disponible. La imagen guardada muestra su bandera.',
-  passportFailed: 'No se pudo cargar la portada. La imagen guardada muestra la bandera.',
+  passportAlt: n => 'Portada del pasaporte de ' + n, creditsLink: 'Créditos y licencias de las imágenes',
   cardNote: 'Simulación de medias nacionales. Nacimientos y esperanza de vida: proyecciones de 2026, no una vida individual ni una ciudadanía.',
-  cardFlag: 'Bandera', cardCta: '¿Dónde nacerías la próxima vez?', cardAlt: n => 'Tarjeta de nacimiento: ' + n,
-  cardGdpYear: '2025, tipo de cambio', cardSources: 'Fuentes y licencias'
+  cardCta: '¿Dónde nacerías la próxima vez?', cardAlt: n => 'Tarjeta de nacimiento: ' + n,
+  cardGdpYear: '2025, tipo de cambio'
 });
 Object.assign(ru, {
   saveImage: 'Сохранить картинку', cardBusy: 'Создаём картинку…', cardTitle: 'Картинка с результатом', cardDownload: 'Сохранить PNG', cardShare: 'Поделиться', cardClose: 'Закрыть',
   cardHint: 'Сохраните PNG или поделитесь им. На телефоне можно также нажать на картинку и удерживать, чтобы сохранить её.',
   cardError: 'Не удалось создать картинку. Попробуйте ещё раз.', cardShareError: 'Не удалось поделиться. Используйте «Сохранить PNG».',
-  passportLabel: 'Обложка паспорта', passportAlt: n => 'Обложка паспорта: ' + n, imageSource: 'Источник изображения',
-  passportNote: 'Обложка паспорта этой страны или территории. Рождение здесь не гарантирует гражданства или получения паспорта.',
-  passportMissing: 'Обложка этой страны или территории пока недоступна. На сохранённой картинке будет флаг.',
-  passportFailed: 'Не удалось загрузить обложку. На сохранённой картинке будет флаг.',
+  passportAlt: n => 'Обложка паспорта: ' + n, creditsLink: 'Источники и лицензии изображений',
   cardNote: 'Симуляция средних показателей стран. Рождаемость и продолжительность жизни — прогнозы на 2026 год, а не судьба или гражданство человека.',
-  cardFlag: 'Флаг', cardCta: 'Где вы родились бы в следующий раз?', cardAlt: n => 'Карточка рождения: ' + n,
-  cardGdpYear: '2025, рыночный курс', cardSources: 'Источники и лицензии'
+  cardCta: 'Где вы родились бы в следующий раз?', cardAlt: n => 'Карточка рождения: ' + n,
+  cardGdpYear: '2025, рыночный курс'
 });
 return { LANGS: ['en', 'ja', 'es', 'ko', 'ru'], en, ja, es, ko, ru };
 })();
