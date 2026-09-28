@@ -11,6 +11,11 @@
     "file": "assets/passports/dz.webp",
     "credit": "Algerian Government · Public domain"
   },
+  "16": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain",
+    "reuse": 840
+  },
   "20": {
     "file": "assets/passports/ad.webp",
     "credit": "Boigandorra · CC BY-SA 4.0"
@@ -74,6 +79,11 @@
   "84": {
     "file": "assets/passports/bz.webp",
     "credit": "chatgpt · Public domain"
+  },
+  "92": {
+    "file": "assets/passports/gb.webp",
+    "credit": "Thepekinite · CC BY 4.0",
+    "reuse": 826
   },
   "96": {
     "file": "assets/passports/bn.webp",
@@ -147,6 +157,11 @@
     "file": "assets/passports/km.webp",
     "credit": "Noble · CC BY-SA 3.0"
   },
+  "175": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
   "178": {
     "file": "assets/passports/cg.webp",
     "credit": "Government of the Republic of Congo · Public domain"
@@ -211,6 +226,11 @@
     "file": "assets/passports/fo.webp",
     "credit": "Conseil de l'Europe · Attribution"
   },
+  "238": {
+    "file": "assets/passports/gb.webp",
+    "credit": "Thepekinite · CC BY 4.0",
+    "reuse": 826
+  },
   "246": {
     "file": "assets/passports/fi.webp",
     "credit": "Noble · CC BY-SA 3.0"
@@ -218,6 +238,16 @@
   "250": {
     "file": "assets/passports/fr.webp",
     "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0"
+  },
+  "254": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
+  "258": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
   },
   "262": {
     "file": "assets/passports/dj.webp",
@@ -258,6 +288,16 @@
   "308": {
     "file": "assets/passports/gd.webp",
     "credit": "Jura695 · CC BY-SA 4.0"
+  },
+  "312": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
+  "316": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain",
+    "reuse": 840
   },
   "320": {
     "file": "assets/passports/gt.webp",
@@ -403,6 +443,11 @@
     "file": "assets/passports/mt.webp",
     "credit": "Government of Malta · Public domain"
   },
+  "474": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
   "478": {
     "file": "assets/passports/mr.webp",
     "credit": "Noble · CC BY-SA 3.0"
@@ -451,6 +496,31 @@
     "file": "assets/passports/nl.webp",
     "credit": "Blagomeni · CC BY-SA 3.0"
   },
+  "531": {
+    "file": "assets/passports/nl.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0",
+    "reuse": 528
+  },
+  "533": {
+    "file": "assets/passports/nl.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0",
+    "reuse": 528
+  },
+  "534": {
+    "file": "assets/passports/nl.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0",
+    "reuse": 528
+  },
+  "535": {
+    "file": "assets/passports/nl.webp",
+    "credit": "Blagomeni · CC BY-SA 3.0",
+    "reuse": 528
+  },
+  "540": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
   "548": {
     "file": "assets/passports/vu.webp",
     "credit": "Alphacenturia123 · CC BY-SA 4.0"
@@ -474,6 +544,11 @@
   "578": {
     "file": "assets/passports/no.webp",
     "credit": "Cyygma · Public domain (government work)"
+  },
+  "580": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain",
+    "reuse": 840
   },
   "583": {
     "file": "assets/passports/fm.webp",
@@ -523,9 +598,19 @@
     "file": "assets/passports/tl.webp",
     "credit": "มองโกเลีย๔๔ · Public domain"
   },
+  "630": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain",
+    "reuse": 840
+  },
   "634": {
     "file": "assets/passports/qa.webp",
     "credit": "JohnGold6000 · Public domain"
+  },
+  "638": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
   },
   "642": {
     "file": "assets/passports/ro.webp",
@@ -538,6 +623,11 @@
   "646": {
     "file": "assets/passports/rw.webp",
     "credit": "Moise Segikwiye · CC BY-SA 4.0"
+  },
+  "652": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
   },
   "654": {
     "file": "assets/passports/sh.webp",
@@ -554,6 +644,16 @@
   "662": {
     "file": "assets/passports/lc.webp",
     "credit": "Samueldho · Public domain"
+  },
+  "663": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
+  },
+  "666": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
   },
   "670": {
     "file": "assets/passports/vc.webp",
@@ -715,6 +815,11 @@
     "file": "assets/passports/us.webp",
     "credit": "Siirski · Public domain"
   },
+  "850": {
+    "file": "assets/passports/us.webp",
+    "credit": "Siirski · Public domain",
+    "reuse": 840
+  },
   "854": {
     "file": "assets/passports/bf.webp",
     "credit": "Rakoon · CC BY 3.0"
@@ -726,6 +831,11 @@
   "862": {
     "file": "assets/passports/ve.webp",
     "credit": "Osmar Rodríguez · Public domain"
+  },
+  "876": {
+    "file": "assets/passports/fr.webp",
+    "credit": "RainbowSilver2ndBackup & Futurhit12 · CC BY-SA 4.0",
+    "reuse": 250
   },
   "887": {
     "file": "assets/passports/ye.webp",
