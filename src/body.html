@@ -40,18 +40,16 @@
     </div>
 
     <div class="id-col" id="idCol">
-      <div class="id-head">
-        <span class="chip" id="chip"></span>
+      <div class="id-head" id="idHead">
         <div class="id-kind"><span class="kind-l" id="kindL"></span><span class="kind-no" id="kindNo"></span></div>
-        <h2 class="id-name" id="idName"></h2>
-        <span class="id-sex" id="idSex"></span>
-        <div class="id-sub"><p class="id-en" id="idEn"></p><p class="id-geo" id="idGeo"></p></div>
+        <span class="chip" id="chip"></span>
+        <span class="pp" id="pp"><img id="ppImg" width="88" height="124" decoding="async" alt="" hidden></span>
+        <div class="id-main">
+          <div class="id-title"><h2 class="id-name" id="idName"></h2><span class="id-sex" id="idSex"></span></div>
+          <div class="id-sub"><img class="mini-flag" id="miniFlag" width="27" height="18" decoding="async" alt=""><p class="id-en" id="idEn"></p><p class="id-geo" id="idGeo"></p></div>
+        </div>
       </div>
       <dl class="facts" id="facts"></dl>
-      <div class="passport-panel" id="passportPanel" hidden>
-        <img id="passportCover" width="130" height="184" decoding="async" alt="" hidden>
-        <div><p class="minor" data-t="passportLabel"></p><p id="passportNote"></p><a id="passportSource" data-t="imageSource" target="_blank" rel="noopener" hidden></a></div>
-      </div>
       <div class="result-actions" id="resultActions" hidden>
         <button type="button" class="btn btn-mini" id="saveBtn" data-t="saveImage"></button>
         <button type="button" class="btn btn-mini" id="copyBtn" data-t="copy"></button>
@@ -221,7 +219,7 @@
     <h3 data-t="mhFlags"></h3>
     <p data-th="mpFlagsHtml"></p>
 
-    <p class="colophon" data-t="colophon"></p>
+    <p class="colophon"><span data-t="colophon"></span> <a href="passport-credits.html" data-t="creditsLink"></a></p>
   </section>
 </main>
 <dialog id="cardDialog" aria-labelledby="cardTitle">
