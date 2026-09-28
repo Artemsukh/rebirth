@@ -174,12 +174,12 @@
     "file": "assets/passports/ao.webp",
     "title": "File:Angolan passport.svg",
     "source": "https://commons.wikimedia.org/wiki/File:Angolan_passport.svg",
-    "original": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Angolan_passport.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Angolan_passport.svg",
     "author": "The Radioactive Box",
     "license": "Public domain",
     "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
     "retrieved": "2026-09-28",
-    "changes": "Resized proportionally and converted to WebP; cover artwork unchanged."
+    "changes": "Rendered from SVG to fit 400 × 568 px and converted to WebP; cover artwork unchanged."
   },
   {
     "code": 120,
@@ -406,14 +406,14 @@
     "code": 384,
     "country": "Côte d'Ivoire",
     "file": "assets/passports/ci.webp",
-    "title": "File:Passeport Ivoirien.png",
-    "source": "https://commons.wikimedia.org/wiki/File:Passeport_Ivoirien.png",
-    "original": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Passeport_Ivoirien.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
-    "author": "Soren17",
+    "title": "File:Passport-IvoryCoast-front.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Passport-IvoryCoast-front.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Passport-IvoryCoast-front.jpg",
+    "author": "Ivorytoast123",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
     "retrieved": "2026-09-28",
-    "changes": "Resized proportionally and converted to WebP; cover artwork unchanged."
+    "changes": "Front cover cropped from the scan of the open cover (Commons 1280 px rendition), resized proportionally and converted to WebP; cover artwork unchanged."
   },
   {
     "code": 288,
@@ -564,12 +564,12 @@
     "file": "assets/passports/kz.webp",
     "title": "File:Kazakhstan Passport.svg",
     "source": "https://commons.wikimedia.org/wiki/File:Kazakhstan_Passport.svg",
-    "original": null,
+    "original": "https://upload.wikimedia.org/wikipedia/commons/9/97/Kazakhstan_Passport.svg",
     "author": "Murat Karibay",
     "license": "Public domain (government work)",
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Kazakhstan_Passport.svg",
     "retrieved": "2026-09-28",
-    "changes": "Resized proportionally and converted to WebP; cover artwork unchanged."
+    "changes": "Rendered from SVG to fit 400 × 568 px and converted to WebP; cover artwork unchanged."
   },
   {
     "code": 417,
@@ -1136,12 +1136,12 @@
     "file": "assets/passports/tr.webp",
     "title": "File:Turkish Passport.svg",
     "source": "https://commons.wikimedia.org/wiki/File:Turkish_Passport.svg",
-    "original": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Turkish_Passport.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Turkish_Passport.svg",
     "author": "Swapnil1101",
     "license": "CC BY-SA 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
     "retrieved": "2026-09-28",
-    "changes": "Resized proportionally and converted to WebP; cover artwork unchanged."
+    "changes": "Rendered from SVG to fit 400 × 568 px and converted to WebP; cover artwork unchanged."
   },
   {
     "code": 784,
@@ -1251,14 +1251,14 @@
     "code": 643,
     "country": "Russia",
     "file": "assets/passports/ru.webp",
-    "title": "Gallery Slideshow",
+    "title": "File:Russian Passport (External).svg",
     "source": "https://commons.wikimedia.org/wiki/File:Russian_Passport_(External).svg",
-    "original": null,
+    "original": "https://upload.wikimedia.org/wikipedia/commons/2/20/Russian_Passport_%28External%29.svg",
     "author": "Swapnil1101",
     "license": "Public domain (government work)",
     "licenseUrl": "https://commons.wikimedia.org/wiki/File:Russian_Passport_(External).svg",
     "retrieved": "2026-09-28",
-    "changes": "Resized proportionally and converted to WebP; cover artwork unchanged."
+    "changes": "Rendered from SVG to fit 400 × 568 px and converted to WebP; cover artwork unchanged."
   },
   {
     "code": 703,
