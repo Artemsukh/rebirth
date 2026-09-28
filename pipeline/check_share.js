@@ -11,16 +11,29 @@ const covers = JSON.parse(read('data/passports.json'));
 const sources = JSON.parse(read('data/passport-sources.json'));
 const missing = JSON.parse(read('data/passports-missing.json'));
 const locs = D.LOC.map(r => Object.fromEntries(D.LOC_FIELDS.map((k, i) => [k, r[i]])));
+const reuseList = JSON.parse(read('data/passport-reuse.json'));
 const credits = read('passport-credits.html');
-assert.equal(sources.length, Object.keys(covers).length);
-assert.equal(new Set([...sources, ...missing].map(a => a.code)).size, locs.length);
-assert.equal(sources.length + missing.length, locs.length);
+// A reused cover has no source record of its own: it is checked against its sovereign state's.
+const reused = Object.keys(covers).filter(c => covers[c].reuse != null).map(Number);
+assert.equal(sources.length + reused.length, Object.keys(covers).length);
+assert.equal(new Set([...sources.map(a => a.code), ...reused, ...missing.map(a => a.code)]).size, locs.length);
+assert.equal(sources.length + reused.length + missing.length, locs.length);
 for (const a of sources) {
   assert(locs.some(l => l.code === a.code));
   assert.equal(covers[a.code].file, a.file);
+  assert.equal(covers[a.code].reuse, undefined, a.country + ' has its own source');
   assert(fs.existsSync(path.join(root, a.file)), a.file);
   assert(a.author && a.license && a.licenseUrl && a.source, a.country + ' attribution');
   assert(credits.includes('id="p' + a.code + '"'), a.country + ' credit anchor');
+}
+for (const code of reused) {
+  const cover = covers[code], home = sources.find(a => a.code === cover.reuse);
+  assert.equal(reuseList[code], cover.reuse, code + ' is on the reuse list');
+  assert(home, code + ': the sovereign state has a sourced cover');
+  assert.equal(cover.file, home.file, code + ' file');
+  assert.equal(cover.credit, covers[cover.reuse].credit, code + ' credit');
+  const entry = credits.match(new RegExp('<article id="p' + code + '">([^]*?)</article>'));
+  assert(entry && entry[1].includes('href="#p' + cover.reuse + '"'), code + ' credit entry links to its sovereign state');
 }
 for (const a of missing) assert(!covers[a.code], a.country + ' fallback');
 // One font file, or several separated by ':'. Files named alike but for a weight (NotoSansKR-400.ttf,
@@ -117,6 +130,15 @@ async function render(p, name, expectedCover) {
       const p = context.makePayload(l.code, lang);
       assert(p.name && p.accent && p.metrics.length === 4);
       assert(!JSON.stringify(p).includes('undefined'), lang + ':' + l.code);
+      // a reused cover: the sovereign state's picture and credit, this place's name and credit link
+      const cover = covers[l.code];
+      if (cover && cover.reuse != null) {
+        const home = covers[cover.reuse];
+        assert.equal(p.passport, home.file);
+        assert.equal(p.credit, 'Passport: ' + home.credit + (/CC BY-SA/.test(home.credit) ? ' · Card: CC BY-SA 4.0' : ''), lang + ':' + l.code + ' credit');
+        assert(p.creditLink.endsWith('passport-credits.html#p' + l.code), lang + ':' + l.code + ' credit link');
+        assert.equal(p.name, l[lang] || l.en);
+      }
     }
     const code = { ko: 410, en: 356, ja: 392, es: 180, ru: 140 }[lang];
     await render(context.makePayload(code, lang), 'result-' + lang, !!covers[code]);
@@ -124,8 +146,9 @@ async function render(p, name, expectedCover) {
     await render(context.makePayload(longest.code, lang, 'lookup'), 'long-name-' + lang, !!covers[longest.code]);
   }
   // the review set: with and without a cover, band 9 (Monaco), no GDP band (Kosovo), a small cover
-  // (Chad) and a two-line name (Bosnia and Herzegovina), in every language
-  const review = { KR: 410, KP: 408, MC: 492, XK: 412, ML: 466, TD: 148, BA: 70 };
+  // (Chad), a two-line name (Bosnia and Herzegovina) and a territory showing its sovereign state's
+  // cover (Puerto Rico), in every language
+  const review = { KR: 410, KP: 408, MC: 492, XK: 412, ML: 466, TD: 148, BA: 70, PR: 630 };
   let reviewed = 0;
   for (const lang of langs) for (const [iso, code] of Object.entries(review)) {
     await render(context.makePayload(code, lang), 'card-' + lang + '-' + iso.toLowerCase(), !!covers[code]);
@@ -136,5 +159,5 @@ async function render(p, name, expectedCover) {
   await render({ ...p, passport: 'https://remote.example/cover.webp', flag: 'assets/flags/missing.svg' }, 'missing-images', false);
   assert.equal(await context.card.loadImage(null), null);
   assert.equal(await context.card.loadImage('https://remote.example/cover.webp'), null);
-  console.log('PASS: ' + sources.length + ' covers, ' + missing.length + ' fallbacks; ' + (locs.length * langs.length) + ' payloads; ' + (12 + reviewed) + ' PNGs (5 languages, long names, review set, image failures).');
+  console.log('PASS: ' + sources.length + ' covers, ' + reused.length + ' reused, ' + missing.length + ' fallbacks; ' + (locs.length * langs.length) + ' payloads; ' + (12 + reviewed) + ' PNGs (5 languages, long names, review set, image failures).');
 })().catch(e => { console.error(e); process.exitCode = 1; });

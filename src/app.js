@@ -587,14 +587,16 @@ async function onCopy(ev) {
    moves the name; until then the box is a dark blank. Without a cover, or when it fails to load, the
    box folds away and the big flag chip returns. Only the result left on screen asks for its cover (a
    series renders its last draw alone), and the token keeps a late image from an earlier result out.
-   Covers are explicit per-place mappings: never infer a passport from a territory's sov field. */
+   Covers are explicit per-place mappings: never infer a passport from a territory's sov field. A
+   territory on the reuse list (data/passport-reuse.json) shows its sovereign state's cover, so the
+   picture is named after that state; the small flag stays the territory's own. */
 let passportToken = 0;
 function renderPassport(L) {
   const head = $('#idHead'), img = $('#ppImg'), mini = $('#miniFlag');
   const cover = L ? PASSPORTS[String(L.code)] : null;
   head.classList.toggle('has-pp', !!cover);
   if (cover) {
-    img.alt = S.passportAlt(nm(L));
+    img.alt = S.passportAlt(nm(cover.reuse ? BY.get(cover.reuse) : L));
     if (mini.getAttribute('src') !== flagSrc(L)) { mini.hidden = false; mini.src = flagSrc(L); }
   }
   /* the same cover again (a language switch, the same place drawn twice): keep the image as it is */
@@ -621,7 +623,9 @@ function cardPayload(st) {
   const css = getComputedStyle(stage), draw = st.type === 'draw';
   const basis = L.gdpNNote ? note(L.gdpNNote) : S.cardGdpYear;
   const detail = M.gdp.v == null ? '' : basis + ' · ' + rankText(M.gdp.r);
-  /* a ShareAlike cover makes the whole card an adaptation, so the card states its own licence too */
+  /* a ShareAlike cover makes the whole card an adaptation, so the card states its own licence too.
+     A reused cover carries its sovereign state's credit; the link still goes to this place's entry,
+     which links on to the sovereign state's. */
   const cardLicence = cover && /CC BY-SA/.test(cover.credit) ? ' · Card: CC BY-SA 4.0' : '';
   return {
     name: nm(L), subtitle: nmSub(L), iso2: L.iso2,

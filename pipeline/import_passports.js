@@ -2,8 +2,11 @@
    Usage: node pipeline/import_passports.js /path/to/passport-audit.json /path/to/images [code ...]
    Images are named by UN M49 code, e.g. 410.bin. Requires sharp. Given codes, only those places are
    (re)imported and every other entry of the three manifests is kept as it is. An audit entry may give
-   its own `changes` line (a crop, for example). */
+   its own `changes` line (a crop, for example). Every run, whole or partial, ends with
+   apply_passport_reuse.js, which adds the territories that share their sovereign state's cover
+   (data/passport-reuse.json) and writes the flag fallback list. */
 const fs = require('fs'), path = require('path'), sharp = require('sharp');
+const { applyPassportReuse, reuseReport } = require('./apply_passport_reuse');
 const root = path.join(__dirname, '..');
 const [auditPath, inputDir, ...codeArgs] = process.argv.slice(2);
 if (!auditPath || !inputDir) throw new Error('Provide audit JSON and local image directory');
@@ -47,7 +50,5 @@ const shortLicense = a => {
   }
   fs.writeFileSync(path.join(root, 'data/passports.json'), JSON.stringify(manifest, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'data/passport-sources.json'), JSON.stringify(sources, null, 2) + '\n');
-  const missing = locs.filter(l => !manifest[l.code]).map(l => ({ code: l.code, country: l.en, iso2: l.iso2 }));
-  fs.writeFileSync(path.join(root, 'data/passports-missing.json'), JSON.stringify(missing, null, 2) + '\n');
-  console.log(sources.length + ' covers; ' + missing.length + ' flag fallbacks; ' + (sources.reduce((s,a)=>s+locs.find(l=>l.code===a.code).births,0)/locs.reduce((s,l)=>s+l.births,0)*100).toFixed(2) + '% of births covered');
+  console.log(reuseReport(applyPassportReuse(root)));
 })();

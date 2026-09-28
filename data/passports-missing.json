@@ -10,16 +10,6 @@
     "iso2": "MU"
   },
   {
-    "code": 175,
-    "country": "Mayotte",
-    "iso2": "YT"
-  },
-  {
-    "code": 638,
-    "country": "Réunion",
-    "iso2": "RE"
-  },
-  {
     "code": 728,
     "country": "South Sudan",
     "iso2": "SS"
@@ -105,11 +95,6 @@
     "iso2": "FI"
   },
   {
-    "code": 533,
-    "country": "Aruba",
-    "iso2": "AW"
-  },
-  {
     "code": 44,
     "country": "Bahamas",
     "iso2": "BS"
@@ -120,59 +105,9 @@
     "iso2": "BB"
   },
   {
-    "code": 535,
-    "country": "Bonaire, Sint Eustatius and Saba",
-    "iso2": "BQ"
-  },
-  {
-    "code": 92,
-    "country": "British Virgin Islands",
-    "iso2": "VG"
-  },
-  {
-    "code": 531,
-    "country": "Curaçao",
-    "iso2": "CW"
-  },
-  {
-    "code": 312,
-    "country": "Guadeloupe",
-    "iso2": "GP"
-  },
-  {
     "code": 388,
     "country": "Jamaica",
     "iso2": "JM"
-  },
-  {
-    "code": 474,
-    "country": "Martinique",
-    "iso2": "MQ"
-  },
-  {
-    "code": 630,
-    "country": "Puerto Rico",
-    "iso2": "PR"
-  },
-  {
-    "code": 652,
-    "country": "Saint Barthélemy",
-    "iso2": "BL"
-  },
-  {
-    "code": 663,
-    "country": "Saint Martin (French part)",
-    "iso2": "MF"
-  },
-  {
-    "code": 534,
-    "country": "Sint Maarten (Dutch part)",
-    "iso2": "SX"
-  },
-  {
-    "code": 850,
-    "country": "United States Virgin Islands",
-    "iso2": "VI"
   },
   {
     "code": 188,
@@ -190,16 +125,6 @@
     "iso2": "CL"
   },
   {
-    "code": 238,
-    "country": "Falkland Islands",
-    "iso2": "FK"
-  },
-  {
-    "code": 254,
-    "country": "French Guiana",
-    "iso2": "GF"
-  },
-  {
     "code": 600,
     "country": "Paraguay",
     "iso2": "PY"
@@ -215,11 +140,6 @@
     "iso2": "UY"
   },
   {
-    "code": 666,
-    "country": "Saint Pierre and Miquelon",
-    "iso2": "PM"
-  },
-  {
     "code": 554,
     "country": "New Zealand",
     "iso2": "NZ"
@@ -230,19 +150,9 @@
     "iso2": "FJ"
   },
   {
-    "code": 540,
-    "country": "New Caledonia",
-    "iso2": "NC"
-  },
-  {
     "code": 90,
     "country": "Solomon Islands",
     "iso2": "SB"
-  },
-  {
-    "code": 316,
-    "country": "Guam",
-    "iso2": "GU"
   },
   {
     "code": 296,
@@ -255,29 +165,14 @@
     "iso2": "NR"
   },
   {
-    "code": 580,
-    "country": "Northern Mariana Islands",
-    "iso2": "MP"
-  },
-  {
     "code": 585,
     "country": "Palau",
     "iso2": "PW"
   },
   {
-    "code": 16,
-    "country": "American Samoa",
-    "iso2": "AS"
-  },
-  {
     "code": 184,
     "country": "Cook Islands",
     "iso2": "CK"
-  },
-  {
-    "code": 258,
-    "country": "French Polynesia",
-    "iso2": "PF"
   },
   {
     "code": 570,
@@ -298,10 +193,5 @@
     "code": 776,
     "country": "Tonga",
     "iso2": "TO"
-  },
-  {
-    "code": 876,
-    "country": "Wallis and Futuna",
-    "iso2": "WF"
   }
 ]
