@@ -5,6 +5,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const D = JSON.parse($('#app-data').textContent);
+const PASSPORTS = JSON.parse($('#passport-data').textContent);
 const CONT = D.CONT, SUB = D.SUB, WR = D.WORLD, FIELDS = D.LOC_FIELDS;
 /* Colour means one thing on this page: GDP per head in US$ at market rates (gdpN, the figure shown,
    fallback years included), in nine bands. An edge belongs to the band above it; a place with no
@@ -455,7 +456,8 @@ function renderStage(st, opt = {}) {
   $('#idEn').className = 'id-en fx-sm';
   $('#idGeo').innerHTML = empty ? '' : esc(subName(L.sub)) + '<span class="coord">' + coordText(L.lat, L.lng) + '</span>';
   $('#idGeo').className = 'id-geo fx-sm';
-  $('#copyBtn').hidden = empty;
+  $('#resultActions').hidden = empty;
+  renderPassport(L);
   const dash = '—';
   const fact = (dt, dd, sm) => '<div class="fact"><dt>' + esc(dt) + '</dt><dd>' + esc(dd) + (sm ? '<small class="fx-sm">' + esc(sm) + '</small>' : '') + '</dd></div>';
   $('#facts').innerHTML = empty
@@ -550,6 +552,7 @@ function recordText(st) {
     : S.kv(S.lbGdp, usd(M.gdp.v)) + ppp + c + S.world(usd(WR.gdpN)) + c + rankText(M.gdp.r));
   lines.push(S.kv(S.lbTier, S.tier[tierOf(L)]));
   lines.push(S.kv(S.lbLife, S.years(fx(M.life.v, 1))) + c + S.world(S.years(fx(M.life.world, 1))) + c + rankText(M.life.r));
+  lines.push('https://artemsukh.github.io/rebirth/?lang=' + LANG);
   return lines.join('\n');
 }
 
@@ -570,6 +573,96 @@ async function onCopy(ev) {
   btn.textContent = ok ? S.copied : S.copyFail;
   announce(btn.textContent);
   setTimeout(() => { if (btn.isConnected) btn.textContent = S.copy; }, 1800);
+}
+
+/* Covers are explicit per-place mappings: never infer a passport from a territory's sov field. */
+let passportToken = 0;
+function renderPassport(L) {
+  const token = ++passportToken, panel = $('#passportPanel'), img = $('#passportCover');
+  const noteEl = $('#passportNote'), source = $('#passportSource');
+  panel.hidden = !L; img.hidden = true; img.onload = img.onerror = null;
+  img.removeAttribute('src'); source.hidden = true; source.removeAttribute('href');
+  if (!L) return;
+  const cover = PASSPORTS[String(L.code)];
+  noteEl.textContent = cover ? S.passportNote : S.passportMissing;
+  if (!cover) return;
+  source.href = 'passport-credits.html#p' + L.code; source.hidden = false;
+  img.alt = S.passportAlt(nm(L));
+  img.onload = () => { if (token === passportToken) img.hidden = false; };
+  img.onerror = () => { if (token === passportToken) { img.hidden = true; noteEl.textContent = S.passportFailed; } };
+  img.src = cover.file;
+}
+
+let cardBusy = false, cardUrl = null, cardFile = null, cardStrings = null, cardOpener = null;
+function cardPayload(st) {
+  const L = st.loc, M = metrics(st), cover = PASSPORTS[String(L.code)];
+  const css = getComputedStyle(stage), draw = st.type === 'draw';
+  const basis = L.gdpNNote ? note(L.gdpNNote) : S.cardGdpYear;
+  const detail = M.gdp.v == null ? '' : basis + ' · ' + rankText(M.gdp.r);
+  return {
+    name: nm(L), subtitle: nmSub(L), iso2: L.iso2,
+    kicker: (draw ? S.kindDraw + ' · ' + S.serial(fmtInt(st.serial)) : S.kindLookup),
+    sex: draw ? sexName(st.sex) : S.both, region: subName(L.sub),
+    flag: 'assets/flags/' + L.iso2.toLowerCase() + '.svg', passport: cover ? cover.file : null,
+    passportLabel: S.passportLabel, flagLabel: S.cardFlag,
+    accent: css.getPropertyValue('--band-' + L.band).trim(), font: css.getPropertyValue('--sans').trim(),
+    metrics: [
+      { label: S.lbProb, value: fmtPct(M.share), detail: oneIn(M.share) },
+      { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail },
+      { label: S.lbLife, value: S.years(fx(M.life.v, 1)), detail: rankText(M.life.r) + ' · ' + S.rankScope(draw ? st.sex : null) },
+      { label: S.lbTier, value: S.tier[tierOf(L)], detail: S.tierSayHtml(fx(tierStats().p1[tierOf(L)], 1)).replace(/<[^>]*>/g, '') }
+    ],
+    note: S.cardNote, callToAction: S.cardCta,
+    credit: cover ? 'Passport: ' + cover.credit : '',
+    flagCredit: 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.',
+    creditLink: 'artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
+  };
+}
+async function onSaveImage() {
+  if (cardBusy || current.type === 'empty') return;
+  // Freeze all result values and translations before the first await, even if another draw follows.
+  const st = current, payload = cardPayload(st), strings = S, lang = LANG;
+  const btn = $('#saveBtn'); cardBusy = true; btn.disabled = true; btn.textContent = strings.cardBusy;
+  $('#cardStatus').textContent = '';
+  try {
+    const result = await BirthCard.render(payload);
+    if (cardUrl) URL.revokeObjectURL(cardUrl);
+    cardUrl = URL.createObjectURL(result.blob); cardStrings = strings;
+    const filename = 'birth-lottery-' + st.loc.iso2.toLowerCase() + '-' + (st.serial || 'lookup') + '-' + lang + '.png';
+    cardFile = typeof File === 'function' ? new File([result.blob], filename, { type: 'image/png' }) : null;
+    $('#cardPreview').src = cardUrl; $('#cardPreview').alt = strings.cardAlt(payload.name);
+    $('#cardTitle').textContent = strings.cardTitle; $('#cardClose').textContent = strings.cardClose;
+    $('#cardHint').textContent = strings.cardHint;
+    $('#cardDownload').href = cardUrl; $('#cardDownload').download = filename;
+    $('#cardDownload').textContent = strings.cardDownload;
+    const share = $('#cardShare'); share.textContent = strings.cardShare;
+    let canShare = false;
+    try { canShare = !!(cardFile && navigator.share && navigator.canShare && navigator.canShare({ files: [cardFile] })); } catch (e) { /* download remains available */ }
+    share.hidden = !canShare; share.disabled = false; $('#cardDialogStatus').textContent = '';
+    cardOpener = btn;
+    const dialog = $('#cardDialog');
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else { dialog.setAttribute('open', ''); dialog.setAttribute('role', 'dialog'); }
+    $('#cardClose').focus();
+  } catch (e) { $('#cardStatus').textContent = strings.cardError; }
+  finally { cardBusy = false; btn.disabled = false; btn.textContent = S.saveImage; }
+}
+function closeCard() {
+  const dialog = $('#cardDialog');
+  if (typeof dialog.close === 'function') dialog.close(); else { dialog.removeAttribute('open'); releaseCard(); }
+}
+function releaseCard() {
+  $('#cardPreview').removeAttribute('src'); $('#cardDownload').removeAttribute('href');
+  if (cardUrl) URL.revokeObjectURL(cardUrl);
+  cardUrl = null; cardFile = null;
+  if (cardOpener && cardOpener.isConnected && !cardOpener.hidden) cardOpener.focus({ preventScroll: true });
+}
+async function shareCard() {
+  if (!cardFile || !navigator.share) return;
+  const btn = $('#cardShare'); btn.disabled = true;
+  try { await navigator.share({ files: [cardFile] }); }
+  catch (e) { if (e.name !== 'AbortError') $('#cardDialogStatus').textContent = cardStrings.cardShareError; }
+  finally { btn.disabled = false; }
 }
 
 /* ================= shared geography ================= */
@@ -1746,6 +1839,10 @@ $('#draw1').addEventListener('click', () => doDraws(1));
 $('#draw10').addEventListener('click', () => doDraws(10));
 $('#draw100').addEventListener('click', () => doDraws(100));
 $('#copyBtn').addEventListener('click', onCopy);
+$('#saveBtn').addEventListener('click', onSaveImage);
+$('#cardClose').addEventListener('click', closeCard);
+$('#cardDialog').addEventListener('close', releaseCard);
+$('#cardShare').addEventListener('click', shareCard);
 $('#batchLine').addEventListener('click', e => { if (e.target.closest('#toMap')) { e.preventDefault(); smoothTo($('#atlas')); } });
 $('#mRecent').addEventListener('click', e => { const b = e.target.closest('button[data-no]'); if (b) reopen(+b.dataset.no); });
 $('#tBody').addEventListener('click', e => { const b = e.target.closest('button[data-code]'); if (b) lookup(+b.dataset.code); });
