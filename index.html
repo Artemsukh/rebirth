@@ -327,8 +327,6 @@ gdpLabel: note => (note || '2025년') + ', 환율 기준',
 noPpp: '구매력 기준 값 없음',
 ppp: ['구매력 기준 ', ' 국제달러'], pppShort: '구매력 기준',
 intl: n => n + ' 국제달러',
-tierSayHtml: p => '2026년 아기 100명 중 <b>' + p + '명</b>이 이 단계의 나라에서 태어납니다.',
-rankScope: s => '2026년 세계 ' + (s === 'M' ? '남아' : s === 'F' ? '여아' : '출생아 전체') + ' 기준',
 top: p => '상위 ' + p, bottom: p => '하위 ' + p,
 oneIn: (c, ppl) => '약 ' + ppl + ' 중 1명',
 people: s => /[만억]$/.test(s) ? s + ' 명' : s + '명',
@@ -445,8 +443,6 @@ gdpLabel: note => (note || '2025') + ', market rates',
 noPpp: 'No PPP figure',
 ppp: ['PPP Int$', ''], pppShort: 'PPP',
 intl: n => 'Int$' + n,
-tierSayHtml: p => '<b>' + p + '</b> of every 100 babies born in 2026 are born in a country at this tier.',
-rankScope: s => 'among ' + (s === 'M' ? 'boys' : s === 'F' ? 'girls' : 'all babies') + ' born in 2026',
 top: p => 'Top ' + p, bottom: p => 'Bottom ' + p,
 oneIn: c => 'about 1 in ' + c,
 people: (s, n) => Math.round(n) === 1 ? '1 person' : s + ' people',
@@ -562,8 +558,6 @@ gdpLabel: note => (note || '2025年') + '・為替レート基準',
 noPpp: '購買力平価の値なし',
 ppp: ['購買力平価 ', ' 国際ドル'], pppShort: '購買力平価',
 intl: n => n + '国際ドル',
-tierSayHtml: p => '2026年に生まれる赤ちゃん100人のうち<b>' + p + '人</b>が、この段階の国で生まれます。',
-rankScope: s => '2026年に世界で生まれる' + (s === 'M' ? '男児' : s === 'F' ? '女児' : '赤ちゃん全体') + 'の中で',
 top: p => '上位' + p, bottom: p => '下位' + p,
 oneIn: c => '約' + c + '人に1人',
 people: s => s + '人',
@@ -680,8 +674,6 @@ gdpLabel: note => (note || '2025') + ', a tipo de cambio',
 noPpp: 'Sin dato por PPA',
 ppp: ['PPA: ', ' dólares internacionales'], pppShort: 'PPA',
 intl: n => n + ' dólares internacionales',
-tierSayHtml: p => 'De cada 100 bebés nacidos en 2026, <b>' + p + '</b> nacen en un país de esta etapa.',
-rankScope: s => 'entre ' + (s === 'M' ? 'los niños' : s === 'F' ? 'las niñas' : 'todos los bebés') + ' nacidos en 2026',
 top: p => p + ' superior', bottom: p => p + ' inferior',
 oneIn: c => 'aprox. 1 de cada ' + c,
 people: (s, n) => /mill(ón|ones)$/.test(s) ? s + ' de personas' : Math.round(n) === 1 ? '1 persona' : s + ' personas',
@@ -805,8 +797,6 @@ gdpLabel: note => (note || '2025 г.') + ', по рыночному курсу',
 noPpp: 'Нет данных по ППС',
 ppp: ['ППС: ', ' межд. долл.'], pppShort: 'ППС',
 intl: n => n + ' межд. долл.',
-tierSayHtml: p => 'Из 100 детей, родившихся в 2026 году, <b>' + p + '</b> рождаются в странах этой группы.',
-rankScope: s => 'среди ' + (s === 'M' ? 'мальчиков' : s === 'F' ? 'девочек' : 'всех детей') + ' 2026 года рождения',
 top: p => 'Верхние ' + p, bottom: p => 'Нижние ' + p,
 oneIn: c => 'примерно 1 из ' + c,
 people: s => /(млн|млрд)$/.test(s) ? s + ' человек' : s + ' ' + ruPl(s, 'человек', 'человека', 'человек'),
@@ -863,51 +853,42 @@ saveImage: '이미지 저장', cardBusy: '이미지 만드는 중…', cardTitle
 cardHint: 'PNG로 저장하거나 공유할 수 있습니다. 휴대폰에서는 이미지를 길게 눌러 저장할 수도 있습니다.',
 cardError: '이미지를 만들지 못했습니다. 다시 시도해 주세요.', cardShareError: '공유하지 못했습니다. PNG 저장을 이용해 주세요.',
 passportAlt: n => n + ' 여권 표지', creditsLink: '이미지 출처·라이선스',
-cardNote: '자료: UN 세계인구전망 2024(2026년 추계), IMF 세계경제전망 2026년 4월',
-cardAlt: n => n + ' 출생 결과 카드',
-cardGdpYear: '2025년 환율 기준'
+cardAlt: n => n + ' 출생 결과 카드'
 });
 Object.assign(en, {
 saveImage: 'Save image', cardBusy: 'Creating image…', cardTitle: 'Result image', cardDownload: 'Save PNG', cardShare: 'Share', cardClose: 'Close',
 cardHint: 'Save the PNG or share it. On a phone, you can also press and hold the image to save it.',
 cardError: 'Could not create the image. Please try again.', cardShareError: 'Could not share. Please use Save PNG.',
 passportAlt: n => n + ' passport cover', creditsLink: 'Image credits and licenses',
-cardNote: 'Data: UN World Population Prospects 2024 (2026 projections), IMF World Economic Outlook, April 2026',
-cardAlt: n => n + ' birth result card',
-cardGdpYear: '2025, market rates'
+cardAlt: n => n + ' birth result card'
 });
 Object.assign(ja, {
 saveImage: '画像を保存', cardBusy: '画像を作成中…', cardTitle: '結果画像', cardDownload: 'PNGを保存', cardShare: '共有', cardClose: '閉じる',
 cardHint: 'PNGを保存、または共有できます。スマートフォンでは画像を長押しして保存することもできます。',
 cardError: '画像を作成できませんでした。もう一度お試しください。', cardShareError: '共有できませんでした。PNGを保存してください。',
 passportAlt: n => n + 'のパスポートの表紙', creditsLink: '画像の出典・ライセンス',
-cardNote: 'データ：国連 世界人口推計2024年版（2026年推計）、IMF 世界経済見通し 2026年4月',
-cardAlt: n => n + 'の出生結果カード',
-cardGdpYear: '2025年、為替レート基準'
+cardAlt: n => n + 'の出生結果カード'
 });
 Object.assign(es, {
 saveImage: 'Guardar imagen', cardBusy: 'Creando imagen…', cardTitle: 'Imagen del resultado', cardDownload: 'Guardar PNG', cardShare: 'Compartir', cardClose: 'Cerrar',
 cardHint: 'Guarda el PNG o compártelo. En el móvil también puedes mantener pulsada la imagen para guardarla.',
 cardError: 'No se pudo crear la imagen. Inténtalo de nuevo.', cardShareError: 'No se pudo compartir. Usa Guardar PNG.',
 passportAlt: n => 'Portada del pasaporte de ' + n, creditsLink: 'Créditos y licencias de las imágenes',
-cardNote: 'Datos: ONU, World Population Prospects 2024 (proyecciones de 2026); FMI, Perspectivas de la Economía Mundial, abril de 2026',
-cardAlt: n => 'Tarjeta de nacimiento: ' + n,
-cardGdpYear: '2025, tipo de cambio'
+cardAlt: n => 'Tarjeta de nacimiento: ' + n
 });
 Object.assign(ru, {
 saveImage: 'Сохранить картинку', cardBusy: 'Создаём картинку…', cardTitle: 'Картинка с результатом', cardDownload: 'Сохранить PNG', cardShare: 'Поделиться', cardClose: 'Закрыть',
 cardHint: 'Сохраните PNG или поделитесь им. На телефоне можно также нажать на картинку и удерживать, чтобы сохранить её.',
 cardError: 'Не удалось создать картинку. Попробуйте ещё раз.', cardShareError: 'Не удалось поделиться. Используйте «Сохранить PNG».',
 passportAlt: n => 'Обложка паспорта: ' + n, creditsLink: 'Источники и лицензии изображений',
-cardNote: 'Данные: ООН, World Population Prospects 2024 (прогноз на 2026 год); МВФ, «Перспективы развития мировой экономики», апрель 2026',
-cardAlt: n => 'Карточка рождения: ' + n,
-cardGdpYear: '2025, рыночный курс'
+cardAlt: n => 'Карточка рождения: ' + n
 });
 return { LANGS: ['en', 'ja', 'es', 'ko', 'ru'], en, ja, es, ko, ru };
 })();
 const BirthCard = (() => {
 'use strict';
 const WIDTH = 1080, HEIGHT = 1350;
+const FLAG_CREDIT = 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.';
 function loadImage(src) {
 return new Promise(resolve => {
 if (!src) { resolve(null); return; }
@@ -979,9 +960,10 @@ c.fillStyle = color; c.font = weight + ' ' + size + 'px ' + font;
 while (c.measureText(str).width > max && size > 13) { size--; c.font = weight + ' ' + size + 'px ' + font; }
 c.fillText(str, x, y);
 };
-const lines = (str, x, y, width, size, maxLines, color = ink, weight = 400) => {
+const lines = (str, x, y, width, size, maxLines, color = ink, weight = 400, bottom = Infinity) => {
 let out;
 do { c.font = weight + ' ' + size + 'px ' + font; out = wrap(c, str, width); if ((out.length <= maxLines && out.every(s => c.measureText(s).width <= width)) || size <= 16) break; size--; } while (true);
+y = Math.min(y, bottom - Math.max(0, out.length - 1) * size * 1.3);
 c.fillStyle = color;
 out.forEach((line, i) => c.fillText(line, x, y + i * size * 1.3));
 return { size, last: y + Math.max(0, out.length - 1) * size * 1.3 };
@@ -992,15 +974,6 @@ const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight, 1.5);
 const iw = img.naturalWidth * scale, ih = img.naturalHeight * scale;
 c.drawImage(img, x + (w - iw) / 2, y + (h - ih) / 2, iw, ih);
 };
-const ladder = (l, x, y) => {
-const w = 16, h = 9, gap = 4, skew = Math.round(h * Math.tan(24 * Math.PI / 180));
-for (let k = 1; k <= l.of; k++) {
-const x0 = x + (k - 1) * (w + gap), on = k === l.band;
-c.fillStyle = on ? acc : '#303A4C';
-c.beginPath(); c.moveTo(x0 + skew, y); c.lineTo(x0 + w + skew, y); c.lineTo(x0 + w, y + h); c.lineTo(x0, y + h); c.closePath(); c.fill();
-}
-text(l.label, x + l.of * (w + gap) + skew + 10, y + h + 2, 19, l.band ? ink : muted, l.band ? 600 : 400, 408 - l.of * (w + gap) - skew - 10);
-};
 c.fillStyle = '#050716'; c.fillRect(0, 0, WIDTH, HEIGHT);
 const glow = c.createRadialGradient(880, 290, 20, 750, 300, 620);
 glow.addColorStop(0, '#172741'); glow.addColorStop(1, '#050716');
@@ -1010,43 +983,33 @@ for (let i = 0; i < 96; i++) c.fillRect(36 + (i * 137 % 1000), 110 + (i * 71 % 4
 c.globalAlpha = 1;
 c.strokeStyle = '#26354D'; c.lineWidth = 2; c.strokeRect(28, 28, WIDTH - 56, HEIGHT - 56);
 c.fillStyle = acc; c.fillRect(28, 28, 180, 5); c.fillRect(WIDTH - 208, HEIGHT - 33, 180, 5);
-text('BIRTH LOTTERY', 72, 91, 32, ink, 600);
-text('2026', 894, 91, 26, acc, 500);
+text(p.header, 72, 91, 26, ink, 500);
 rule(72, 122, 936);
-text(p.kicker, 72, 174, 23, muted, 400, 570);
-if (flag) contain(flag, 72, 212, 96, 64);
-else text(p.iso2, 72, 261, 34, acc, 600);
-const name = lines(p.name, 72, 359, 585, 76, 2, ink, 600);
+if (flag) contain(flag, 72, 170, 96, 64);
+else text(p.iso2, 72, 219, 34, acc, 600);
+const name = lines(p.name, 72, 318, 585, 76, 2, ink, 600);
 let y = name.last + Math.round(name.size * .3) + 33;
 if (p.subtitle) { text(p.subtitle, 72, y, 26, muted, 400, 585); y += 46; }
 text(p.sex, 72, y, 28, acc, 500, 585);
-text(p.region, 72, y + 40, 22, muted, 400, 585);
-c.strokeStyle = '#34445C'; c.lineWidth = 1; c.strokeRect(702, 202, 290, 394);
-if (passport) contain(passport, 722, 218, 250, 352);
-else if (flag) contain(flag, 737, 302, 220, 156);
-else text(p.iso2, 780, 407, 64, acc, 600, 200);
-const metrics = p.metrics;
-metrics.forEach((m, i) => {
-const x = 72 + (i % 2) * 480, y = 673 + Math.floor(i / 2) * 190;
-c.fillStyle = '#0D172A'; c.fillRect(x, y, 456, 168);
-c.fillStyle = acc; c.fillRect(x, y, 3, 168);
-text(m.label, x + 24, y + 37, 22, muted, 400, 408);
-text(m.value, x + 24, y + 94, 45, i === 0 ? acc : ink, 600, 408);
-if (m.ladder) {
-ladder(m.ladder, x + 24, y + 111);
-lines(m.detail, x + 24, y + 150, 408, 19, 1, muted);
-} else lines(m.detail, x + 24, y + 127, 408, 19, 2, muted);
+c.strokeStyle = '#34445C'; c.lineWidth = 1; c.strokeRect(702, 170, 290, 394);
+if (passport) contain(passport, 722, 186, 250, 352);
+else if (flag) contain(flag, 737, 270, 220, 156);
+else text(p.iso2, 780, 375, 64, acc, 600, 200);
+text(p.hero.value, 72, 740, 120, acc, 600);
+text(p.hero.label, 72, 795, 26, muted);
+rule(72, 860, 936);
+p.facts.forEach((f, i) => {
+text(f.value, 72 + i * 480, 950, 52, f.na ? muted : ink, 600, 456);
+text(f.label, 72 + i * 480, 995, 22, muted, 400, 456);
 });
-lines(p.note, 72, 1089, 936, 19, 2, muted);
 rule(72, 1140, 936);
 text('artemsukh.github.io/rebirth', 72, 1208, 28, ink, 500);
-const credit = passport ? p.credit : p.flagCredit;
-text(credit, 72, 1274, 16, muted, 400, 936);
-text(p.creditLink, 72, 1302, 16, muted, 400, 936);
+const credit = passport || !p.passport ? p.credit : FLAG_CREDIT + p.credit.slice(p.credit.lastIndexOf(' · '));
+lines(credit, 72, 1262, 936, 16, 2, muted, 400, 1303);
 const blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('PNG unavailable')), 'image/png'));
 return { blob, passportUsed: !!passport };
 }
-return { render, loadImage, wrap, WIDTH, HEIGHT };
+return { render, loadImage, wrap, WIDTH, HEIGHT, FLAG_CREDIT };
 })();
 (() => {
 'use strict';
@@ -1578,26 +1541,20 @@ let cardBusy = false, cardUrl = null, cardFile = null, cardStrings = null, cardO
 function cardPayload(st) {
 const L = st.loc, M = metrics(st), cover = PASSPORTS[String(L.code)];
 const css = getComputedStyle(stage), draw = st.type === 'draw';
-const basis = L.gdpNNote ? note(L.gdpNNote) : S.cardGdpYear;
-const detail = M.gdp.v == null ? '' : basis + ' · ' + rankText(M.gdp.r);
 const cardLicence = cover && /CC BY-SA/.test(cover.credit) ? ' · Card: CC BY-SA 4.0' : '';
 return {
+header: draw ? 'Certificate No. ' + new Intl.NumberFormat('en-US').format(st.serial) : S.kindLookup,
 name: nm(L), subtitle: nmSub(L), iso2: L.iso2,
-kicker: (draw ? S.kindDraw + ' · ' + S.serial(fmtInt(st.serial)) : S.kindLookup),
-sex: draw ? sexName(st.sex) : S.both, region: subName(L.sub),
+sex: draw ? sexName(st.sex) : S.both,
 flag: flagSrc(L), passport: cover ? cover.file : null,
 accent: css.getPropertyValue('--band-' + L.band).trim(), font: css.getPropertyValue('--sans').trim(),
-metrics: [
-{ label: S.lbProb, value: fmtPct(M.share), detail: oneIn(M.share) },
-{ label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail,
-ladder: { band: L.band, of: NBANDS, label: L.band ? bandName(L.band) : S.noData } },
-{ label: S.lbLife, value: S.years(fx(M.life.v, 1)), detail: rankText(M.life.r) + ' · ' + S.rankScope(draw ? st.sex : null) },
-{ label: S.lbTier, value: S.tier[tierOf(L)], detail: S.tierSayHtml(fx(tierStats().p1[tierOf(L)], 1)).replace(/<[^>]*>/g, '') }
+hero: { label: S.lbProb, value: fmtPct(M.share) },
+facts: [
+{ label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), na: M.gdp.v == null },
+{ label: S.lbTier, value: S.tier[tierOf(L)] }
 ],
-note: S.cardNote,
-credit: cover ? 'Passport: ' + cover.credit + cardLicence : '',
-flagCredit: 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.',
-creditLink: 'artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
+credit: (cover ? 'Passport: ' + cover.credit + cardLicence : BirthCard.FLAG_CREDIT) +
+' · artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
 };
 }
 async function onSaveImage() {

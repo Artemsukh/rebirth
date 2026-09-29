@@ -79,8 +79,6 @@ const ko = {
   noPpp: '구매력 기준 값 없음',
   ppp: ['구매력 기준 ', ' 국제달러'], pppShort: '구매력 기준',
   intl: n => n + ' 국제달러',
-  tierSayHtml: p => '2026년 아기 100명 중 <b>' + p + '명</b>이 이 단계의 나라에서 태어납니다.',
-  rankScope: s => '2026년 세계 ' + (s === 'M' ? '남아' : s === 'F' ? '여아' : '출생아 전체') + ' 기준',
   top: p => '상위 ' + p, bottom: p => '하위 ' + p,
   oneIn: (c, ppl) => '약 ' + ppl + ' 중 1명',
   people: s => /[만억]$/.test(s) ? s + ' 명' : s + '명',
@@ -209,8 +207,6 @@ const en = {
   noPpp: 'No PPP figure',
   ppp: ['PPP Int$', ''], pppShort: 'PPP',
   intl: n => 'Int$' + n,
-  tierSayHtml: p => '<b>' + p + '</b> of every 100 babies born in 2026 are born in a country at this tier.',
-  rankScope: s => 'among ' + (s === 'M' ? 'boys' : s === 'F' ? 'girls' : 'all babies') + ' born in 2026',
   top: p => 'Top ' + p, bottom: p => 'Bottom ' + p,
   oneIn: c => 'about 1 in ' + c,
   people: (s, n) => Math.round(n) === 1 ? '1 person' : s + ' people',
@@ -338,8 +334,6 @@ const ja = {
   noPpp: '購買力平価の値なし',
   ppp: ['購買力平価 ', ' 国際ドル'], pppShort: '購買力平価',
   intl: n => n + '国際ドル',
-  tierSayHtml: p => '2026年に生まれる赤ちゃん100人のうち<b>' + p + '人</b>が、この段階の国で生まれます。',
-  rankScope: s => '2026年に世界で生まれる' + (s === 'M' ? '男児' : s === 'F' ? '女児' : '赤ちゃん全体') + 'の中で',
   top: p => '上位' + p, bottom: p => '下位' + p,
   oneIn: c => '約' + c + '人に1人',
   people: s => s + '人',
@@ -468,8 +462,6 @@ const es = {
   noPpp: 'Sin dato por PPA',
   ppp: ['PPA: ', ' dólares internacionales'], pppShort: 'PPA',
   intl: n => n + ' dólares internacionales',
-  tierSayHtml: p => 'De cada 100 bebés nacidos en 2026, <b>' + p + '</b> nacen en un país de esta etapa.',
-  rankScope: s => 'entre ' + (s === 'M' ? 'los niños' : s === 'F' ? 'las niñas' : 'todos los bebés') + ' nacidos en 2026',
   top: p => p + ' superior', bottom: p => p + ' inferior',
   oneIn: c => 'aprox. 1 de cada ' + c,
   people: (s, n) => /mill(ón|ones)$/.test(s) ? s + ' de personas' : Math.round(n) === 1 ? '1 persona' : s + ' personas',
@@ -608,8 +600,6 @@ const ru = {
   noPpp: 'Нет данных по ППС',
   ppp: ['ППС: ', ' межд. долл.'], pppShort: 'ППС',
   intl: n => n + ' межд. долл.',
-  tierSayHtml: p => 'Из 100 детей, родившихся в 2026 году, <b>' + p + '</b> рождаются в странах этой группы.',
-  rankScope: s => 'среди ' + (s === 'M' ? 'мальчиков' : s === 'F' ? 'девочек' : 'всех детей') + ' 2026 года рождения',
   top: p => 'Верхние ' + p, bottom: p => 'Нижние ' + p,
   oneIn: c => 'примерно 1 из ' + c,
   people: s => /(млн|млрд)$/.test(s) ? s + ' человек' : s + ' ' + ruPl(s, 'человек', 'человека', 'человек'),
@@ -674,45 +664,35 @@ Object.assign(ko, {
   cardHint: 'PNG로 저장하거나 공유할 수 있습니다. 휴대폰에서는 이미지를 길게 눌러 저장할 수도 있습니다.',
   cardError: '이미지를 만들지 못했습니다. 다시 시도해 주세요.', cardShareError: '공유하지 못했습니다. PNG 저장을 이용해 주세요.',
   passportAlt: n => n + ' 여권 표지', creditsLink: '이미지 출처·라이선스',
-  cardNote: '자료: UN 세계인구전망 2024(2026년 추계), IMF 세계경제전망 2026년 4월',
-  cardAlt: n => n + ' 출생 결과 카드',
-  cardGdpYear: '2025년 환율 기준'
+  cardAlt: n => n + ' 출생 결과 카드'
 });
 Object.assign(en, {
   saveImage: 'Save image', cardBusy: 'Creating image…', cardTitle: 'Result image', cardDownload: 'Save PNG', cardShare: 'Share', cardClose: 'Close',
   cardHint: 'Save the PNG or share it. On a phone, you can also press and hold the image to save it.',
   cardError: 'Could not create the image. Please try again.', cardShareError: 'Could not share. Please use Save PNG.',
   passportAlt: n => n + ' passport cover', creditsLink: 'Image credits and licenses',
-  cardNote: 'Data: UN World Population Prospects 2024 (2026 projections), IMF World Economic Outlook, April 2026',
-  cardAlt: n => n + ' birth result card',
-  cardGdpYear: '2025, market rates'
+  cardAlt: n => n + ' birth result card'
 });
 Object.assign(ja, {
   saveImage: '画像を保存', cardBusy: '画像を作成中…', cardTitle: '結果画像', cardDownload: 'PNGを保存', cardShare: '共有', cardClose: '閉じる',
   cardHint: 'PNGを保存、または共有できます。スマートフォンでは画像を長押しして保存することもできます。',
   cardError: '画像を作成できませんでした。もう一度お試しください。', cardShareError: '共有できませんでした。PNGを保存してください。',
   passportAlt: n => n + 'のパスポートの表紙', creditsLink: '画像の出典・ライセンス',
-  cardNote: 'データ：国連 世界人口推計2024年版（2026年推計）、IMF 世界経済見通し 2026年4月',
-  cardAlt: n => n + 'の出生結果カード',
-  cardGdpYear: '2025年、為替レート基準'
+  cardAlt: n => n + 'の出生結果カード'
 });
 Object.assign(es, {
   saveImage: 'Guardar imagen', cardBusy: 'Creando imagen…', cardTitle: 'Imagen del resultado', cardDownload: 'Guardar PNG', cardShare: 'Compartir', cardClose: 'Cerrar',
   cardHint: 'Guarda el PNG o compártelo. En el móvil también puedes mantener pulsada la imagen para guardarla.',
   cardError: 'No se pudo crear la imagen. Inténtalo de nuevo.', cardShareError: 'No se pudo compartir. Usa Guardar PNG.',
   passportAlt: n => 'Portada del pasaporte de ' + n, creditsLink: 'Créditos y licencias de las imágenes',
-  cardNote: 'Datos: ONU, World Population Prospects 2024 (proyecciones de 2026); FMI, Perspectivas de la Economía Mundial, abril de 2026',
-  cardAlt: n => 'Tarjeta de nacimiento: ' + n,
-  cardGdpYear: '2025, tipo de cambio'
+  cardAlt: n => 'Tarjeta de nacimiento: ' + n
 });
 Object.assign(ru, {
   saveImage: 'Сохранить картинку', cardBusy: 'Создаём картинку…', cardTitle: 'Картинка с результатом', cardDownload: 'Сохранить PNG', cardShare: 'Поделиться', cardClose: 'Закрыть',
   cardHint: 'Сохраните PNG или поделитесь им. На телефоне можно также нажать на картинку и удерживать, чтобы сохранить её.',
   cardError: 'Не удалось создать картинку. Попробуйте ещё раз.', cardShareError: 'Не удалось поделиться. Используйте «Сохранить PNG».',
   passportAlt: n => 'Обложка паспорта: ' + n, creditsLink: 'Источники и лицензии изображений',
-  cardNote: 'Данные: ООН, World Population Prospects 2024 (прогноз на 2026 год); МВФ, «Перспективы развития мировой экономики», апрель 2026',
-  cardAlt: n => 'Карточка рождения: ' + n,
-  cardGdpYear: '2025, рыночный курс'
+  cardAlt: n => 'Карточка рождения: ' + n
 });
 return { LANGS: ['en', 'ja', 'es', 'ko', 'ru'], en, ja, es, ko, ru };
 })();

@@ -1,12 +1,14 @@
 // Line breaking on the result card (wrap() in src/share.js), without a canvas: measureText is faked
-// from a table of character widths. The texts are the real card lines, made by the page's own code
-// for every place in all five languages (the note, the life expectancy line, the tier sentence and the
-// other metric lines), wrapped at the card's two widths, 408 and 936 px, and at a sweep of widths so
-// that breaks fall in many more places. Checks:
+// from a table of character widths. The texts are the card's two wrapped lines, made by the page's own
+// code for every place in all five languages (the country name and the image credit line), wrapped at
+// the card's two widths, 585 px (the name) and 936 px (the credit), and at a sweep of widths so that
+// breaks fall in many more places. Checks:
 //   1. Korean lines break only at spaces (a word wider than the whole line may be cut, nothing else);
 //   2. no line starts with a character that may not start a line, or ends with one that may not end it;
 //   3. English, Spanish and Russian words are never split;
-//   and every line is a piece of the text in order, nothing lost or added.
+//   and every line is a piece of the text in order, nothing lost or added. The credit line is English in
+//   every language but may name a Chinese or Japanese author, whose name may break between characters
+//   on any card, as Japanese does.
 // node pipeline/check_wrap.js
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert/strict');
 const root = path.join(__dirname, '..');
@@ -15,6 +17,8 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 // the rules as the work order gives them, kept apart from the ones in share.js on purpose
 const NO_START = '、。，．・：；？！）」』】〕〉》ー々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ)]},.!?:;%';
 const NO_END = '（「『【〔〈《([{';
+// kanji, hanzi and kana: text in these scripts may break between characters
+const HAN_KANA = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 
 // character widths in em, close to IBM Plex Sans / Noto Sans
 function em(ch) {
@@ -58,14 +62,14 @@ for (const lang of ['ko', 'en', 'ja', 'es', 'ru']) {
   for (const code of context.codes) {
     for (const [type, sex] of [['draw', 'M'], ['draw', 'F'], ['lookup', null]]) {
       const p = context.makePayload(code, lang, type, sex);
-      set.add(p.note);
-      p.metrics.forEach(m => m.detail && set.add(m.detail));
+      set.add(p.name);
+      set.add(p.credit);
     }
   }
   texts[lang] = [...set];
 }
 
-const widths = [408, 936];
+const widths = [585, 936];
 for (let w = 140; w <= 936; w += 12) widths.push(w);
 let lineCount = 0, cases = 0;
 for (const [lang, list] of Object.entries(texts)) {
@@ -82,11 +86,12 @@ for (const [lang, list] of Object.entries(texts)) {
         if (i && norm[pos] === ' ') { pos++; atSpace = true; }
         assert(norm.startsWith(line, pos), 'lost or changed text: ' + where);
         if (i && !atSpace) {
-          // a break inside a word: Japanese may break between characters, Korean only when the word is
-          // wider than the line, other languages never
+          // a break inside a word: Japanese, and Chinese or Japanese script in any language, may break
+          // between characters, Korean only when the word is wider than the line, other languages never
           const start = norm.lastIndexOf(' ', pos) + 1, end = norm.indexOf(' ', pos), word = norm.slice(start, end < 0 ? undefined : end);
-          if (lang === 'ko') assert(ctx.measureText(word).width > width, 'Korean word cut though it fits a line (' + word + '): ' + where);
-          else assert.equal(lang, 'ja', 'word split (' + word + '): ' + where);
+          if (lang === 'ja' || HAN_KANA.test(norm[pos - 1]) || HAN_KANA.test(norm[pos])) { /* allowed */ }
+          else if (lang === 'ko') assert(ctx.measureText(word).width > width, 'Korean word cut though it fits a line (' + word + '): ' + where);
+          else assert.fail('word split (' + word + '): ' + where);
         }
         pos += line.length;
         assert(!NO_START.includes([...line][0]), 'line starts with ' + [...line][0] + ': ' + where);
