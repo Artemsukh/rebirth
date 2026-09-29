@@ -95,9 +95,9 @@ const app = read('src/app.js');
 const prefix = app.slice(app.indexOf("'use strict';"), app.indexOf('/* ================= space backdrop'));
 const payloadFn = app.slice(app.indexOf('function cardPayload('), app.indexOf('async function onSaveImage('));
 vm.runInContext(prefix + '\nconst stage = {};\n' + payloadFn + '\n' +
-  'globalThis.makePayload = (code, lang, type = "draw") => { LANG = lang; S = I18N[lang]; return cardPayload({type,loc:BY.get(code),sex:"F",serial:42}); };' +
+  'globalThis.makePayload = (code, lang, type = "draw", serial = 42) => { LANG = lang; S = I18N[lang]; return cardPayload({type,loc:BY.get(code),sex:"F",serial}); };' +
   '\nglobalThis.card = BirthCard; globalThis.translations = I18N;', context);
-const keys = ['saveImage', 'cardBusy', 'cardTitle', 'cardDownload', 'cardShare', 'cardClose', 'cardHint', 'cardError', 'cardShareError', 'passportAlt', 'creditsLink', 'cardNote', 'cardAlt', 'cardGdpYear'];
+const keys = ['saveImage', 'cardBusy', 'cardTitle', 'cardDownload', 'cardShare', 'cardClose', 'cardHint', 'cardError', 'cardShareError', 'passportAlt', 'creditsLink', 'cardAlt'];
 const langs = ['ko', 'en', 'ja', 'es', 'ru'];
 const outDir = process.argv[2];
 if (outDir) fs.mkdirSync(outDir, { recursive: true });
@@ -111,16 +111,18 @@ async function render(p, name, expectedCover) {
   }
   const png = Buffer.from(await result.blob.arrayBuffer());
   assert.equal(png.readUInt32BE(16), 1080); assert.equal(png.readUInt32BE(20), 1350);
+  // between the identity block and the footer rule, only the hero figure and the left fact sit at x 72
+  const below = { 740: p.hero.value, 795: p.hero.label, 950: p.facts[0].value, 995: p.facts[0].label };
   for (const t of drawn) {
     assert(!/undefined|NaN/.test(t.str), name + ': ' + t.str);
     assert(t.x + t.width <= 1009 && t.y <= 1303, name + ' overflow: ' + t.str);
-    if (t.x === 72 && t.y > 300 && t.y < 673) assert(t.x + t.width <= 658, name + ' identity overlaps cover');
-    assert(!(t.x === 72 && t.y > 640 && t.y < 1000), name + ' identity runs into the metrics: ' + t.str);
-    if (t.x === 96 || t.x === 576) {
-      assert(t.x + t.width <= t.x + 409, name + ' metric overflow');
-      assert(t.y <= (t.y < 863 ? 673 : 863) + 162, name + ' metric text below its box: ' + t.str);
-    }
+    if (t.x === 72 && t.y > 170 && t.y < 660) assert(t.x + t.width <= 658, name + ' identity overlaps cover: ' + t.str);
+    if (t.x === 72 && t.y >= 660 && t.y < 1140) assert.equal(t.str, below[t.y], name + ' identity runs into the hero: ' + t.str);
+    if ((t.x === 72 || t.x === 552) && t.y > 900 && t.y < 1010) assert(t.width <= 456, name + ' fact overflow: ' + t.str);
   }
+  const sex = drawn.find(t => t.x === 72 && t.y > 170 && t.str === p.sex);
+  assert(sex && sex.y <= 640, name + ' sex line below 640');
+  assert(drawn.filter(t => t.y > 1230).length <= 2, name + ' credit runs past two lines');
   if (outDir) fs.writeFileSync(path.join(outDir, name + '.png'), png);
 }
 (async () => {
@@ -128,24 +130,30 @@ async function render(p, name, expectedCover) {
     for (const key of keys) assert(context.translations[lang][key], lang + ':' + key);
     for (const l of locs) {
       const p = context.makePayload(l.code, lang);
-      assert(p.name && p.accent && p.metrics.length === 4);
+      assert(p.name && p.accent && p.hero && p.facts.length === 2);
       assert(!JSON.stringify(p).includes('undefined'), lang + ':' + l.code);
+      assert.equal(p.header, 'Certificate No. 42');
+      assert(p.credit.startsWith(covers[l.code] ? 'Passport: ' : 'Flag: '), lang + ':' + l.code + ' credit');
+      assert(p.credit.endsWith(' · artemsukh.github.io/rebirth/passport-credits.html#p' + l.code), lang + ':' + l.code + ' credit link');
       // a reused cover: the sovereign state's picture and credit, this place's name and credit link
       const cover = covers[l.code];
       if (cover && cover.reuse != null) {
         const home = covers[cover.reuse];
         assert.equal(p.passport, home.file);
-        assert.equal(p.credit, 'Passport: ' + home.credit + (/CC BY-SA/.test(home.credit) ? ' · Card: CC BY-SA 4.0' : ''), lang + ':' + l.code + ' credit');
-        assert(p.creditLink.endsWith('passport-credits.html#p' + l.code), lang + ':' + l.code + ' credit link');
+        assert.equal(p.credit, 'Passport: ' + home.credit + (/CC BY-SA/.test(home.credit) ? ' · Card: CC BY-SA 4.0' : '') +
+          ' · artemsukh.github.io/rebirth/passport-credits.html#p' + l.code, lang + ':' + l.code + ' credit');
         assert.equal(p.name, l[lang] || l.en);
       }
     }
+    // the header is English in every language, its number in en-US digits; a lookup has no number
+    assert.equal(context.makePayload(410, lang, 'draw', 1234).header, 'Certificate No. 1,234');
+    assert.equal(context.makePayload(410, lang, 'lookup').header, context.translations[lang].kindLookup);
     const code = { ko: 410, en: 356, ja: 392, es: 180, ru: 140 }[lang];
     await render(context.makePayload(code, lang), 'result-' + lang, !!covers[code]);
     const longest = [...locs].sort((a, b) => (b[lang] || b.en).length - (a[lang] || a.en).length)[0];
     await render(context.makePayload(longest.code, lang, 'lookup'), 'long-name-' + lang, !!covers[longest.code]);
   }
-  // the review set: with and without a cover, band 9 (Monaco), no GDP band (Kosovo), a small cover
+  // the review set: with and without a cover, band 9 (Monaco), no GDP (Kosovo), a small cover
   // (Chad), a two-line name (Bosnia and Herzegovina) and a territory showing its sovereign state's
   // cover (Puerto Rico), in every language
   const review = { KR: 410, KP: 408, MC: 492, XK: 412, ML: 466, TD: 148, BA: 70, PR: 630 };
@@ -156,6 +164,9 @@ async function render(p, name, expectedCover) {
   }
   const p = context.makePayload(410, 'ko');
   await render({ ...p, passport: 'assets/passports/missing.webp' }, 'missing-passport', false);
+  // the flag stands in the cover's box, so the flag is credited, with the same link
+  assert(drawn.some(t => t.str.startsWith('Flag: flag-icons')), 'missing passport: flag credit');
+  assert(drawn.every(t => !t.str.startsWith('Passport: ')), 'missing passport: no cover credit');
   await render({ ...p, passport: 'https://remote.example/cover.webp', flag: 'assets/flags/missing.svg' }, 'missing-images', false);
   assert.equal(await context.card.loadImage(null), null);
   assert.equal(await context.card.loadImage('https://remote.example/cover.webp'), null);

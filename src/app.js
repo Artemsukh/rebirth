@@ -619,29 +619,24 @@ let cardBusy = false, cardUrl = null, cardFile = null, cardStrings = null, cardO
 function cardPayload(st) {
   const L = st.loc, M = metrics(st), cover = PASSPORTS[String(L.code)];
   const css = getComputedStyle(stage), draw = st.type === 'draw';
-  const basis = L.gdpNNote ? note(L.gdpNNote) : S.cardGdpYear;
-  const detail = M.gdp.v == null ? '' : basis + ' · ' + rankText(M.gdp.r);
   /* a ShareAlike cover makes the whole card an adaptation, so the card states its own licence too.
      A reused cover carries its sovereign state's credit; the link still goes to this place's entry,
      which links on to the sovereign state's. */
   const cardLicence = cover && /CC BY-SA/.test(cover.credit) ? ' · Card: CC BY-SA 4.0' : '';
   return {
+    // English in every language, like the app's name, with en-US digits
+    header: draw ? 'Certificate No. ' + new Intl.NumberFormat('en-US').format(st.serial) : S.kindLookup,
     name: nm(L), subtitle: nmSub(L), iso2: L.iso2,
-    kicker: (draw ? S.kindDraw + ' · ' + S.serial(fmtInt(st.serial)) : S.kindLookup),
-    sex: draw ? sexName(st.sex) : S.both, region: subName(L.sub),
+    sex: draw ? sexName(st.sex) : S.both,
     flag: flagSrc(L), passport: cover ? cover.file : null,
     accent: css.getPropertyValue('--band-' + L.band).trim(), font: css.getPropertyValue('--sans').trim(),
-    metrics: [
-      { label: S.lbProb, value: fmtPct(M.share), detail: oneIn(M.share) },
-      { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), detail,
-        ladder: { band: L.band, of: NBANDS, label: L.band ? bandName(L.band) : S.noData } },
-      { label: S.lbLife, value: S.years(fx(M.life.v, 1)), detail: rankText(M.life.r) + ' · ' + S.rankScope(draw ? st.sex : null) },
-      { label: S.lbTier, value: S.tier[tierOf(L)], detail: S.tierSayHtml(fx(tierStats().p1[tierOf(L)], 1)).replace(/<[^>]*>/g, '') }
+    hero: { label: S.lbProb, value: fmtPct(M.share) },
+    facts: [
+      { label: S.lbGdp, value: M.gdp.v == null ? S.noData : usd(M.gdp.v), na: M.gdp.v == null },
+      { label: S.lbTier, value: S.tier[tierOf(L)] }
     ],
-    note: S.cardNote,
-    credit: cover ? 'Passport: ' + cover.credit + cardLicence : '',
-    flagCredit: 'Flag: flag-icons (MIT). Card: CC BY-SA 4.0.',
-    creditLink: 'artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
+    credit: (cover ? 'Passport: ' + cover.credit + cardLicence : BirthCard.FLAG_CREDIT) +
+      ' · artemsukh.github.io/rebirth/passport-credits.html#p' + L.code
   };
 }
 async function onSaveImage() {
