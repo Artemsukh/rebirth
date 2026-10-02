@@ -455,7 +455,8 @@ function renderStage(st, opt = {}) {
   else no.textContent = empty ? S.serialEmpty : '';
   const name = $('#idName');
   name.className = 'id-name' + (empty ? ' empty' : ' ' + nameClass(nm(L)));
-  name.textContent = empty ? S.emptyName : nm(L);
+  if (empty) name.innerHTML = '<span class="sr-only">' + esc(S.emptyName) + '</span>';
+  else name.textContent = nm(L);
   const sex = empty ? '' : draw ? sexName(st.sex) : S.both;
   $('#idSex').textContent = sex;
   $('#idEn').textContent = empty ? '' : nmSub(L);
@@ -787,7 +788,7 @@ initGeo();
    degrees. A draw flies the camera: pull back to the whole globe, turn, then zoom in.
    Frames are drawn only while something moves: 8 a second while the empty globe turns (and only
    while it is on screen), at most about 30 a second in flight, and none once the target is locked.
-   Everything else (sphere, rings, brackets, read-outs) is static HTML and SVG; the two HUD rings
+   Everything else (sphere, rings, brackets) is static HTML and SVG; the two HUD rings
    turn as separate layers, so turning them never repaints the globe. */
 const PLANET = (() => {
   const box = $('#planet');
@@ -807,7 +808,6 @@ const PLANET = (() => {
   };
   /* each HUD ring is its own square SVG around its circle, the smallest layer that holds it */
   const square = (h, cls, inner) => '<svg class="p-spin ' + cls + '" viewBox="' + (CX - h) + ' ' + (CY - h) + ' ' + 2 * h + ' ' + 2 * h + '">' + inner + '</svg>';
-  const txt = (x, y, s, cls, id) => '<span' + (cls ? ' class="' + cls + '"' : '') + (id ? ' id="' + id + '"' : '') + ' style="--x:' + x + ';--y:' + y + '">' + s + '</span>';
   box.innerHTML =
     '<svg class="p-ring back" viewBox="0 0 720 600"><defs><linearGradient id="pRingGrad" gradientUnits="userSpaceOnUse" x1="' + (CX - 1.62 * RS) + '" y1="' + CY + '" x2="' + (CX + 1.62 * RS) + '" y2="' + CY + '">' +
       stops([[0, 0], [.3, .55], [.7, .55], [1, 0]]) + '</linearGradient></defs>' + ring(false) + '</svg>' +
@@ -817,12 +817,9 @@ const PLANET = (() => {
     square(224, 'p-hud-ring', '<circle cx="' + CX + '" cy="' + CY + '" r="' + (RS + 26) + '"/>') +
     square(238, 'p-hud-arcs', '<path d="' + [45, 135, 225, 315].map(a => arc(a - 11, a + 11, RS + 40)).join('') + '"/>') +
     '<i class="brk"></i><i class="brk tr"></i><i class="brk br"></i><i class="brk bl"></i>' +
-    '<svg class="p-cross" viewBox="0 0 720 600"><circle cx="' + CX + '" cy="' + CY + '" r="7"/><path d="M' + CX + ' ' + (CY - 19) + 'v8M' + CX + ' ' + (CY + 11) + 'v8M' + (CX - 19) + ' ' + CY + 'h8M' + (CX + 11) + ' ' + CY + 'h8"/></svg>' +
-    '<div class="p-hud">' + txt(112, 62, 'TARGET') + txt(112, 84, 'LAT --.--', 'hl', 'hudLat') + txt(112, 104, 'LNG --.--', 'hl', 'hudLng') +
-      txt(112, 124, 'ZOOM ×1.0', '', 'hudZoom') + txt(608, 540, 'STANDBY', 'end p-status', 'hudStatus') + txt(608, 560, 'NO SIGNAL', 'end', 'hudCode') + '</div>';
+    '<svg class="p-cross" viewBox="0 0 720 600"><circle cx="' + CX + '" cy="' + CY + '" r="7"/><path d="M' + CX + ' ' + (CY - 19) + 'v8M' + CX + ' ' + (CY + 11) + 'v8M' + (CX - 19) + ' ' + CY + 'h8M' + (CX + 11) + ' ' + CY + 'h8"/></svg>';
   const cv = $('canvas', box), ctx = cv.getContext('2d'), sphere = $('.sphere', box), cross = $('.p-cross', box);
   const brks = Array.from(box.querySelectorAll('.brk'));
-  const hud = { lat: $('#hudLat'), lng: $('#hudLng'), zoom: $('#hudZoom'), status: $('#hudStatus'), code: $('#hudCode') };
   /* the cell image is drawn at one pixel per cell here, then scaled up onto the page canvas */
   const cellCv = document.createElement('canvas'), cellCtx = cellCv.getContext('2d');
 
@@ -1090,10 +1087,6 @@ const PLANET = (() => {
     if (locked) blip = count < 6;
     if (target && (target.dot || (locked && blip))) marker(v);
     output(img);
-    const lon = ((v.lon % 360) + 540) % 360 - 180;
-    hud.lat.textContent = 'LAT ' + Math.abs(v.lat).toFixed(2) + '°' + (v.lat >= 0 ? 'N' : 'S');
-    hud.lng.textContent = 'LNG ' + Math.abs(lon).toFixed(2) + '°' + (lon >= 0 ? 'E' : 'W');
-    hud.zoom.textContent = 'ZOOM ×' + v.m.toFixed(1);
   }
   /* the lock-on flicker: four bands of 1-3 rows pushed 1-3 cells sideways, for one frame */
   function glitch() {
@@ -1139,9 +1132,8 @@ const PLANET = (() => {
 
   /* ---- states ---- */
   let view = null, target = null, raf = 0, idleT = 0, glitchT = 0, idling = false, visible = true;
-  /* kept as a flag: reading the media query right after the read-outs change would force a style pass */
+  /* kept as a flag rather than read from the media query on every draw */
   let reduced = REDUCED.matches;
-  const status = (s, hl) => { hud.status.textContent = s; hud.status.classList.toggle('hl', !!hl); };
   function stop() {
     cancelAnimationFrame(raf); raf = 0;
     clearTimeout(idleT); idleT = 0;
@@ -1150,7 +1142,6 @@ const PLANET = (() => {
   }
   function lock(animate) {
     locked = true;
-    status('TARGET LOCKED', true);
     brackets(0.42);
     cross.style.opacity = '';
     render(view);
@@ -1178,7 +1169,6 @@ const PLANET = (() => {
     const rot = interp([from.lon, from.lat], [t.lon, t.lat]);
     const zOut = far && from.m > 1.05 ? 0.3 : 0;
     const lf = Math.log(from.m), lt = Math.log(t.m);
-    status('SCANNING');
     brackets(1.6);
     cross.style.opacity = '.35';
     const t0 = performance.now();
@@ -1228,8 +1218,6 @@ const PLANET = (() => {
     win = null;
     locked = false;
     view = view && view.m === 1 ? view : { lon: 20, lat: 14, m: 1 };
-    status(GEO.ready ? 'STANDBY' : 'NO MAP DATA');
-    hud.code.textContent = 'AWAITING DRAW';
     brackets(1.6);
     cross.style.opacity = '.35';
     render(view);
@@ -1251,11 +1239,9 @@ const PLANET = (() => {
     setBand(empty ? 0 : st.loc.band);
     if (empty) { idle(); return; }
     const L = st.loc;
-    hud.code.textContent = 'M49 ' + String(L.code).padStart(3, '0') + ' · ' + L.iso2;
     if (!GEO.ready) {
       target = null;
       locked = true;
-      status('NO MAP DATA');
       brackets(0.42);
       cross.style.opacity = '';
       return;
@@ -1508,19 +1494,11 @@ function loadScript(src) {
 
 /* ================= page text ================= */
 function renderIntro() {
-  $('#lede').innerHTML = S.ledeHtml(big(WR.births, 4));
-  $('#legend').textContent = S.legend;
   $('#map').setAttribute('aria-label', S.mapAria);
   /* the nine bands then no data; a range may break after its dash */
   const keys = $('#keys');
   keys.innerHTML = BAND_LIST.map(b => '<li class="b-' + b + '"><i aria-hidden="true"></i><span>' + esc(bandName(b)).replace('–', '–<wbr>') + '</span></li>').join('');
   keys.setAttribute('aria-label', S.keysAria);
-  $('#live').innerHTML = '<span class="rate">' + S.liveB + '<b>' + fx(RATE_B, 1) + '</b></span>' +
-    '<span><span class="dot" aria-hidden="true"></span><span class="since">' + S.liveSince + '</span><b id="liveN">0</b>' + S.liveAfter + '</span>';
-}
-const T0 = performance.now();
-function tickLive() {
-  $('#liveN').textContent = fmtInt(Math.floor((performance.now() - T0) / 1000 * RATE_B));
 }
 
 function renderMethod() {
@@ -1571,12 +1549,10 @@ function renderHundred() {
 let clearArmed = 0;
 function renderMine() {
   const st = store.stats, T = tierStats();
-  const lede = $('#mLede'), wrap = $('#mCmpWrap');
+  const wrap = $('#mCmpWrap');
   if (!st.n) {
-    lede.textContent = S.mineEmpty;
     wrap.hidden = true;
   } else {
-    lede.textContent = S.mineCount(fmtInt(st.n), st.n);
     wrap.hidden = false;
     const tot = TOT.births, exp = CONT.map(() => 0);
     LOCS.forEach(l => { exp[l.cont] += l.births / tot; });
@@ -1591,7 +1567,7 @@ function renderMine() {
   }
   const list = $('#mRecent');
   if (!store.recent.length) {
-    list.innerHTML = '<li><p class="empty-hint">' + esc(S.emptyHint) + '</p></li>';
+    list.innerHTML = '';
   } else {
     list.innerHTML = store.recent.map(r => {
       const l = BY.get(r.c), t = tierOf(l);
@@ -1686,8 +1662,8 @@ function fromRecent(r) {
 }
 
 let lastBatchArgs = null;
-function renderBatch(n, batch, last, tierN) {
-  lastBatchArgs = [n, batch, last, tierN];
+function renderBatch(n, batch, tierN) {
+  lastBatchArgs = [n, batch, tierN];
   const box = $('#batch'), tot = TOT.births, T = tierStats();
   const cc = CONT.map(() => 0), exp = CONT.map(() => 0);
   batch.forEach((c, code) => { cc[BY.get(code).cont] += c; });
@@ -1696,7 +1672,7 @@ function renderBatch(n, batch, last, tierN) {
   const seg = vals => order.map(ci => vals[ci] > 0 ? '<b class="k' + ci + '" style="--w:' + (vals[ci] / n * 100).toFixed(3) + '%"></b>' : '').join('');
   const tops = [...batch].sort((x, y) => y[1] - x[1] || BY.get(y[0]).births - BY.get(x[0]).births).slice(0, 5);
   box.innerHTML =
-    '<div class="batch-h"><h3>' + esc(S.batchTitle(n)) + '</h3><p>' + esc(S.batchNote(S.serial(fmtInt(last.serial)))) + '</p></div>' +
+    '<div class="batch-h"><h3>' + esc(S.batchTitle(n)) + '</h3></div>' +
     '<div class="stack" role="img" aria-label="' + esc(S.batchAria(order.map(ci => S.batchItem(contName(ci), cc[ci], fmtSmall(exp[ci]))).join('; '))) + '">' +
       '<div class="stack-row"><span>' + esc(S.rowNow) + '</span><span class="stack-bar">' + seg(cc) + '</span></div>' +
       '<div class="stack-row"><span>' + esc(S.rowExp) + '</span><span class="stack-bar exp">' + seg(exp) + '</span></div>' +
@@ -1740,7 +1716,7 @@ function doDraws(n) {
     if (MAP.ready) MAP.pick(last.loc.code, true);
   } else {
     lastBatch = batch;
-    renderBatch(n, batch, last, tierN);
+    renderBatch(n, batch, tierN);
     if (MAP.ready) { MAP.showBatch(batch); MAP.pick(last.loc.code, false); MAP.reset(); }
   }
   renderMine();
@@ -1834,7 +1810,7 @@ function setLang(l) {
     const u = new URL(location.href);
     if (u.searchParams.has('lang')) { u.searchParams.set('lang', l); history.replaceState(history.state, '', u.href); }
   } catch (e) { /* address left as it is */ }
-  renderIntro(); tickLive(); renderMethod();
+  renderIntro(); renderMethod();
   renderStage(current, {});
   renderHundred(); renderMine();
   renderTableHead(); renderTable();
@@ -1905,8 +1881,6 @@ renderHundred();
 renderMine();
 renderTableHead();
 renderTable();
-tickLive();
-setInterval(tickLive, 1000);
 let fitT = 0;
 window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitName, 120); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
