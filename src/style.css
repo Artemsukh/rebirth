@@ -13,7 +13,6 @@
   --lvl-3: #D3D8E3; --lvl-2: #A2A9BA; --lvl-1: #707A8E;
   --pip-off: rgba(234, 242, 255, .16);
   --btn: #E6F0FF; --btn-ink: #06102A;
-  --live: #7CF0B0;
   --focus: #BFF6FB;
   --c0: #D98A4E; --c1: #5E9DC0; --c2: #9A87C4; --c3: #6DB585; --c4: #C0728F; --c5: #D1B04F;
   --land: #16223A; --land-hover: #22324F; --land-edge: #050716; --grat: rgba(234, 242, 255, .06);
@@ -115,7 +114,7 @@ a:hover { text-decoration-color: currentColor; }
 /* ---------- header ---------- */
 .hud-head {
   position: relative; z-index: 3; height: 72px; padding: 0 40px;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px;
+  display: flex; align-items: center;
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(5, 7, 22, .85), rgba(5, 7, 22, .35));
 }
@@ -124,11 +123,6 @@ a:hover { text-decoration-color: currentColor; }
 .logo ellipse { stroke: var(--acc); }
 .logo .logo-dot { fill: var(--acc); stroke: none; }
 .brand-name { margin: 0; font-family: 'Orbit', 'IBM Plex Sans KR', sans-serif; font-weight: 400; font-size: 1.25rem; letter-spacing: .04em; white-space: nowrap; }
-.head-mid { margin: 0; font-size: .9375rem; color: var(--ink-2); text-align: center; white-space: nowrap; }
-.head-mid b { color: var(--ink); font-family: var(--num); font-weight: 600; }
-.head-live { margin: 0; justify-self: end; display: flex; gap: 18px; align-items: center; font-size: .8125rem; color: var(--ink-3); white-space: nowrap; font-family: var(--num); font-variant-numeric: tabular-nums; }
-.head-live b { color: var(--ink); font-weight: 600; margin-left: 5px; }
-.head-live .dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 8px var(--live); vertical-align: 1px; }
 
 /* ---------- stage (result screen) ---------- */
 /* the accent (the shown country's GDP band) is set on the five parts that show it (language bar, header,
@@ -379,11 +373,6 @@ a:hover { text-decoration-color: currentColor; }
 #planet .brk.bl { border-width: 0 0 2px 2px; }
 #planet.wide .brk { opacity: .5; }
 #planet .p-cross { fill: none; stroke: #E9FBFF; stroke-opacity: .85; stroke-width: 1.2; }
-/* read-outs: --x, --y are the old SVG text anchor and baseline in design units */
-#planet .p-hud { inset: 0; font-family: var(--num); font-size: calc(13 * var(--u)); line-height: 1; letter-spacing: .12em; color: var(--ink-2); white-space: nowrap; }
-#planet .p-hud span { position: absolute; left: calc(var(--x) * var(--u)); top: calc((var(--y) - 10.5) * var(--u)); }
-#planet .p-hud .end { left: auto; right: calc((720 - var(--x)) * var(--u)); }
-#planet .p-hud .hl { color: var(--acc); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- sections ---------- */
@@ -391,12 +380,10 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .block-h { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .block-h .idx { font-family: var(--num); font-size: .8125rem; font-weight: 600; letter-spacing: .2em; color: var(--ink-3); padding: 2px 8px; box-shadow: inset 0 0 0 1px var(--line); }
 .block h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.875rem; line-height: 1.25; }
-.block .sub { margin: 0 0 22px; max-width: 46em; color: var(--ink-2); }
-/* the map and the 100 babies open straight under the title, with the gap a lede would leave */
-.block-h + .atlas-top, .block-h + .h-tier { margin-top: 22px; }
+/* sections open straight under the title, with the gap a lede would leave */
+.block-h + .atlas-top, .block-h + .h-tier, .block-h + .m-grid, .block-h + .tbl-tools { margin-top: 22px; }
 .minor { margin: 0 0 10px; font-size: 1rem; font-weight: 600; color: var(--ink); }
 .minor.gap { margin-top: 26px; }
-.note { margin: 10px 0 0; font-size: .8125rem; color: var(--ink-3); }
 
 /* atlas */
 .atlas-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 10px; min-height: 32px; }
@@ -438,7 +425,6 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .batch { margin-top: 16px; padding: 14px 18px 13px; background: var(--panel); clip-path: var(--clip-panel); box-shadow: inset 0 0 0 1px var(--line); }
 .batch-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; margin-bottom: 10px; }
 .batch-h h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.0625rem; }
-.batch-h p { margin: 0; font-size: .8125rem; color: var(--ink-2); }
 .stack { display: grid; gap: 5px; }
 .stack-row { display: grid; grid-template-columns: 2.4em minmax(0, 1fr); align-items: center; gap: 8px; font-size: .75rem; color: var(--ink-3); }
 .stack-bar { display: flex; height: 14px; overflow: hidden; background: rgba(234, 242, 255, .06); }
@@ -504,7 +490,6 @@ main > .block { position: relative; z-index: 1; max-width: 1360px; margin: 0 aut
 .recent .r-no { color: var(--ink-3); font-variant-numeric: tabular-nums; flex: none; font-family: var(--num); }
 .recent .r-no small { margin-right: 8px; font-size: .75rem; font-family: var(--sans); }
 .recent button[aria-current] .r-txt { font-weight: 600; }
-.empty-hint { color: var(--ink-2); margin: 0; }
 
 /* table */
 .tbl-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
@@ -553,10 +538,6 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
 @media (min-width: 1180px) {
   .center-col { margin-right: -50px; }
 }
-/* the English, Japanese and Spanish header lines are longer; the counter keeps its number and unit */
-@media (min-width: 1180px) and (max-width: 1439px) {
-  :root:not(:lang(ko)) .head-live .since { display: none; }
-}
 @media (min-width: 1180px) and (max-width: 1379px) {
   .stage { grid-template-columns: 300px minmax(0, 1fr) 350px; }
   .planet-wrap { height: 480px; }
@@ -572,9 +553,7 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
 /* ---------- tablet 760..1179 ---------- */
 @media (max-width: 1179px) {
   .lang-bar { padding: 0 24px; }
-  .hud-head { padding: 0 24px; grid-template-columns: auto minmax(0, 1fr) auto; }
-  .head-mid { font-size: .875rem; overflow: hidden; text-overflow: ellipsis; }
-  .head-live .rate { display: none; }
+  .hud-head { padding: 0 24px; }
   .stage {
     grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
     grid-template-areas: "center center" "id read";
@@ -599,8 +578,6 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
 }
 @media (max-width: 999px) and (min-width: 760px) {
   .stage { grid-template-columns: minmax(0, 270px) minmax(0, 1fr); column-gap: 20px; }
-  .head-mid { display: none; }
-  .hud-head { grid-template-columns: minmax(0, 1fr) auto; }
   .read-col { gap: 10px; }
   .panel { padding: 12px 14px 13px; }
   .p-label { flex-direction: column; gap: 0; }
@@ -623,11 +600,9 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   :root { --rail: 40px; }
   .lang-bar { padding: 0 16px; }
   .lang-track label span { padding: 6px 9px; }
-  .hud-head { height: 56px; padding: 0 16px; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  .hud-head { height: 56px; padding: 0 16px; }
   .logo { width: 28px; height: 28px; }
   .brand-name { font-size: 1.0625rem; }
-  .head-mid { display: none; }
-  .head-live .rate, .head-live .since { display: none; }
   .brand { overflow: hidden; }
   .brand-name { overflow: hidden; text-overflow: ellipsis; }
   /* the three columns open up (display: contents) so every part is a direct item of this grid and
@@ -708,7 +683,6 @@ td .gchip { display: inline-block; width: 7px; height: 7px; margin-right: 7px; v
   .btn-ghost .lg { display: none; }
   .btn-ghost .sm { display: inline; font-family: var(--num); font-weight: 600; }
   .batch-line { order: 1; margin: 0; text-align: left; }
-  #planet .p-hud { display: none; }
   main > .block { padding: 56px 16px 0; }
   .block h2 { font-size: 1.5rem; }
   .h-grid, .m-grid { grid-template-columns: minmax(0, 1fr); }
